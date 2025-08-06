@@ -1,0 +1,49 @@
+name: Deploy Spring App
+
+on:
+  push:
+    tags: 
+      - "[0-9]+.[0-9]+.[0-9]+-[d].[0-9]+"
+      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build JAR
+        run: |
+          ./gradlew clean bootJar
+
+      - name: Upload jar to S3
+        run: |
+          aws s3 cp build/libs/app.jar s3://${{ secrets.S3_BUCKET_NAME }}/springboot/app.jar
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ap-northeast-2
+
+      - name: Deploy to EC2 via SSH
+        run: |
+          echo "$EC2_SSH_KEY" > key.pem
+          chmod 600 key.pem
+          
+          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << EOF
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          
+            cd /home/ubuntu/onuljang-backend
+          
+            pkill -f 'onuljang.jar' || true
+          
+            nohup java -jar onuljang.jar > app.log 2>&1 &
+          EOF
