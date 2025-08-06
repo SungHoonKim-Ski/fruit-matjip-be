@@ -34,7 +34,7 @@ jobs:
 
       - name: Deploy to EC2 via SSH
         run: |
-          echo "$EC2_SSH_KEY" > key.pem
+          echo "$EC2_SSH_KEY" | base64 -d > key.pem
           chmod 600 key.pem
 
           ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
