@@ -46,13 +46,13 @@ jobs:
             cd /home/ubuntu/onuljang-backend
           
             echo "Downloading jar from S3..."
-            aws s3 cp s3://\$S3_BUCKET_NAME/springboot/app.jar onuljang.jar
+            aws s3 cp s3://\${{ secrets.S3_BUCKET_NAME }}/springboot/app.jar onuljang.jar
           
             echo "Stopping previous process if exists..."
             pkill -f 'onuljang.jar' || true
           
             echo "Starting new application..."
-            DB_URL=\$DB_URL DB_USERNAME=\$DB_USERNAME DB_PASSWORD=\$DB_PASSWORD \
+            DB_URL=\${{ secrets.DB_URL }} DB_USERNAME=\${{ secrets.DB_USERNAME }} DB_PASSWORD=\${{ secrets.DB_PASSWORD }} \
             nohup java -jar onuljang.jar --server.port=8088 > app.log 2>&1 &
           EOF
         env:
