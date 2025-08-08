@@ -3,7 +3,7 @@ name: Deploy Spring App
 on:
   push:
     tags: 
-      - "[0-9]+.[0-9]+.[0-9]+-[d].[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-[dp].[0-9]+"
       
 jobs:
   deploy:
@@ -13,11 +13,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Resolve environment from tag
+        id: env
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF##*/}"
+          if [[ "$TAG" == *-d* ]]; then
+            echo "ENV=DEV" >> $GITHUB_OUTPUT
+          elif [[ "$TAG" == *-p* ]]; then
+            echo "ENV=PROD" >> $GITHUB_OUTPUT
+          else
+            echo "Unsupported tag: $TAG"; exit 1
+          fi
+          echo "TAG_NAME=$TAG" >> $GITHUB_ENV
+
+      - name: Set EC2 connection info
+        run: |
+          echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
+          echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
+          cache: 'gradle'
+      - run: chmod +x ./gradlew
 
       - name: Build JAR
         run: ./gradlew clean bootJar
@@ -36,28 +57,62 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" | base64 -d > key.pem
           chmod 600 key.pem
-          
-          ssh -i key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << EOF
-            export DB_URL="${DB_URL}"
-            export DB_USERNAME="${DB_USERNAME}"
-            export DB_PASSWORD="${DB_PASSWORD}"
-            export S3_BUCKET_NAME="${S3_BUCKET_NAME}"
-          
+
+          ssh -i key.pem -o StrictHostKeyChecking=no "ubuntu@$EC2_HOST" \
+            DB_URL="${{ secrets.DB_URL }}" \
+            DB_USERNAME="${{ secrets.DB_USERNAME }}" \
+            DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}" \
+            bash -s << 'EOF'
+            set -e
             cd /home/ubuntu/onuljang-backend
-          
+
             echo "Downloading jar from S3..."
-            aws s3 cp s3://\${{ secrets.S3_BUCKET_NAME }}/springboot/app.jar onuljang.jar
-          
+            
+            aws s3 cp "s3://${S3_BUCKET_NAME}/springboot/app.jar" onuljang.jar
+
             echo "Stopping previous process if exists..."
             pkill -f 'onuljang.jar' || true
-          
+            sleep 1
+
             echo "Starting new application..."
-            DB_URL=\${{ secrets.DB_URL }} DB_USERNAME=\${{ secrets.DB_USERNAME }} DB_PASSWORD=\${{ secrets.DB_PASSWORD }} \
-            nohup java -jar onuljang.jar --server.port=8088 > app.log 2>&1 &
+            nohup env \
+              DB_URL="${DB_URL}" \
+              DB_USERNAME="${DB_USERNAME}" \
+              DB_PASSWORD="${DB_PASSWORD}" \
+              S3_BUCKET_NAME="${S3_BUCKET_NAME}" \
+              java -jar onuljang.jar --server.port=8088 \
+              > app.log 2>&1 &
+
+            echo "Tail last logs:"
+            tail -n 50 app.log || true
           EOF
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          DB_URL: ${{ secrets.DB_URL }}
-          DB_USERNAME: ${{ secrets.DB_USERNAME }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
+
+      - name: Health Check
+        run: |
+          if [[ "${{ steps.env.outputs.ENV }}" == "DEV" ]]; then
+            HEALTH_URL="https://dev.onuljang.store/health"
+          else
+            HEALTH_URL="https://onuljang.store/health"
+          fi
+          
+          ATTEMPTS=12   # 최대 1분
+          SLEEP=5
+          ok=false
+          
+          echo "Waiting for 200 from: $HEALTH_URL"
+          for i in $(seq 1 $ATTEMPTS); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || true)
+            if [ "$code" = "200" ]; then
+              ok=true
+              break
+            fi
+            sleep $SLEEP
+          done
+          
+          if [ "$ok" != "true" ]; then
+            echo "❌ Health check failed (timeout or non-200)"
+            exit 1
+          fi
+          
+          echo "✅ App is UP (200)"
