@@ -2,9 +2,9 @@ name: Deploy Spring App
 
 on:
   push:
-    tags: 
+    tags:
       - "[0-9]+.[0-9]+.[0-9]+-[dp].[0-9]+"
-      
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -30,8 +30,8 @@ jobs:
       - name: Set EC2 connection info
         run: |
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
-          echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
-          echo "KAKAO_REDIRECT=${{ secrets[format('{0}_KAKAO_REDIRECT', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
+          echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
+          echo "KAKAO_REDIRECT=${{ secrets[format('{0}_KAKAO_REDIRECT', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -58,55 +58,48 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" | base64 -d > key.pem
           chmod 600 key.pem
-          
-          ssh -i key.pem -o StrictHostKeyChecking=no "ubuntu@$EC2_HOST" << 'EOF'
+
+          ssh -i key.pem -o StrictHostKeyChecking=no "ubuntu@$EC2_HOST" \
+            DB_URL="${{ secrets.DB_URL }}" \
+            DB_USERNAME="${{ secrets.DB_USERNAME }}" \
+            DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
+            S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}" \
+            KAKAO_REDIRECT="${{ KAKAO_REDIRECT }}" \
+            API_KAKAO_KEY="${{ API_KAKAO_KEY }}" \
+            bash -s << 'EOF'
             set -e
-          
-            # 0) 디버그: 어떤 유저/디렉터리인지 확인
-            whoami
-            pwd
-            ls -la /home/ubuntu || true
-          
-            # 1) 작업 디렉터리 보장
-            mkdir -p /home/ubuntu/onuljang-backend
             cd /home/ubuntu/onuljang-backend
-            echo "PWD=$(pwd)"
-          
-            # 2) 필요한 패키지 (aws cli 없으면 설치)
-            if ! command -v aws >/dev/null 2>&1; then
-              sudo apt-get update -y
-              sudo apt-get install -y awscli
-            fi
-            if ! command -v java >/dev/null 2>&1; then
-              sudo apt-get update -y
-              sudo apt-get install -y openjdk-17-jre
-            fi
-          
-            # 3) S3에서 JAR 다운
+
             echo "Downloading jar from S3..."
-            aws s3 cp "s3://${S3_BUCKET_NAME}/springboot/app.jar" onuljang.jar
           
-            # 4) 이전 프로세스 종료
+            aws s3 cp "s3://${S3_BUCKET_NAME}/springboot/app.jar" onuljang.jar
+
+            echo "Stopping previous process if exists..."
             pkill -f 'onuljang.jar' || true
             sleep 1
-          
-            # 5) 환경변수 export 후 실행
-            export DB_URL="${DB_URL}"
-            export DB_USERNAME="${DB_USERNAME}"
-            export DB_PASSWORD="${DB_PASSWORD}"
-            export S3_BUCKET_NAME="${S3_BUCKET_NAME}"
-            export KAKAO_REDIRECT="${KAKAO_REDIRECT}"
-            export API_KAKAO_KEY="${API_KAKAO_KEY}"
-          
-            nohup java -jar onuljang.jar --server.port=8088 > app.log 2>&1 &
-          
+
+            echo "Starting new application..."
+            nohup env \
+              DB_URL="${DB_URL}" \
+              DB_USERNAME="${DB_USERNAME}" \
+              DB_PASSWORD="${DB_PASSWORD}" \
+              S3_BUCKET_NAME="${S3_BUCKET_NAME}" \
+              KAKAO_REDIRECT="${KAKAO_REDIRECT}" \
+              API_KAKAO_KEY="${API_KAKAO_KEY}" \
+              java -jar onuljang.jar --server.port=8088 \
+              > app.log 2>&1 &
+
             echo "Tail last logs:"
             tail -n 50 app.log || true
           EOF
 
       - name: Health Check
         run: |
-          HEALTH_URL="${{ secrets[format('{0}_HEALTH_URL', steps.env.outputs.ENV)] }}"
+          if [[ "${{ steps.env.outputs.ENV }}" == "DEV" ]]; then
+            HEALTH_URL="https://dev.api.onuljang.store/health"
+          else
+            HEALTH_URL="https://api.onuljang.store/health"
+          fi
           
           ATTEMPTS=12   # 최대 1분
           SLEEP=5
@@ -128,10 +121,3 @@ jobs:
           fi
           
           echo "✅ App is UP (200)"
-    env:
-      # ✅ GitHub Actions 쪽에서 원격으로 전달할 값들을 'env:'로 넘겨줌
-      DB_URL: ${{ secrets.DB_URL }}
-      DB_USERNAME: ${{ secrets.DB_USERNAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-      API_KAKAO_KEY: ${{ secrets.API_KAKAO_KEY }}
