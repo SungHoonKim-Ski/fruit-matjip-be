@@ -86,7 +86,7 @@ jobs:
               DB_PASSWORD="${DB_PASSWORD}" \
               S3_BUCKET_NAME="${S3_BUCKET_NAME}" \
               KAKAO_REDIRECT="${KAKAO_REDIRECT}" \
-              API_KAKAO_KEY="${S3_BUCKET_NAME}" \
+              API_KAKAO_KEY="${API_KAKAO_KEY}" \
               java -jar onuljang.jar --server.port=8088 \
               > app.log 2>&1 &
 
