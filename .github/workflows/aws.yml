@@ -64,8 +64,7 @@ jobs:
             DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}" \
-            KAKAO_REDIRECT="${{ KAKAO_REDIRECT }}" \
-            API_KAKAO_KEY="${{ API_KAKAO_KEY }}" \
+            API_KAKAO_KEY="${{ secrets.API_KAKAO_KEY }}" \
             bash -s << 'EOF'
             set -e
             cd /home/ubuntu/onuljang-backend
