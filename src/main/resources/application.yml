@@ -18,3 +18,6 @@ spring:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 200
+KAKAO:
+  KEY: ${API_KAKAO_KEY}
+  REDIRECT: ${KAKAO_REDIRECT}

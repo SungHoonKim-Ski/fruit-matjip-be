@@ -30,7 +30,8 @@ jobs:
       - name: Set EC2 connection info
         run: |
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
-          echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
+          echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
+          echo "KAKAO_REDIRECT=${{ secrets[format('{0}_KAKAO_REDIRECT', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -63,6 +64,9 @@ jobs:
             DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}" \
+            KAKAO_REDIRECT="${{ secrets.KAKAO_REDIRECT }}" \
+            API_KAKAO_KEY="${{ secrets.API_KAKAO_KEY }}" \
+          
             bash -s << 'EOF'
             set -e
             cd /home/ubuntu/onuljang-backend
@@ -81,6 +85,8 @@ jobs:
               DB_USERNAME="${DB_USERNAME}" \
               DB_PASSWORD="${DB_PASSWORD}" \
               S3_BUCKET_NAME="${S3_BUCKET_NAME}" \
+              KAKAO_REDIRECT="${KAKAO_REDIRECT}" \
+              API_KAKAO_KEY="${S3_BUCKET_NAME}" \
               java -jar onuljang.jar --server.port=8088 \
               > app.log 2>&1 &
 
