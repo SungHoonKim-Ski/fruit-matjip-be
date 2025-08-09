@@ -134,5 +134,4 @@ jobs:
       DB_USERNAME: ${{ secrets.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       S3_BUCKET_NAME: ${{ secrets.S3_BUCKET_NAME }}
-      KAKAO_REDIRECT: ${{ secrets[format('{0}_KAKAO_REDIRECT', steps.env.outputs.ENV)] }}
       API_KAKAO_KEY: ${{ secrets.API_KAKAO_KEY }}
