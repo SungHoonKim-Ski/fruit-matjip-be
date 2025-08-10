@@ -10,7 +10,7 @@ import store.onuljang.feign.dto.KakaoRequest;
 
 import java.util.HashMap;
 
-@RequestMapping("/api/auth/kakao")
+@RequestMapping("/auth/kakao")
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,12 +22,13 @@ public class KakaoController {
     @PostMapping
     public ResponseEntity<String> getToken(@RequestBody HashMap<String, String> contents) {
         System.out.println(contents);
-        String clientId = env.getProperty("kakao.client.id");
+        String clientId = env.getProperty("KAKAO.KEY");
+        System.out.println(contents);
 
         val data = new KakaoRequest(
                 "authorization_code"
                 , clientId
-                , "http://localhost:3000/login"
+                , contents.get("redirect_uri")
                 ,contents.get("code"));
 
         String res = feignClient.getToken(data.grant_type(), data.client_id(), data.redirect_uri(), data.code());
