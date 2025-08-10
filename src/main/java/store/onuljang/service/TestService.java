@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
-import store.onuljang.controller.Request.TestRequest;
+import store.onuljang.controller.request.TestRequest;
 import store.onuljang.repository.entity.TestEntity;
 import store.onuljang.repository.TestRepository;
 
