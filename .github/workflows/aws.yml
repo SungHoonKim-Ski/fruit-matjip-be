@@ -65,6 +65,7 @@ jobs:
             DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}" \
             API_KAKAO_KEY="${{ secrets.API_KAKAO_KEY }}" \
+            JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             bash -s << 'EOF'
             set -e
             cd /home/ubuntu/onuljang-backend
@@ -95,9 +96,9 @@ jobs:
       - name: Health Check
         run: |
           if [[ "${{ steps.env.outputs.ENV }}" == "DEV" ]]; then
-            HEALTH_URL="https://dev.api.onuljang.store/health"
+            HEALTH_URL="https://dev.api.onuljang.store/api/health"
           else
-            HEALTH_URL="https://api.onuljang.store/health"
+            HEALTH_URL="https://api.onuljang.store/api/health"
           fi
           
           ATTEMPTS=12   # 최대 1분

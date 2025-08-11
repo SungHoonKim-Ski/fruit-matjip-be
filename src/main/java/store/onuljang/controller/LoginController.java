@@ -4,7 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import store.onuljang.appservice.LoginAppService;
+import store.onuljang.appservice.AuthAppService;
 import store.onuljang.controller.request.LoginRequest;
 import store.onuljang.controller.response.LoginResponse;
 
@@ -13,11 +13,10 @@ import store.onuljang.controller.response.LoginResponse;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class LoginController {
-    LoginAppService loginAppService;
+    AuthAppService authAppService;
 
     @PostMapping
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-
-        return ResponseEntity.ok(loginAppService.login(request));
+        return ResponseEntity.ok(authAppService.socialLogin(request));
     }
 }

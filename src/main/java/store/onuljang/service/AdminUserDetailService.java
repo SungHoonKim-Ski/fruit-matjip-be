@@ -1,0 +1,32 @@
+package store.onuljang.service;
+
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.repository.AdminRepository;
+import store.onuljang.repository.entity.Admin;
+
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
+public class AdminUserDetailService implements UserDetailsService {
+    AdminRepository adminRepository;
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Admin admin = adminRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+
+        return org.springframework.security.core.userdetails.User
+                .withUsername(admin.getEmail())
+                .password(admin.getPassword())
+                .roles(admin.getRole().name())
+                .build();
+    }
+}
