@@ -134,3 +134,23 @@ CREATE TABLE admin_logs (
         FOREIGN KEY (admin_id)
             REFERENCES admins(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE nickname_pool (
+   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+   base_name    VARCHAR(50) NOT NULL,
+   next_seq     INT NOT NULL DEFAULT 1,
+   PRIMARY KEY (id),
+   CHECK (next_seq >= 1)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+INSERT INTO nickname_pool(base_name)
+VALUES
+('포도'),
+('사과'),
+('키위'),
+('바나나'),
+('복숭아'),
+('딸기'),
+('수박'),
+('자몽'),
+('망고');
