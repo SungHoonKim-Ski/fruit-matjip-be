@@ -1,16 +1,12 @@
 package store.onuljang.controller.response;
 
-import store.onuljang.feign.dto.KakaoMeRespone;
+import lombok.Builder;
 
+@Builder
 public record LoginResponse(
-    Long id,
-    String nickName
+    String name,
+    String access,
+    String refresh
 ) {
 
-    public static LoginResponse from(KakaoMeRespone respone) {
-        return new LoginResponse(
-            respone.id(),
-            respone.properties().nickname()
-        );
-    }
 }
