@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import store.onuljang.repository.entity.base.BaseEntity;
 
 @Entity
 @NoArgsConstructor
