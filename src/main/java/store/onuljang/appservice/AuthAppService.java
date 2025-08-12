@@ -35,10 +35,10 @@ public class AuthAppService {
         JwtToken jwtToken = authService.generateToken(user);
 
         return LoginResponse
-                .builder()
-                .name(user.getName())
-                .access(jwtToken.access())
-                .refresh(jwtToken.refresh())
-                .build();
+            .builder()
+            .name(user.getName())
+            .access(jwtToken.access())
+            .refresh(jwtToken.refresh())
+            .build();
     }
 }
