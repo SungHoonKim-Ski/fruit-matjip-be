@@ -1,5 +1,13 @@
 server:
   port: 8088
+  servlet:
+    session:
+      cookie:
+        name: ADMINSESSION
+        http-only: true
+        secure: true
+        same-site: Lax
+
 spring:
   application:
     name: onuljang
@@ -8,6 +16,11 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+  session:
+    store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    timeout: 30m
 
   jpa:
     hibernate:
