@@ -22,8 +22,8 @@ public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(401);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         mapper.writeValue(response.getOutputStream(), Map.of(
-                "error", "unauthorized",
-                "message", authException.getMessage()
+            "error", "unauthorized",
+            "message", authException.getMessage()
         ));
     }
 }

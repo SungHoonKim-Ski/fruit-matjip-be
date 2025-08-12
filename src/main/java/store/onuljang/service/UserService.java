@@ -6,6 +6,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.exception.UserNotExistException;
+import store.onuljang.exception.UserNotFoundException;
 import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.Users;
 
@@ -18,23 +20,13 @@ import java.util.UUID;
 public class UserService {
     UserRepository userRepository;
 
-    public boolean existSocialId(String socialId) {
-        return userRepository.findBySocialId(socialId).isPresent();
-    }
-
     public Users findBySocialId(String socialId) {
         return userRepository.findBySocialId(socialId)
-                .orElseThrow(() -> new RuntimeException("유저 검색 서버 에러"));
+            .orElseThrow(() -> new UserNotFoundException("유저 검색 서버 에러"));
     }
 
-    @Transactional
-    public void signUp(String socialId, String name) {
-        userRepository.save(
-            Users.builder()
-                .socialId(socialId)
-                .name(name)
-                .uuid(UUID.randomUUID())
-                .build()
-        );
+    public Users findByUId(String uId) {
+        return userRepository.findByInternalUid(uId)
+            .orElseThrow(() -> new UserNotExistException("존재하지 않는 유저"));
     }
 }
