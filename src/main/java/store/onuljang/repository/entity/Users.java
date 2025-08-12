@@ -37,4 +37,8 @@ public class Users extends BaseEntity {
         this.internalUid = uuid.toString();
         this.name = name;
     }
+
+    public void modifyName(String name) {
+        this.name = name;
+    }
 }

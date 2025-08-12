@@ -29,4 +29,8 @@ public class UserService {
         return userRepository.findByInternalUid(uId)
             .orElseThrow(() -> new UserNotExistException("존재하지 않는 유저"));
     }
+
+    public boolean findByName(String name) {
+        return userRepository.findByName(name).isPresent();
+    }
 }
