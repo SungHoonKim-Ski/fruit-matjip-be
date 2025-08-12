@@ -33,14 +33,4 @@ public class LoginController {
 
         return ResponseEntity.ok().body(authAppService.refresh(authorization, refreshToken));
     }
-
-    @PatchMapping("/auth/name/{name}")
-    public ResponseEntity<?> modifyName(@PathVariable String name) {
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/auth/name/{name}")
-    public ResponseEntity<?> existName(@PathVariable String name) {
-        return ResponseEntity.ok().build();
-    }
 }

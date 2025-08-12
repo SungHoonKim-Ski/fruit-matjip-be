@@ -14,7 +14,7 @@ import store.onuljang.repository.entity.Admin;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-@FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AdminUserDetailService implements UserDetailsService {
     AdminRepository adminRepository;
 
