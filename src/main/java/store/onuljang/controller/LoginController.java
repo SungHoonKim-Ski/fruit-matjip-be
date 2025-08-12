@@ -24,4 +24,9 @@ public class LoginController {
     public ResponseEntity<?> reissueTokens() {
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("/auth/name/{name}")
+    public ResponseEntity<?> modifyName(@PathVariable String name) {
+        return ResponseEntity.ok().build();
+    }
 }

@@ -25,4 +25,9 @@ public class AdminController {
         authenticationManager.authenticate(auth);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/sighup")
+    public ResponseEntity<Void> sighup() {
+        return ResponseEntity.ok().build();
+    }
 }
