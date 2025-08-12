@@ -14,14 +14,14 @@ import java.util.Map;
 @Component
 public class CustomAuthEntryPoint implements AuthenticationEntryPoint {
 
-    private static final ObjectMapper om = new ObjectMapper();
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException {
         response.setStatus(401);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        om.writeValue(response.getOutputStream(), Map.of(
+        mapper.writeValue(response.getOutputStream(), Map.of(
                 "error", "unauthorized",
                 "message", authException.getMessage()
         ));
