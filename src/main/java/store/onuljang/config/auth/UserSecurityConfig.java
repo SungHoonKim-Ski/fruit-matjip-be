@@ -16,7 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class ApiSecurityConfig {
+public class UserSecurityConfig {
     JwtFilter jwtAuthFilter;
 
     @Bean
@@ -26,7 +26,7 @@ public class ApiSecurityConfig {
             .securityMatcher("/**")
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/health", "/api/login"
+                    "/api/health", "/api/login", "/api/logout", "/api/refresh"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
