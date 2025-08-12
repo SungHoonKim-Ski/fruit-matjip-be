@@ -1,18 +1,17 @@
 CREATE TABLE users (
        id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-       social_id        VARCHAR(255) NOT NULL,              -- 소셜id
-       internal_uid     CHAR(36) NOT NULL,              -- 내부고유id
-       nickname         VARCHAR(255)  NOT NULL,
-       joined_date      DATE NOT NULL,                      -- 가입일
-       last_order_date  DATE NULL,                          -- 최근주문일
-       total_orders  BIGINT NOT NULL DEFAULT 0,          -- 누적주문량
+       social_id        VARCHAR(255) NOT NULL,
+       internal_uid     CHAR(36) NOT NULL,
+       name         VARCHAR(255)  NOT NULL,
+       last_order_date  DATE NULL,
+       total_orders  BIGINT NOT NULL DEFAULT 0,
        created_at       DATETIME NOT NULL,
        updated_at       DATETIME NOT NULL,
        deleted_at       DATETIME,
        PRIMARY KEY (id),
        UNIQUE KEY uq_users_social_id   (social_id),
        UNIQUE KEY uq_users_internal_uid(internal_uid),
-       UNIQUE KEY uq_users_nickname    (nickname),
+       UNIQUE KEY uq_users_name    (name),
        CHECK (total_orders >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -135,15 +134,15 @@ CREATE TABLE admin_logs (
             REFERENCES admins(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE nickname_pool (
+CREATE TABLE name_pool (
    id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-   base_name    VARCHAR(50) NOT NULL,
+   base_name    VARCHAR(255) NOT NULL,
    next_seq     INT NOT NULL DEFAULT 1,
    PRIMARY KEY (id),
    CHECK (next_seq >= 1)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT INTO nickname_pool(base_name)
+INSERT INTO name_pool(base_name)
 VALUES
 ('포도'),
 ('사과'),
@@ -154,3 +153,46 @@ VALUES
 ('수박'),
 ('자몽'),
 ('망고');
+
+CREATE TABLE user_name_logs (
+  id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name_before       VARCHAR(255) NOT NULL,
+  name_after        VARCHAR(255) NOT NULL,
+  user_id      BIGINT UNSIGNED NULL,
+  created_at   DATETIME NOT NULL,
+  PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE SPRING_SESSION (
+    PRIMARY_ID CHAR(36) NOT NULL,
+    SESSION_ID CHAR(36) NOT NULL,
+    CREATION_TIME BIGINT NOT NULL,
+    LAST_ACCESS_TIME BIGINT NOT NULL,
+    MAX_INACTIVE_INTERVAL INT NOT NULL,
+    EXPIRY_TIME BIGINT NOT NULL,
+    PRINCIPAL_NAME VARCHAR(100),
+    CONSTRAINT SPRING_SESSION_PK PRIMARY KEY (PRIMARY_ID)
+) ENGINE=InnoDB;
+
+
+CREATE TABLE SPRING_SESSION_ATTRIBUTES (
+   SESSION_PRIMARY_ID CHAR(36) NOT NULL,
+   ATTRIBUTE_NAME VARCHAR(200) NOT NULL,
+   ATTRIBUTE_BYTES BLOB NOT NULL,
+   CONSTRAINT SPRING_SESSION_ATTRIBUTES_PK PRIMARY KEY (SESSION_PRIMARY_ID, ATTRIBUTE_NAME),
+   CONSTRAINT SPRING_SESSION_ATTRIBUTES_FK FOREIGN KEY (SESSION_PRIMARY_ID) REFERENCES SPRING_SESSION(PRIMARY_ID) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE refresh_tokens (
+    id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_uid   CHAR(36) NOT NULL,
+    token_hash  CHAR(64) NOT NULL,
+    issued_at   DATETIME NOT NULL,
+    expires_at  DATETIME NOT NULL,
+    revoked     TINYINT(1) NOT NULL DEFAULT 0,
+    replaced_by CHAR(64) NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_token (token_hash),
+    KEY idx_user_exp (user_uid, expires_at),
+    KEY idx_revoked (revoked, expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
