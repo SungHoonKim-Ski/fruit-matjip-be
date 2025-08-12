@@ -14,15 +14,19 @@ import java.time.LocalDateTime;
 @Table(name = "admins")
 public class Admin extends BaseEntity {
 
+    @Getter
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Getter
     @Column(name = "email", nullable = false)
     private String email;
 
+    @Getter
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 16)
     private AdminRole role = AdminRole.NONE;

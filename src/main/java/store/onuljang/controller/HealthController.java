@@ -3,7 +3,7 @@ package store.onuljang.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RequestMapping("/health")
+@RequestMapping("/api/health")
 @RestController
 public class HealthController {
 
