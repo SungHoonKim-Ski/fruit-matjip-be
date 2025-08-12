@@ -1,4 +1,4 @@
-package store.onuljang.controller.admin;
+package store.onuljang.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

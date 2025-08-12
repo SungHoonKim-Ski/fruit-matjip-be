@@ -1,4 +1,4 @@
-package store.onuljang.controller.admin;
+package store.onuljang.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
-public class UploadController {
+public class AdminUploadController {
 
     @PostMapping("/products/presigned-url")
     public ResponseEntity<?> getUploadUrl() {
