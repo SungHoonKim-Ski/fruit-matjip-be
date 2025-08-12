@@ -3,7 +3,6 @@ package store.onuljang.controller.admin;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import store.onuljang.service.AdminReservationService;
 
 @RestController
 @RequestMapping("/api/admin/reservations")
