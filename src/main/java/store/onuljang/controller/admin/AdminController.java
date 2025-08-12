@@ -1,4 +1,4 @@
-package store.onuljang.controller;
+package store.onuljang.controller.admin;
 
 
 import lombok.RequiredArgsConstructor;
