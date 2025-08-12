@@ -19,7 +19,7 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
-    @PostMapping("/")
+    @GetMapping("/")
     public ResponseEntity<?> get() {
         return ResponseEntity.ok().build();
     }

@@ -8,15 +8,20 @@ import store.onuljang.appservice.AuthAppService;
 import store.onuljang.controller.request.LoginRequest;
 import store.onuljang.controller.response.LoginResponse;
 
-@RequestMapping("/api/login")
+@RequestMapping("/api")
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class LoginController {
     AuthAppService authAppService;
 
-    @PostMapping
+    @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
         return ResponseEntity.ok(authAppService.socialLogin(request));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> reissueTokens() {
+        return ResponseEntity.ok().build();
     }
 }
