@@ -6,7 +6,7 @@ import store.onuljang.controller.response.LoginResponse;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record KakaoMeRespone(
-    Long id,
+    String id,
     Properties properties,
     @JsonProperty("kakao_account")
     KakaoAccount kakaoAccount
