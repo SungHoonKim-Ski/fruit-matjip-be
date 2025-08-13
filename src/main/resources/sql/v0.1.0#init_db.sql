@@ -1,54 +1,54 @@
 CREATE TABLE users (
-       id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-       social_id        VARCHAR(255) NOT NULL,
-       internal_uid     CHAR(36) NOT NULL,
-       name         VARCHAR(255)  NOT NULL,
-       last_order_date  DATE NULL,
-       total_orders  BIGINT NOT NULL DEFAULT 0,
-       created_at       DATETIME NOT NULL,
-       updated_at       DATETIME NOT NULL,
-       deleted_at       DATETIME,
-       PRIMARY KEY (id),
-       UNIQUE KEY uq_users_social_id   (social_id),
-       UNIQUE KEY uq_users_internal_uid(internal_uid),
-       UNIQUE KEY uq_users_name    (name),
-       CHECK (total_orders >= 0)
+    id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    social_id        VARCHAR(255) NOT NULL,
+    internal_uid     CHAR(36) NOT NULL,
+    name         VARCHAR(255)  NOT NULL,
+    last_order_date  DATE NULL,
+    total_orders  BIGINT NOT NULL DEFAULT 0,
+    created_at       DATETIME NOT NULL,
+    updated_at       DATETIME NOT NULL,
+    deleted_at       DATETIME,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_users_social_id   (social_id),
+    UNIQUE KEY uq_users_internal_uid(internal_uid),
+    UNIQUE KEY uq_users_name    (name),
+    CHECK (total_orders >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE admins (
-        id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        name           VARCHAR(255) NOT NULL,
-        email          VARCHAR(255) NOT NULL,
-        password       VARCHAR(255) NOT NULL,
-        role           ENUM('MANAGER','OWNER','NONE') NOT NULL DEFAULT 'NONE',
-        created_at     DATETIME NOT NULL,
-        updated_at     DATETIME NOT NULL,
-        deleted_at       DATETIME,
-        PRIMARY KEY (id),
-        UNIQUE KEY uq_admins_email (email)
+    id             BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(255) NOT NULL,
+    email          VARCHAR(255) NOT NULL,
+    password       VARCHAR(255) NOT NULL,
+    role           ENUM('MANAGER','OWNER','NONE') NOT NULL DEFAULT 'NONE',
+    created_at     DATETIME NOT NULL,
+    updated_at     DATETIME NOT NULL,
+    deleted_at       DATETIME,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_admins_email (email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE products (
-      id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-      product_url         TEXT NULL,
-      name              VARCHAR(255) NOT NULL,
-      stock             INT NOT NULL DEFAULT 0,
-      price             INT NOT NULL,
-      sell_date         DATE NOT NULL,
-      description       TEXT,
-      is_visible        TINYINT(1) DEFAULT 1,
-      total_sold        BIGINT NOT NULL DEFAULT 0,
-      registered_admin  BIGINT UNSIGNED NOT NULL,
-      created_at        DATETIME NOT NULL,
-      updated_at        DATETIME NOT NULL,
-      deleted_at       DATETIME,
-      PRIMARY KEY (id),
-      KEY idx_products_sell_date (sell_date),
-      KEY idx_products_visible   (is_visible),
-      CONSTRAINT fk_products_admin
-          FOREIGN KEY (registered_admin)
-              REFERENCES admins(id),
-      CHECK (total_sold >= 0)
+    id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    product_url         TEXT NULL,
+    name              VARCHAR(255) NOT NULL,
+    stock             INT NOT NULL DEFAULT 0,
+    price             INT NOT NULL,
+    sell_date         DATE NOT NULL,
+    description       TEXT,
+    is_visible        TINYINT(1) DEFAULT 1,
+    total_sold        BIGINT NOT NULL DEFAULT 0,
+    registered_admin  BIGINT UNSIGNED NOT NULL,
+    created_at        DATETIME NOT NULL,
+    updated_at        DATETIME NOT NULL,
+    deleted_at       DATETIME,
+    PRIMARY KEY (id),
+    KEY idx_products_sell_date (sell_date),
+    KEY idx_products_visible   (is_visible),
+    CONSTRAINT fk_products_admin
+      FOREIGN KEY (registered_admin)
+          REFERENCES admins(id),
+    CHECK (total_sold >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE product_detail_images (
@@ -59,7 +59,7 @@ CREATE TABLE product_detail_images (
     updated_at        DATETIME NOT NULL,
     deleted_at        DATETIME,
     PRIMARY KEY (id),
-    KEY idx_pdi_detail (product_detail_id),
+    KEY idx_pdi_detail (product_id),
     CONSTRAINT fk_pdi_detail
        FOREIGN KEY (product_id)
            REFERENCES products(id)
@@ -82,7 +82,7 @@ CREATE TABLE reservations (
     KEY idx_res_status    (status, status_changed_at),
     CONSTRAINT fk_res_user
       FOREIGN KEY (user_uid)
-          REFERENCES users(id)
+          REFERENCES users(internal_uid)
           ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_res_product
       FOREIGN KEY (product_id)
@@ -131,23 +131,23 @@ CREATE TABLE name_pool (
 
 INSERT INTO name_pool(base_name)
 VALUES
-('포도'),
-('사과'),
-('키위'),
-('바나나'),
-('복숭아'),
-('딸기'),
-('수박'),
-('자몽'),
-('망고');
+    ('포도'),
+    ('사과'),
+    ('키위'),
+    ('바나나'),
+    ('복숭아'),
+    ('딸기'),
+    ('수박'),
+    ('자몽'),
+    ('망고');
 
 CREATE TABLE user_name_logs (
-  id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  name_before       VARCHAR(255) NOT NULL,
-  name_after        VARCHAR(255) NOT NULL,
-  user_uid      CHAR(36) NULL,
-  created_at   DATETIME NOT NULL,
-  PRIMARY KEY (id)
+    id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    name_before       VARCHAR(255) NOT NULL,
+    name_after        VARCHAR(255) NOT NULL,
+    user_uid      CHAR(36) NULL,
+    created_at   DATETIME NOT NULL,
+    PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE SPRING_SESSION (
