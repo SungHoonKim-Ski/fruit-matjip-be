@@ -29,7 +29,7 @@ public class AdminUploadService {
     public PresignedUrlResponse issueTempImageUrl(Long adminId, String filename, String contentType) {
         String ext = extOf(filename);
         String key = "images/temp/%d/%s.%s".formatted(adminId, UUID.randomUUID(), ext);
-        return presignPost(key, contentType, DEFAULT_EXPIRE);
+        return presignPut(key, contentType, DEFAULT_EXPIRE);
     }
 
     // 대표 이미지 교체 URL
@@ -52,27 +52,6 @@ public class AdminUploadService {
         }
         return list;
     }
-
-    private PresignedUrlResponse presignPost(String key, String contentType, Duration ttl) {
-        Date expiration = new Date(System.currentTimeMillis() + ttl.toMillis());
-
-        GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(s3Config.getBucket(), key)
-                .withMethod(HttpMethod.POST)
-                .withExpiration(expiration);
-
-        req.addRequestParameter("Content-Type", contentType);
-
-        URL url = s3.generatePresignedUrl(req);
-
-        return new PresignedUrlResponse(
-                url.toExternalForm(),
-                key,
-                "POST",
-                contentType,
-                ttl.toSeconds()
-        );
-    }
-
 
     private PresignedUrlResponse presignPut(String key, String contentType, Duration ttl) {
         Date expiration = new Date(System.currentTimeMillis() + ttl.toMillis());
