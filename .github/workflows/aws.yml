@@ -32,7 +32,6 @@ jobs:
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
           echo "S3_APP_BUCKET_NAME=${{ secrets[format('S3_{0}_APP_BUCKET_NAME', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
-          echo "KAKAO_REDIRECT=${{ secrets[format('{0}_KAKAO_REDIRECT', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -68,6 +67,7 @@ jobs:
             JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             AWS_ACCESS_KEY="${{secrets.AWS_ACCESS_KEY_ID}}" \
             AWS_SECRET_KEY="${{secrets.AWS_SECRET_ACCESS_KEY}}" \
+            S3_APP_BUCKET_NAME="${{ env.S3_APP_BUCKET_NAME }}" \
             bash -s << 'EOF'
             set -e
             cd /home/ubuntu/onuljang-backend
@@ -86,7 +86,6 @@ jobs:
               DB_USERNAME="${DB_USERNAME}" \
               DB_PASSWORD="${DB_PASSWORD}" \
               S3_APP_BUCKET_NAME="${S3_APP_BUCKET_NAME}" \
-              KAKAO_REDIRECT="${KAKAO_REDIRECT}" \
               API_KAKAO_KEY="${API_KAKAO_KEY}" \
               AWS_ACCESS_KEY="${AWS_ACCESS_KEY_ID}" \
               AWS_SECRET_KEY="${AWS_SECRET_ACCESS_KEY}" \
