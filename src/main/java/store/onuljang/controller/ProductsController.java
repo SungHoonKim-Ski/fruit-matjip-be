@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.ProductsAppService;
 import store.onuljang.controller.request.ProductListRequest;
+import store.onuljang.controller.response.ProductDetailResponse;
 import store.onuljang.controller.response.ProductListResponse;
 
 @RestController
@@ -23,9 +24,8 @@ public class ProductsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> detail(@PathVariable @Valid @PositiveOrZero Long id) {
-        productsAppService.getDetail(id);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ProductDetailResponse> detail(@PathVariable @Valid @PositiveOrZero Long id) {
+        return ResponseEntity.ok(productsAppService.getDetail(id));
     }
 }
 
