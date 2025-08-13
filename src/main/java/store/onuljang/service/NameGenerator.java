@@ -4,13 +4,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NamePoolException;
 import store.onuljang.repository.NamePoolRepository;
 import store.onuljang.repository.entity.NamePool;
 
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -21,19 +24,13 @@ public class NameGenerator {
 
     @Transactional(readOnly = true)
     public String generate() {
-        int count = (int)getCount();
-        int index = new Random().nextInt(count);
-        NamePool name = findById(index);
+        List<NamePool> namePools = namePoolRepository.findAll();
+        int size = namePools.size();
+        if (size == 0) throw new IllegalStateException("NamePool is empty");
+
+        int offset = ThreadLocalRandom.current().nextInt(size);
+        NamePool name = namePools.get(offset);
+
         return name.generate();
-    }
-
-    private long getCount() {
-        return namePoolRepository.count();
-    }
-
-    @Transactional
-    public NamePool findById(long id) {
-        return namePoolRepository.findById(id)
-                .orElseThrow(() -> new NamePoolException("이름 생성 서버 에러"));
     }
 }
