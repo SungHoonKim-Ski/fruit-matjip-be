@@ -16,8 +16,8 @@ import java.util.List;
 @Table(name = "products")
 public class Product extends BaseEntity {
     @Getter
-    @Column(name = "image_url", nullable = false)
-    private String imageUrl;
+    @Column(name = "product_url", nullable = false)
+    private String productUrl;
 
     @Getter
     @Column(name = "name", nullable = false)
@@ -66,7 +66,7 @@ public class Product extends BaseEntity {
         }
 
         return this.productDetailImages.stream()
-            .map(ProductDetailImage::getUrl)
+            .map(ProductDetailImage::getDetailUrl)
             .toList();
     }
 }

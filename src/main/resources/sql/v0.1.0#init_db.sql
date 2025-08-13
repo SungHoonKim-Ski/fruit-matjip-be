@@ -30,7 +30,7 @@ CREATE TABLE admins (
 
 CREATE TABLE products (
       id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-      image_url         TEXT NULL,
+      product_url         TEXT NULL,
       name              VARCHAR(255) NOT NULL,
       stock             INT NOT NULL DEFAULT 0,
       price             INT NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE products (
 CREATE TABLE product_detail_images (
     id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     product_id  BIGINT UNSIGNED NOT NULL,
-    url                TEXT NOT NULL,
+    detail_url                TEXT NOT NULL,
     created_at        DATETIME NOT NULL,
     updated_at        DATETIME NOT NULL,
     deleted_at        DATETIME,

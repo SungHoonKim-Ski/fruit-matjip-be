@@ -18,8 +18,8 @@ public class ProductDetailImage extends BaseEntity {
     private Product product;
 
     @Getter
-    @Column(name = "url", nullable = false)
-    private String url;
+    @Column(name = "detail_url", nullable = false)
+    private String detailUrl;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
