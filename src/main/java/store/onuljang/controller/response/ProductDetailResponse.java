@@ -20,7 +20,7 @@ public record ProductDetailResponse(
             .id(entity.getId())
             .name(entity.getName())
             .price(entity.getPrice())
-            .imageUrl(entity.getImageUrl())
+            .imageUrl(entity.getProductUrl())
             .description(entity.getDescription())
             .detailImages(entity.getDetailImages())
             .build();
