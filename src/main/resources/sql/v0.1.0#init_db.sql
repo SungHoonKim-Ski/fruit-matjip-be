@@ -35,6 +35,7 @@ CREATE TABLE products (
       stock             INT NOT NULL DEFAULT 0,
       price             INT NOT NULL,
       sell_date         DATE NOT NULL,
+      description       TEXT,
       is_visible        TINYINT(1) DEFAULT 1,
       total_sold        BIGINT NOT NULL DEFAULT 0,
       registered_admin  BIGINT UNSIGNED NOT NULL,
@@ -50,23 +51,9 @@ CREATE TABLE products (
       CHECK (total_sold >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE product_details (
-     id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-     product_id  BIGINT UNSIGNED NOT NULL,
-     description TEXT NOT NULL,
-     created_at        DATETIME NOT NULL,
-     updated_at        DATETIME NOT NULL,
-     deleted_at        DATETIME,
-     PRIMARY KEY (id),
-     UNIQUE KEY idx_pd_product (product_id),
-     CONSTRAINT fk_pd_product
-         FOREIGN KEY (product_id)
-             REFERENCES products(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE product_detail_images (
     id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    product_detail_id  BIGINT UNSIGNED NOT NULL,
+    product_id  BIGINT UNSIGNED NOT NULL,
     url                TEXT NOT NULL,
     created_at        DATETIME NOT NULL,
     updated_at        DATETIME NOT NULL,
@@ -74,8 +61,8 @@ CREATE TABLE product_detail_images (
     PRIMARY KEY (id),
     KEY idx_pdi_detail (product_detail_id),
     CONSTRAINT fk_pdi_detail
-       FOREIGN KEY (product_detail_id)
-           REFERENCES product_details(id)
+       FOREIGN KEY (product_id)
+           REFERENCES products(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE reservations (
