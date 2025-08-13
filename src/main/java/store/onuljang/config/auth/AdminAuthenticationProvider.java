@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import store.onuljang.service.AdminUserDetailService;
+import store.onuljang.service.dto.AdminUserDetails;
 
 @Component
 @RequiredArgsConstructor
@@ -34,8 +35,9 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
         if (!passwordEncoder.matches(rawPw, user.getPassword())) {
             throw new BadCredentialsException("Invalid admin credentials");
         }
+        Long adminId = ((AdminUserDetails) user).getAdminId();
 
-        return new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+        return new AdminAuthenticationToken(user, user.getAuthorities(), adminId);
     }
 
     @Override public boolean supports(Class<?> aClass) {

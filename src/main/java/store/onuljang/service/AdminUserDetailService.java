@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.repository.AdminRepository;
 import store.onuljang.repository.entity.Admin;
+import store.onuljang.service.dto.AdminUserDetails;
 
 @Service
 @RequiredArgsConstructor
@@ -21,12 +22,8 @@ public class AdminUserDetailService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Admin admin = adminRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+            .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
 
-        return org.springframework.security.core.userdetails.User
-                .withUsername(admin.getEmail())
-                .password(admin.getPassword())
-                .roles(admin.getRole().name())
-                .build();
+        return new AdminUserDetails(admin);
     }
 }
