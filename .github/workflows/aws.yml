@@ -66,6 +66,8 @@ jobs:
             S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}" \
             API_KAKAO_KEY="${{ secrets.API_KAKAO_KEY }}" \
             JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+            AWS_ACCESS_KEY="${{secrets.AWS_ACCESS_KEY_ID}}" \
+            AWS_SECRET_KEY="${{secrets.AWS_SECRET_ACCESS_KEY}}" \
             bash -s << 'EOF'
             set -e
             cd /home/ubuntu/onuljang-backend
