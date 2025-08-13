@@ -25,7 +25,7 @@ public record ProductListResponse(
             return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
-                .imageUrl(product.getImageUrl())
+                .imageUrl(product.getProductUrl())
                 .stock(product.getStock())
                 .price(product.getPrice())
                 .sellDate(product.getSellDate())
