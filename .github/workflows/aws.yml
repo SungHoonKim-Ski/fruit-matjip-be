@@ -31,6 +31,7 @@ jobs:
         run: |
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
+          echo "S3_APP_BUCKET_NAME=${{ secrets[format('S3_{0}_APP_BUCKET_NAME', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "KAKAO_REDIRECT=${{ secrets[format('{0}_KAKAO_REDIRECT', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
 
       - name: Set up JDK 17
@@ -48,7 +49,7 @@ jobs:
         run: |
           JAR_PATH=$(find build/libs -name "*.jar" | head -n 1)
           echo "Uploading $JAR_PATH"
-          aws s3 cp "$JAR_PATH" s3://${{ secrets.S3_BUCKET_NAME }}/springboot/app.jar
+          aws s3 cp "$JAR_PATH" s3://${{ secrets.S3_DEPLOY_BUCKET_NAME }}/springboot/app.jar
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -63,18 +64,17 @@ jobs:
             DB_URL="${{ secrets.DB_URL }}" \
             DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-            S3_BUCKET_NAME="${{ secrets.S3_BUCKET_NAME }}" \
             API_KAKAO_KEY="${{ secrets.API_KAKAO_KEY }}" \
             JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             AWS_ACCESS_KEY="${{secrets.AWS_ACCESS_KEY_ID}}" \
-            AWS_SECRET_KEY="${{secrets.AWS_SECRET_ACCESS_KEY}}" \
+            AWS_SECRE T_KEY="${{secrets.AWS_SECRET_ACCESS_KEY}}" \
             bash -s << 'EOF'
             set -e
             cd /home/ubuntu/onuljang-backend
 
             echo "Downloading jar from S3..."
           
-            aws s3 cp "s3://${S3_BUCKET_NAME}/springboot/app.jar" onuljang.jar
+            aws s3 cp "s3://${S3_DEPLOY_BUCKET_NAME}/springboot/app.jar" onuljang.jar
 
             echo "Stopping previous process if exists..."
             pkill -f 'onuljang.jar' || true
@@ -85,7 +85,7 @@ jobs:
               DB_URL="${DB_URL}" \
               DB_USERNAME="${DB_USERNAME}" \
               DB_PASSWORD="${DB_PASSWORD}" \
-              S3_BUCKET_NAME="${S3_BUCKET_NAME}" \
+              S3_APP_BUCKET_NAME="${S3_APP_BUCKET_NAME}" \
               KAKAO_REDIRECT="${KAKAO_REDIRECT}" \
               API_KAKAO_KEY="${API_KAKAO_KEY}" \
               AWS_ACCESS_KEY="${AWS_ACCESS_KEY_ID}" \
