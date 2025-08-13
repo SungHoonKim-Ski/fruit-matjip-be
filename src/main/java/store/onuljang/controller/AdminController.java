@@ -1,7 +1,11 @@
 package store.onuljang.controller;
 
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,13 +20,16 @@ record AdminLoginRequest(String email, String password) {}
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AdminController {
     AuthenticationManager authenticationManager;
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody AdminLoginRequest req) {
         Authentication auth = new UsernamePasswordAuthenticationToken(req.email(), req.password());
+
         authenticationManager.authenticate(auth);
+
         return ResponseEntity.ok().build();
     }
 

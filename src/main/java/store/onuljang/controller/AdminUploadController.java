@@ -1,8 +1,15 @@
 package store.onuljang.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import store.onuljang.controller.request.PresignedUrlBatchRequest;
+import store.onuljang.controller.request.PresignedUrlRequest;
+import store.onuljang.controller.response.PresignedUrlResponse;
+import store.onuljang.service.AdminUploadService;
+
+import java.util.List;
 
 
 @RestController
@@ -10,18 +17,35 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AdminUploadController {
 
+    AdminUploadService uploadService;
+
     @PostMapping("/products/presigned-url")
-    public ResponseEntity<?> getUploadUrl() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PresignedUrlResponse> getTempUploadUrl(@Valid @RequestBody PresignedUrlRequest req) {
+        PresignedUrlResponse res = uploadService.issueTempImageUrl(req.adminId(), req.filename(), req.contentType());
+        return ResponseEntity.ok(res);
     }
 
+    // 대표 이미지 교체
     @PatchMapping("/products/{productId}/presigned-url")
-    public ResponseEntity<?> getUpdateUrl() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<PresignedUrlResponse> getMainUploadUrl(
+            @PathVariable Long productId, @Valid @RequestBody PresignedUrlRequest req)
+    {
+
+        PresignedUrlResponse res = uploadService.issueMainImageUrl(productId, req.filename(), req.contentType());
+        return ResponseEntity.ok(res);
     }
 
+    // 상세 이미지 N개 교체/추가
     @PatchMapping("/products/{productId}/detail/presigned-url")
-    public ResponseEntity<?> getDetailUpdateUrl() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<List<PresignedUrlResponse>> getDetailUploadUrls(
+            @PathVariable Long productId,
+            @Valid @RequestBody PresignedUrlBatchRequest req) {
+
+        if (!productId.equals(req.productId())) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<PresignedUrlResponse> res = uploadService.issueDetailImageUrls(productId, req.filenames(), req.contentType());
+        return ResponseEntity.ok(res);
     }
 }

@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import store.onuljang.component.JwtUtil;
 
@@ -20,6 +21,7 @@ import java.io.IOException;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class JwtFilter extends OncePerRequestFilter {
     JwtUtil jwtUtil;
+    AntPathMatcher matcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -39,5 +41,12 @@ public class JwtFilter extends OncePerRequestFilter {
         } catch (Exception ignore) {
 
         }
+        chain.doFilter(req, res);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return matcher.match("/api/admin/**", path);
     }
 }

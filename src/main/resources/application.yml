@@ -39,3 +39,13 @@ security:
     secret: ${JWT_SECRET}
     access-ttl-minutes: 30
     refresh-ttl-days: 7
+
+cloud:
+  aws:
+    s3:
+      bucket: ${S3_BUCKET_NAME}
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}

@@ -38,15 +38,6 @@ public class AdminSecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
             )
             .authenticationProvider(adminAuthProvider)
-            .formLogin(form -> form
-                .loginPage("/api/admin/login")
-                .loginProcessingUrl("/api/admin/login")
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .successHandler(successHandler)
-                .failureHandler(failureHandler)
-                .permitAll()
-            )
             .logout(lo -> lo
                 .logoutUrl("/api/admin/logout")
                 .logoutSuccessUrl("/api/admin/login?logout")

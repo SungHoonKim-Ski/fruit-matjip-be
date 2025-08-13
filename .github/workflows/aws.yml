@@ -86,6 +86,9 @@ jobs:
               S3_BUCKET_NAME="${S3_BUCKET_NAME}" \
               KAKAO_REDIRECT="${KAKAO_REDIRECT}" \
               API_KAKAO_KEY="${API_KAKAO_KEY}" \
+              AWS_ACCESS_KEY="${AWS_ACCESS_KEY_ID}" \
+              AWS_SECRET_KEY="${AWS_SECRET_ACCESS_KEY}" \
+          
               java -jar onuljang.jar --server.port=8088 \
               > app.log 2>&1 &
 
