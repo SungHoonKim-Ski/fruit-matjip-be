@@ -19,7 +19,7 @@ import java.util.Random;
 public class NameGenerator {
     NamePoolRepository namePoolRepository;
 
-    @Transactional
+    @Transactional(readOnly = true)
     public String generate() {
         int count = (int)getCount();
         int index = new Random().nextInt(count);
@@ -31,7 +31,8 @@ public class NameGenerator {
         return namePoolRepository.count();
     }
 
-    private NamePool findById(long id) {
+    @Transactional
+    public NamePool findById(long id) {
         return namePoolRepository.findById(id)
                 .orElseThrow(() -> new NamePoolException("이름 생성 서버 에러"));
     }
