@@ -1,11 +1,9 @@
 package store.onuljang.component;
 
 import io.jsonwebtoken.*;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import store.onuljang.config.JwtConfigDto;
 import store.onuljang.exception.AccessTokenParseException;
