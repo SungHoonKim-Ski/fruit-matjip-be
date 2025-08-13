@@ -57,7 +57,7 @@ public class Product extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @OneToMany(mappedBy = "productDetailImages", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDetailImage> productDetailImages = new ArrayList<>();
 
     public List<String> getDetailImages() {

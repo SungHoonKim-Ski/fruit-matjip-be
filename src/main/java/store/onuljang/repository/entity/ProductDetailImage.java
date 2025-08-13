@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "product_detail_images")
 public class ProductDetailImage extends BaseEntity {
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
