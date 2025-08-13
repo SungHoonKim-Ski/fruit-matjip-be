@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class Reservation extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_uid", nullable = false)
     private Users user;
 
     @Column(name = "order_date", nullable = false)

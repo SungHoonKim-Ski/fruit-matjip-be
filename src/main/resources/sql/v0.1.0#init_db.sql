@@ -67,21 +67,21 @@ CREATE TABLE product_detail_images (
 
 CREATE TABLE reservations (
     id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    user_id           BIGINT UNSIGNED NOT NULL,
+    user_uid          CHAR(36) NOT NULL,
     order_date        DATE NOT NULL,
     product_id        BIGINT UNSIGNED NOT NULL,
     quantity          INT NOT NULL,
-    amount            INT NOT NULL,
+    amount            DECIMAL NOT NULL,
     status            ENUM('PENDING','CANCELED','PICKED') NOT NULL DEFAULT 'PENDING',
     status_changed_at DATETIME NOT NULL,
     created_at        DATETIME NOT NULL,
     updated_at        DATETIME NOT NULL,
     deleted_at        DATETIME,
     PRIMARY KEY (id),
-    KEY idx_res_user_date (user_id, order_date),
+    KEY idx_res_user_date (user_uid, order_date),
     KEY idx_res_status    (status, status_changed_at),
     CONSTRAINT fk_res_user
-      FOREIGN KEY (user_id)
+      FOREIGN KEY (user_uid)
           REFERENCES users(id)
           ON DELETE RESTRICT ON UPDATE CASCADE,
     CONSTRAINT fk_res_product
@@ -145,7 +145,7 @@ CREATE TABLE user_name_logs (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   name_before       VARCHAR(255) NOT NULL,
   name_after        VARCHAR(255) NOT NULL,
-  user_id      BIGINT UNSIGNED NULL,
+  user_uid      CHAR(36) NULL,
   created_at   DATETIME NOT NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
