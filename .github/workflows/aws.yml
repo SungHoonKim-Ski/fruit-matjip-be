@@ -74,7 +74,7 @@ jobs:
 
             echo "Downloading jar from S3..."
           
-            aws s3 cp "s3://${S3_DEPLOY_BUCKET_NAME}/springboot/app.jar" onuljang.jar
+            aws s3 cp "s3://${{ secrets.S3_DEPLOY_BUCKET_NAME }}/springboot/app.jar" onuljang.jar
 
             echo "Stopping previous process if exists..."
             pkill -f 'onuljang.jar' || true
