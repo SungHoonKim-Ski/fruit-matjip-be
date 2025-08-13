@@ -19,6 +19,7 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminAppService;
+import store.onuljang.controller.request.AdminSignupRequest;
 import store.onuljang.repository.AdminRepository;
 import store.onuljang.repository.entity.Admin;
 
@@ -55,14 +56,17 @@ public class AdminController {
         return ResponseEntity.ok(admin.getId());
     }
 
-    @PostMapping("/sighup")
-    public ResponseEntity<Void> sighup() {
-        return ResponseEntity.ok().build();
+    @PostMapping("/signup")
+    public ResponseEntity<Long> sighup(@RequestBody AdminSignupRequest request) {
+        long res = adminAppService.signUp(request);
+
+        return ResponseEntity.ok(res);
     }
 
     @GetMapping("/validate")
     public ResponseEntity<Void> validateSession() {
         adminAppService.validate();
+
         return ResponseEntity.ok().build();
     }
 }

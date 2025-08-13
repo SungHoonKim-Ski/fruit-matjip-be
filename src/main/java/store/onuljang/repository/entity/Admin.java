@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "admins")
 public class Admin extends BaseEntity {
@@ -29,9 +28,15 @@ public class Admin extends BaseEntity {
     @Getter
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 16)
-    @Builder.Default
     private AdminRole role = AdminRole.NONE;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    @Builder
+    Admin(String name, String email, String password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+    }
 }

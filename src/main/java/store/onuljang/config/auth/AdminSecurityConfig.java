@@ -26,7 +26,7 @@ public class AdminSecurityConfig {
     SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
         http.securityMatcher("/api/admin/**")
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/api/admin/login", "/api/admin/logout").permitAll()
+                .requestMatchers("/api/admin/login", "/api/admin/signup", "/api/admin/logout").permitAll()
                 .anyRequest().authenticated()
             )
             .csrf(csrf -> csrf.disable())
