@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NamePoolException;
 import store.onuljang.repository.NamePoolRepository;
 import store.onuljang.repository.entity.NamePool;
@@ -18,6 +19,7 @@ import java.util.Random;
 public class NameGenerator {
     NamePoolRepository namePoolRepository;
 
+    @Transactional
     public String generate() {
         int count = (int)getCount();
         int index = new Random().nextInt(count);
