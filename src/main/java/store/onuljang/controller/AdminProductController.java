@@ -1,21 +1,30 @@
 package store.onuljang.controller;
 
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import store.onuljang.controller.request.AdminCreateProductRequest;
+import store.onuljang.service.AdminProductAppService;
 
 @RestController
 @RequestMapping("/api/admin/products")
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Validated
 public class AdminProductController {
+    AdminProductAppService adminProductAppService;
 
     @PostMapping
-    public ResponseEntity<?> create() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Long> create(@Valid AdminCreateProductRequest request) {
+        return ResponseEntity.ok(adminProductAppService.saveAndMoveTempImage(request));
     }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<?> update(@PathVariable("productId") Long productId) {
+    public ResponseEntity<?> updateDetail(@PathVariable("productId") Long productId) {
         return ResponseEntity.ok().build();
     }
 

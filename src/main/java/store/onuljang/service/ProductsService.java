@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.controller.request.AdminCreateProductRequest;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.entity.Product;
@@ -21,8 +22,9 @@ import java.util.List;
 public class ProductsService {
     ProductsRepository productsRepository;
 
-    public List<Product> findAllBetween(LocalDate from, LocalDate to) {
-        return productsRepository.findAllBySellDateBetween(from, to);
+    @Transactional
+    public long save(Product product) {
+        return productsRepository.save(product).getId();
     }
 
     public Product findByIdWithDetailImages(long id) {

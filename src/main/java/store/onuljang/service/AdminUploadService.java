@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import store.onuljang.config.S3Config;
 import store.onuljang.controller.response.PresignedUrlResponse;
 
@@ -19,29 +19,29 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AdminUploadService {
-
     AmazonS3 s3;
     S3Config s3Config;
-    static Duration DEFAULT_EXPIRE = Duration.ofMinutes(10);
+    Duration DEFAULT_EXPIRE = Duration.ofMinutes(10);
 
-    // 신규 상품(아직 productId 없음) 임시 업로드 URL
-    @Transactional(readOnly = true)
+    public void move(String srcKey, String destKey) {
+        String bucket = s3Config.getBucket();
+        s3.copyObject(bucket, srcKey, bucket, destKey);
+        s3.deleteObject(bucket, srcKey);
+    }
+
+
     public PresignedUrlResponse issueTempImageUrl(Long adminId, String filename, String contentType) {
         String ext = extOf(filename);
         String key = "images/temp/%d/%s.%s".formatted(adminId, UUID.randomUUID(), ext);
         return presignPut(key, contentType, DEFAULT_EXPIRE);
     }
 
-    // 대표 이미지 교체 URL
-    @Transactional(readOnly = true)
     public PresignedUrlResponse issueMainImageUrl(Long productId, String filename, String contentType) {
         String ext = extOf(filename);
         String key = "images/images/products/%d/main/%s.%s".formatted(productId, UUID.randomUUID(), ext);
         return presignPut(key, contentType, DEFAULT_EXPIRE);
     }
 
-    // 상세 이미지 N개 업로드 URL
-    @Transactional(readOnly = true)
     public List<PresignedUrlResponse> issueDetailImageUrls(Long productId, List<String> filenames, String contentType) {
         List<PresignedUrlResponse> list = new ArrayList<>();
         int n = filenames.size();
