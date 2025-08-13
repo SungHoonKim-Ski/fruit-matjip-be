@@ -2,7 +2,9 @@ package store.onuljang.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import store.onuljang.controller.response.ProductListResponse;
 @RequestMapping("/api/auth/products")
 @RequiredArgsConstructor
 @Validated
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class ProductsController {
     ProductsAppService productsAppService;
 

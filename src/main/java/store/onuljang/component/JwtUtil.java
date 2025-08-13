@@ -80,4 +80,8 @@ public class JwtUtil {
 
         throw new AccessTokenParseException("Bearer token is null");
     }
+
+    public String getBearerUid(String bearerToken) {
+        return getUid(extractBearer(bearerToken));
+    }
 }

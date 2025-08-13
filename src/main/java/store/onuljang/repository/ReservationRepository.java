@@ -10,6 +10,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    @EntityGraph(attributePaths = "products")
+    @EntityGraph(attributePaths = {"product"})
     List<Reservation> findAllByUserAndOrderDateBetween(Users user, LocalDate from, LocalDate to);
 }
