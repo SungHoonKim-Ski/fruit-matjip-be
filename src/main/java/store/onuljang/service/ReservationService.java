@@ -60,7 +60,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public List<Reservation> findAllByUserAndOrderDateBetween(Users user, LocalDate from, LocalDate to) {
+    public List<Reservation> findAllByUserAndOrderDateBetweenWithProduct(Users user, LocalDate from, LocalDate to) {
         return reservationRepository.findAllByUserAndOrderDateBetween(user, from, to);
     }
 }

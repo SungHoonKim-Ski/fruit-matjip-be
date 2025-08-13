@@ -41,7 +41,7 @@ public class ReservationAppService {
     public ReservationListResponse getReservations(String uId, ReservationListRequest request) {
         Users user = userService.findByUId(uId);
 
-        List<Reservation> entities = reservationService.findAllByUserAndOrderDateBetween(user, request.from(), request.to());
+        List<Reservation> entities = reservationService.findAllByUserAndOrderDateBetweenWithProduct(user, request.from(), request.to());
 
         return ReservationListResponse.from(entities);
     }
