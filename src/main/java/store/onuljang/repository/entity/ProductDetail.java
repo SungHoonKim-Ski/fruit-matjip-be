@@ -19,12 +19,10 @@ public class ProductDetail extends BaseEntity {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Getter
     @Column(name = "description", nullable = false)
     private String description;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    @OneToMany(mappedBy = "productDetail", cascade = CascadeType.ALL)
-    private List<ProductDetailImage> images = new ArrayList<>();
 }

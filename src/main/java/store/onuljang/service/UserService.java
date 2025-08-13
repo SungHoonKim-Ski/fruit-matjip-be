@@ -5,13 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.exception.UserNotExistException;
+import store.onuljang.exception.NotFoundException;
 import store.onuljang.exception.UserNotFoundException;
 import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.Users;
-
-import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -27,7 +24,7 @@ public class UserService {
 
     public Users findByUId(String uId) {
         return userRepository.findByInternalUid(uId)
-            .orElseThrow(() -> new UserNotExistException("존재하지 않는 유저"));
+            .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
     }
 
     public boolean findByName(String name) {

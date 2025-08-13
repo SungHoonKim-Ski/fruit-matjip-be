@@ -14,9 +14,10 @@ import java.time.LocalDateTime;
 public class ProductDetailImage extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "product_detail_id", nullable = false)
-    private ProductDetail productDetail;
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
 
+    @Getter
     @Column(name = "url", nullable = false)
     private String url;
 
