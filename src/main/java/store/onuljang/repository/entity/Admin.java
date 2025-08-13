@@ -29,6 +29,7 @@ public class Admin extends BaseEntity {
     @Getter
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 16)
+    @Builder.Default
     private AdminRole role = AdminRole.NONE;
 
     @Column(name = "deleted_at")

@@ -25,6 +25,7 @@ public class Product extends BaseEntity {
 
     @Getter
     @Column(name = "stock", nullable = false)
+    @Builder.Default
     private Integer stock = 0;
 
     @Getter
@@ -37,10 +38,12 @@ public class Product extends BaseEntity {
 
     @Getter
     @Column(name = "is_visible", nullable = false)
+    @Builder.Default
     private Boolean isVisible = true;
 
     @Getter
     @Column(name = "total_sold", nullable = false)
+    @Builder.Default
     private Long totalSold = 0L;
 
     @Getter
@@ -61,7 +64,7 @@ public class Product extends BaseEntity {
     private List<ProductDetailImage> productDetailImages = new ArrayList<>();
 
     public List<String> getDetailImages() {
-        if (productDetailImages == null) {
+        if (this.productDetailImages == null) {
             return List.of();
         }
 
