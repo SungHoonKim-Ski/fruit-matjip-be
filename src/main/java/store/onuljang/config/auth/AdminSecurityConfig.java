@@ -24,44 +24,19 @@ public class AdminSecurityConfig {
     @Bean
     @Order(1)
     SecurityFilterChain adminChain(HttpSecurity http) throws Exception {
-        AuthenticationSuccessHandler successHandler = getAuthenticationSuccessHandler();
-        AuthenticationFailureHandler failureHandler = getAuthenticationFailureHandler();
-
-        http
-            .securityMatcher("/api/admin/**")
-            .authorizeHttpRequests(auth -> auth
+        http.securityMatcher("/api/admin/**")
+            .authorizeHttpRequests(a -> a
                 .requestMatchers("/api/admin/login", "/api/admin/logout").permitAll()
                 .anyRequest().authenticated()
             )
-            .csrf(csrf -> csrf.ignoringRequestMatchers("/api/admin/login", "/api/admin/logout"))
-            .sessionManagement(sm -> sm
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-            )
+            .csrf(csrf -> csrf.disable())
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authenticationProvider(adminAuthProvider)
-            .logout(lo -> lo
-                .logoutUrl("/api/admin/logout")
-                .logoutSuccessUrl("/api/admin/login?logout")
-                .deleteCookies("JSESSIONID")
-                .permitAll()
+            .exceptionHandling(e -> e
+                .authenticationEntryPoint((req,res,ex) -> res.sendError(401))
+                .accessDeniedHandler((req,res,ex) -> res.sendError(403))
             )
             .cors(cors -> {});
         return http.build();
-    }
-
-    private static AuthenticationFailureHandler getAuthenticationFailureHandler() {
-        return (req, res, ex) -> {
-            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            res.setContentType("application/json;charset=UTF-8");
-            res.getWriter().write("{\"ok\":false,\"message\":\"invalid credentials\"}");
-        };
-    }
-
-    private static AuthenticationSuccessHandler getAuthenticationSuccessHandler() {
-        AuthenticationSuccessHandler successHandler = (req, res, auth) -> {
-            res.setStatus(HttpServletResponse.SC_OK);
-            res.setContentType("application/json;charset=UTF-8");
-            res.getWriter().write("{\"ok\":true}");
-        };
-        return successHandler;
     }
 }

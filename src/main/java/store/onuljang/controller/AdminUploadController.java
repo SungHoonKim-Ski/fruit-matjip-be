@@ -1,7 +1,9 @@
 package store.onuljang.controller;
 
 import jakarta.validation.Valid;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.controller.request.PresignedUrlBatchRequest;
@@ -15,13 +17,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AdminUploadController {
 
     AdminUploadService uploadService;
 
     @PostMapping("/products/presigned-url")
     public ResponseEntity<PresignedUrlResponse> getTempUploadUrl(@Valid @RequestBody PresignedUrlRequest req) {
-        PresignedUrlResponse res = uploadService.issueTempImageUrl(req.adminId(), req.filename(), req.contentType());
+        PresignedUrlResponse res = uploadService.issueTempImageUrl(req.adminId(), req.fileName(), req.contentType());
         return ResponseEntity.ok(res);
     }
 
@@ -31,7 +34,7 @@ public class AdminUploadController {
             @PathVariable Long productId, @Valid @RequestBody PresignedUrlRequest req)
     {
 
-        PresignedUrlResponse res = uploadService.issueMainImageUrl(productId, req.filename(), req.contentType());
+        PresignedUrlResponse res = uploadService.issueMainImageUrl(productId, req.fileName(), req.contentType());
         return ResponseEntity.ok(res);
     }
 
@@ -45,7 +48,7 @@ public class AdminUploadController {
             return ResponseEntity.badRequest().build();
         }
 
-        List<PresignedUrlResponse> res = uploadService.issueDetailImageUrls(productId, req.filenames(), req.contentType());
+        List<PresignedUrlResponse> res = uploadService.issueDetailImageUrls(productId, req.fileNames(), req.contentType());
         return ResponseEntity.ok(res);
     }
 }

@@ -16,12 +16,10 @@ import store.onuljang.component.JwtUtil;
 
 import java.io.IOException;
 
-@Component
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class JwtFilter extends OncePerRequestFilter {
     JwtUtil jwtUtil;
-    AntPathMatcher matcher = new AntPathMatcher();
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -42,11 +40,5 @@ public class JwtFilter extends OncePerRequestFilter {
 
         }
         chain.doFilter(req, res);
-    }
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getRequestURI();
-        return matcher.match("/api/admin/**", path);
     }
 }

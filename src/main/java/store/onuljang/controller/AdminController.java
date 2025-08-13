@@ -1,6 +1,8 @@
 package store.onuljang.controller;
 
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -10,10 +12,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import store.onuljang.repository.AdminRepository;
+import store.onuljang.repository.entity.Admin;
+
+import java.util.Optional;
 
 record AdminLoginRequest(String email, String password) {}
 
@@ -23,14 +33,24 @@ record AdminLoginRequest(String email, String password) {}
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AdminController {
     AuthenticationManager authenticationManager;
+    SecurityContextRepository securityContextRepository = new HttpSessionSecurityContextRepository();
+    AdminRepository adminRepository;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody AdminLoginRequest req) {
+    public ResponseEntity<Long> login(HttpServletRequest request, HttpServletResponse response, @RequestBody AdminLoginRequest req) {
         Authentication auth = new UsernamePasswordAuthenticationToken(req.email(), req.password());
 
-        authenticationManager.authenticate(auth);
+        var authRes = authenticationManager.authenticate(auth);
+        var context = SecurityContextHolder.createEmptyContext();
+        context.setAuthentication(authRes);
+        SecurityContextHolder.setContext(context);
 
-        return ResponseEntity.ok().build();
+        request.getSession(true);
+
+        securityContextRepository.saveContext(context, request, response);
+        Admin admin = adminRepository.findByEmail(req.email())
+            .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+        return ResponseEntity.ok(admin.getId());
     }
 
     @PostMapping("/sighup")
