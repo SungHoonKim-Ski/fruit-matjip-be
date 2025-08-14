@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NamePoolException;
@@ -22,7 +23,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class NameGenerator {
     NamePoolRepository namePoolRepository;
 
-    @Transactional(readOnly = true)
+    @Transactional
     public String generate() {
         List<NamePool> namePools = namePoolRepository.findAll();
         int size = namePools.size();
@@ -31,6 +32,13 @@ public class NameGenerator {
         int offset = ThreadLocalRandom.current().nextInt(size);
         NamePool name = namePools.get(offset);
 
-        return name.generate();
+        return generateWithLock(name);
+    }
+
+    @Transactional
+    public String generateWithLock(NamePool namePool) {
+        return namePoolRepository.findByIdWithLock(namePool.getId())
+                .orElseThrow(() -> new NamePoolException("이름 생성 서버 에러"))
+                .generate();
     }
 }

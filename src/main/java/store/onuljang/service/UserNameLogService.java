@@ -6,7 +6,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import store.onuljang.repository.UserNameLogRepository;
-import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.log.UserNameLog;
 
 @Service
@@ -16,7 +15,7 @@ import store.onuljang.repository.entity.log.UserNameLog;
 public class UserNameLogService {
     UserNameLogRepository userNameLogRepository;
 
-    public void save(Users user, String before, String after) {
-        userNameLogRepository.save(new UserNameLog(user, before, after));
+    public void save(String uId, String before, String after) {
+        userNameLogRepository.save(new UserNameLog(uId, before, after));
     }
 }

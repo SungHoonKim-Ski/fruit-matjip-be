@@ -24,12 +24,12 @@ public class UserAppService {
 
     @Transactional
     public void modifyName(String uid, String name) {
-        Users user = userService.findByUId(uid);
         if (!existName(name)) {
             throw new NameAlreadyExistsException("이미 존재하는 닉네임입니다.");
         }
+        Users user = userService.findByUId(uid);
 
-        userNameLogService.save(user, user.getName(), name);
+        userNameLogService.save(user.getUid(), user.getName(), name);
 
         user.modifyName(name);
     }

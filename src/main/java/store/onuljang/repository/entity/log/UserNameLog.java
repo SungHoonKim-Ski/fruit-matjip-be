@@ -14,9 +14,8 @@ import store.onuljang.repository.entity.base.BaseLogEntity;
 @Table(name = "user_name_logs")
 @Builder
 public class UserNameLog extends BaseLogEntity {
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_uid", nullable = false)
-    private Users user;
+    private String userUid;
 
     @Column(name = "name_before", nullable = false)
     private String nameBefore;

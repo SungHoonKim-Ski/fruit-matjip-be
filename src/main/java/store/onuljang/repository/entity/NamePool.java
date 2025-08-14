@@ -1,6 +1,7 @@
 package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 public class NamePool {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Getter
     private Long id;
 
     @Column(name = "base_name", nullable = false, length = 50)
