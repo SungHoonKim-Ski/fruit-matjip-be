@@ -19,7 +19,7 @@ public class RefreshToken {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", nullable = false, length = 36)
+    @Column(name = "user_uid", nullable = false, length = 36)
     private String userUid;
 
     @Column(name = "token_hash", nullable = false, length = 64)
