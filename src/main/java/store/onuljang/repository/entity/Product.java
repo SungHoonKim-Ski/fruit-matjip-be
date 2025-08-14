@@ -72,4 +72,8 @@ public class Product extends BaseEntity {
             .map(ProductDetailImage::getDetailUrl)
             .toList();
     }
+
+    public void addStock(int quantity) {
+        this.stock += quantity;
+    }
 }

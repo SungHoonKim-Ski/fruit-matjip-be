@@ -1,15 +1,20 @@
 package store.onuljang.appservice;
 
+import jakarta.persistence.LockModeType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.ReservationListRequest;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
+import store.onuljang.exception.ProductExceedException;
+import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
+import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
 
@@ -21,9 +26,16 @@ import java.util.List;
 public class ReservationAppService {
     ReservationService reservationService;
     UserService userService;
+    ProductsService productsService;
 
     @Transactional
-    public long save(String uId, ReservationRequest request) {
+    public long reserve(String uId, ReservationRequest request) {
+        Product product = productsService.findByIdWithLock(request.productId());
+        if (product.getStock() < request.quantity()) {
+            throw new ProductExceedException("상품의 재고가 부족합니다.");
+        }
+
+        product.addStock(-request.quantity());
         return reservationService.save(uId, request.productId(), request.quantity(), request.amount());
     }
 
@@ -33,6 +45,9 @@ public class ReservationAppService {
         Reservation reservation = reservationService.findById(reservationId);
 
         validateReservation(user, reservation);
+
+        Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
+        product.addStock(reservation.getQuantity());
 
         reservationService.cancel(reservation);
     }

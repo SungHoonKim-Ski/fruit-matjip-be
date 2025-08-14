@@ -21,12 +21,17 @@ import java.util.List;
 public class ProductsService {
     ProductsRepository productsRepository;
 
+    public Product findByIdWithLock(long id) {
+        return productsRepository.findByIdWithLock(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
+    }
+
     public List<Product> findAllBetween(LocalDate from, LocalDate to) {
         return productsRepository.findAllBySellDateBetween(from, to);
     }
 
     public Product findByIdWithDetailImages(long id) {
-        return productsRepository.findById(id)
+        return productsRepository.findAllById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
     }
 

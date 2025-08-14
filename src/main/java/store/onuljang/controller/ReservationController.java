@@ -2,7 +2,6 @@ package store.onuljang.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +31,7 @@ public class ReservationController {
     ) {
         String uId = jwtUtil.getBearerUid(bearerToken);
 
-        return ResponseEntity.ok(reservationAppService.save(uId, request));
+        return ResponseEntity.ok(reservationAppService.reserve(uId, request));
     }
 
     @PatchMapping("/cancel/{id}")
