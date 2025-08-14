@@ -20,7 +20,7 @@ public class UserController {
 
     @PatchMapping("/auth/name/{name}")
     public ResponseEntity<Void> modifyName(@RequestHeader("Authorization") String authorization, @PathVariable String name) {
-        userAppService.modifyName(jwtUtil.getUid(authorization), name);
+        userAppService.modifyName(jwtUtil.getBearerUid(authorization), name);
         return ResponseEntity.ok().build();
     }
 
