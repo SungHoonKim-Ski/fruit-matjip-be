@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.component.SessionUtil;
 import store.onuljang.controller.request.AdminCreateProductRequest;
 import store.onuljang.repository.entity.Admin;
 
@@ -27,7 +28,7 @@ public class AdminProductAppService {
 
         String imageUrl = moveImage(tempImageUrl);
 
-        Admin admin = adminService.findById(request.adminId());
+        Admin admin = adminService.findById(SessionUtil.getAdminId());
 
         return productsService.save(AdminCreateProductRequest.toEntity(request, imageUrl, admin));
     }
