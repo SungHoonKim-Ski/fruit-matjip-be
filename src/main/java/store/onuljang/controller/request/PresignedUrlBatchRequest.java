@@ -8,7 +8,6 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record PresignedUrlBatchRequest(
-    @NotNull Long adminId,
     @NotNull Long productId,
     @Size(min = 1, max = 10) List<@NotBlank String> fileNames,
     @Pattern(regexp = "image/[-+.\\w]+") @NotBlank String contentType

@@ -30,9 +30,9 @@ public class AdminUploadService {
     }
 
 
-    public PresignedUrlResponse issueTempImageUrl(Long adminId, String filename, String contentType) {
+    public PresignedUrlResponse issueTempImageUrl(String filename, String contentType) {
         String ext = extOf(filename);
-        String key = "images/temp/%d/%s.%s".formatted(adminId, UUID.randomUUID(), ext);
+        String key = "images/temp/%s.%s".formatted(UUID.randomUUID(), ext);
         return presignPut(key, contentType, DEFAULT_EXPIRE);
     }
 

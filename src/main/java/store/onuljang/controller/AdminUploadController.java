@@ -24,7 +24,7 @@ public class AdminUploadController {
 
     @PostMapping("/products/presigned-url")
     public ResponseEntity<PresignedUrlResponse> getTempUploadUrl(@Valid @RequestBody PresignedUrlRequest req) {
-        PresignedUrlResponse res = uploadService.issueTempImageUrl(req.adminId(), req.fileName(), req.contentType());
+        PresignedUrlResponse res = uploadService.issueTempImageUrl(req.fileName(), req.contentType());
         return ResponseEntity.ok(res);
     }
 

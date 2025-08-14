@@ -7,12 +7,8 @@ import store.onuljang.repository.entity.Product;
 import java.time.LocalDate;
 
 public record AdminCreateProductRequest (
-    @PositiveOrZero
-    @NotNull
-    Long adminId,
-
     @NotBlank(message = "상품명은 필수입니다")
-    @Size(max = 100, message = "상품명은 100자 이하로 입력해주세요")
+    @Size(max = 20, message = "상품명은 20자 이하로 입력해주세요")
     String name,
 
     @NotNull(message = "가격은 필수입니다")
@@ -32,7 +28,7 @@ public record AdminCreateProductRequest (
 
     @NotNull(message = "상품 상태는 필수입니다")
     Boolean visible
-) implements AdminRequest {
+) {
     public static Product toEntity(AdminCreateProductRequest request, String imageUrl, Admin admin) {
         return Product.builder()
             .price(request.price)
@@ -43,10 +39,5 @@ public record AdminCreateProductRequest (
             .isVisible(request.visible)
             .registeredAdmin(admin)
             .build();
-    }
-
-    @Override
-    public Long adminId() {
-        return adminId;
     }
 }
