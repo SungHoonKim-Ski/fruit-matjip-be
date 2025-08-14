@@ -22,7 +22,7 @@ public class Reservation extends BaseEntity {
 
     @Getter
     @Column(name = "order_date", nullable = false)
-    private LocalDate orderDate;
+    private LocalDate orderDate = LocalDate.now();
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
