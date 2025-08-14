@@ -39,7 +39,7 @@ public class ReservationService {
         Product product = productsRepository.findById(productId)
             .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));;
 
-        Users user = userRepository.findByInternalUid(uId)
+        Users user = userRepository.findByUid(uId)
             .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
 
         Reservation entity = Reservation.builder()

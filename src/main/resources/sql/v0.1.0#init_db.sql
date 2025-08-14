@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     social_id        VARCHAR(255) NOT NULL,
-    internal_uid     CHAR(36) NOT NULL,
+    uid     CHAR(36) NOT NULL,
     name         VARCHAR(255)  NOT NULL,
     last_order_date  DATE NULL,
     total_orders  BIGINT NOT NULL DEFAULT 0,

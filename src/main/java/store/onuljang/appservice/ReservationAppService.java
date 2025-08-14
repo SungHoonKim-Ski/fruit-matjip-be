@@ -47,7 +47,7 @@ public class ReservationAppService {
     }
 
     public void validateReservation(Users user, Reservation reservation) {
-        if (!user.getInternalUid().equals(reservation.getUser().getInternalUid())) {
+        if (!user.getUid().equals(reservation.getUser().getUid())) {
             throw new IllegalArgumentException("다른 유저가 예약한 상품");
         }
     }

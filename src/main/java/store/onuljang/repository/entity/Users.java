@@ -18,7 +18,7 @@ public class Users extends BaseEntity {
 
     @Getter
     @Column(nullable = false, length = 50)
-    private String internalUid;
+    private String uid;
 
     @Getter
     @Column(nullable = false, length = 50)
@@ -32,9 +32,9 @@ public class Users extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Users(String socialId, String name, UUID uuid) {
+    public Users(String socialId, String name, UUID uid) {
         this.socialId = socialId;
-        this.internalUid = uuid.toString();
+        this.uid = uid.toString();
         this.name = name;
     }
 

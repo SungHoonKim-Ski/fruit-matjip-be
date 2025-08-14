@@ -23,7 +23,7 @@ public class UserService {
     }
 
     public Users findByUId(String uId) {
-        return userRepository.findByInternalUid(uId)
+        return userRepository.findByUid(uId)
             .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
     }
 

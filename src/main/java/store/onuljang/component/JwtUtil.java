@@ -22,7 +22,7 @@ public class JwtUtil {
     JwtConfigDto jwtConfigDto;
 
     public JwtToken generateToken(Users user) {
-        return generateToken(user.getInternalUid(), user.getName());
+        return generateToken(user.getUid(), user.getName());
     }
 
     public JwtToken generateToken(String uid, String name) {

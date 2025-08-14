@@ -39,7 +39,7 @@ public class TokenService {
 
         refreshTokenRepository.save(
             RefreshToken.builder()
-                .userUid(user.getInternalUid())
+                .userUid(user.getUid())
                 .tokenHash(HashUtil.sha256Hex(jwtToken.refresh()))
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(jwtConfigDto.getRefreshTtl(), ChronoUnit.DAYS))
@@ -73,7 +73,7 @@ public class TokenService {
 
         refreshTokenRepository.save(
             RefreshToken.builder()
-                .userUid(user.getInternalUid())
+                .userUid(user.getUid())
                 .tokenHash(tokenHash)
                 .issuedAt(Instant.now())
                 .expiresAt(Instant.now().plus(jwtConfigDto.getRefreshTtl(), ChronoUnit.DAYS))

@@ -27,7 +27,7 @@ public class UserSignupService {
                 Users newUser = Users.builder()
                     .name(uniqueName)
                     .socialId(socialId)
-                    .uuid(UUID.randomUUID())
+                    .uid(UUID.randomUUID())
                     .build();
 
                 return userRepository.save(newUser);
