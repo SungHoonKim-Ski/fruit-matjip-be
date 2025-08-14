@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.controller.request.AdminCreateProductRequest;
+import store.onuljang.controller.request.AdminProductListItemRequest;
+import store.onuljang.controller.response.AdminProductListItems;
 import store.onuljang.service.AdminProductAppService;
 
 @RestController
@@ -17,6 +19,11 @@ import store.onuljang.service.AdminProductAppService;
 @Validated
 public class AdminProductController {
     AdminProductAppService adminProductAppService;
+
+    @GetMapping
+    public ResponseEntity<AdminProductListItems> getAll() {
+        return ResponseEntity.ok(adminProductAppService.getAll());
+    }
 
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody AdminCreateProductRequest request) {

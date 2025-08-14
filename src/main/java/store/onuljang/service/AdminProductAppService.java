@@ -8,7 +8,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.component.SessionUtil;
 import store.onuljang.controller.request.AdminCreateProductRequest;
+import store.onuljang.controller.response.AdminProductListItems;
 import store.onuljang.repository.entity.Admin;
+import store.onuljang.repository.entity.Product;
+
+import java.util.List;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,5 +43,12 @@ public class AdminProductAppService {
         adminUploadService.move(tempUrl, destKey);
 
         return destKey;
+    }
+
+    @Transactional(readOnly = true)
+    public AdminProductListItems getAll() {
+        List<Product> entities = productsService.findAll();
+
+        return AdminProductListItems.from(entities);
     }
 }

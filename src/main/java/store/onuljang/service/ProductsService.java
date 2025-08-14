@@ -21,6 +21,10 @@ import java.util.List;
 public class ProductsService {
     ProductsRepository productsRepository;
 
+    public List<Product> findAll() {
+        return productsRepository.findAll();
+    }
+
     public Product findByIdWithLock(long id) {
         return productsRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
