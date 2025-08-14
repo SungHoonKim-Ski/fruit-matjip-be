@@ -17,7 +17,7 @@ public class Reservation extends BaseEntity {
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "users_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
     @Getter
