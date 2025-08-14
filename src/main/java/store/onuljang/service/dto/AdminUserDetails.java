@@ -8,12 +8,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import store.onuljang.repository.entity.Admin;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Getter
-public class AdminUserDetails implements UserDetails {
+public class AdminUserDetails implements UserDetails, Serializable {
     Long adminId;
     String email;
     String password;

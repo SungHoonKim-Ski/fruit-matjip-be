@@ -30,14 +30,13 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
         String email = String.valueOf(auth.getName()).trim().toLowerCase();
         String rawPw = String.valueOf(auth.getCredentials());
 
-        UserDetails user = adminUserDetailService.loadUserByUsername(email);
+        AdminUserDetails user = adminUserDetailService.loadUserByUsername(email);
 
         if (!passwordEncoder.matches(rawPw, user.getPassword())) {
             throw new BadCredentialsException("Invalid admin credentials");
         }
-        Long adminId = ((AdminUserDetails) user).getAdminId();
 
-        return new AdminAuthenticationToken(user, user.getAuthorities(), adminId);
+        return new AdminAuthenticationToken(user, null, user.getAuthorities(), user.getAdminId());
     }
 
     @Override public boolean supports(Class<?> aClass) {
