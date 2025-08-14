@@ -52,7 +52,7 @@ public class AuthAppService {
 
     @Transactional
     public String refresh(String accessBearerToken, String refreshToken) {
-        String userUid = jwtUtil.getUid(accessBearerToken);
+        String userUid = jwtUtil.getUidFromExpiredToken(accessBearerToken);
         RefreshToken curToken = tokenService.validate(userUid, refreshToken);
 
         Users user = userService.findByUId(userUid);

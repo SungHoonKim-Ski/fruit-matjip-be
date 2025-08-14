@@ -43,6 +43,18 @@ public class JwtUtil {
         return claims.getBody().getSubject();
     }
 
+    public String getUidFromExpiredToken(String accessToken) {
+        try {
+            Jws<Claims> claims = Jwts.parserBuilder()
+                .setSigningKey(jwtConfigDto.getKeys())
+                .build()
+                .parseClaimsJws(accessToken.replace("Bearer ", ""));
+            return claims.getBody().getSubject();
+        } catch (ExpiredJwtException e) {
+            return e.getClaims().getSubject();
+        }
+    }
+
     private String generateAccessToken(String subject, Map<String, Object> extraClaims) {
         return buildToken(subject, extraClaims, Instant.now().plus(jwtConfigDto.getAccessTtl(), ChronoUnit.MINUTES));
     }

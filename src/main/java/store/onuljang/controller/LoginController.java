@@ -24,8 +24,8 @@ public class LoginController {
 
     @PostMapping("/refresh")
     public ResponseEntity<String> reissueTokens(
-        @RequestHeader(value="Authorization", required=false) String authorization,
-        @CookieValue(value="REFRESH_TOKEN", required=false) String refreshToken
+        @RequestHeader(value="Authorization") String authorization,
+        @CookieValue(value="REFRESH_TOKEN") String refreshToken
     ) {
         if (refreshToken == null || refreshToken.isBlank()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

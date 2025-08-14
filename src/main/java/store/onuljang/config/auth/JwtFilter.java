@@ -1,5 +1,6 @@
 package store.onuljang.config.auth;
 
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -36,9 +38,14 @@ public class JwtFilter extends OncePerRequestFilter {
             var jws = jwtUtil.parseAndValidate(token);
             var auth = new UsernamePasswordAuthenticationToken(jws.getBody().getSubject(), null, java.util.List.of());
             SecurityContextHolder.getContext().setAuthentication(auth);
+            chain.doFilter(req, res);
+        } catch (JwtException e) {
+            res.setStatus(HttpStatus.UNAUTHORIZED.value());  // 401
+            res.getWriter().write("Token expired");
         } catch (Exception ignore) {
-
+            res.setStatus(HttpStatus.UNAUTHORIZED.value());  // 401
+            res.getWriter().write("Invalid token");
         }
-        chain.doFilter(req, res);
     }
 }
+
