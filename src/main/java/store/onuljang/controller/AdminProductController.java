@@ -19,17 +19,17 @@ public class AdminProductController {
     AdminProductAppService adminProductAppService;
 
     @PostMapping
-    public ResponseEntity<Long> create(@Valid AdminCreateProductRequest request) {
+    public ResponseEntity<Long> create(@Valid @RequestBody AdminCreateProductRequest request) {
         return ResponseEntity.ok(adminProductAppService.saveAndMoveTempImage(request));
     }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<?> updateDetail(@PathVariable("productId") Long productId) {
+    public ResponseEntity<?> updateDetail(@Valid @RequestBody @PathVariable("productId") Long productId) {
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/sold-out/{productId}")
-    public ResponseEntity<?> setSoldOut(@PathVariable("productId") Long productId) {
+    public ResponseEntity<?> setSoldOut(@Valid @RequestBody @PathVariable("productId") Long productId) {
         return ResponseEntity.ok().build();
     }
 
