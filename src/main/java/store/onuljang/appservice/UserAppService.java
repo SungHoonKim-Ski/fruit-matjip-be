@@ -28,7 +28,9 @@ public class UserAppService {
         if (!existName(name)) {
             throw new NameAlreadyExistsException("이미 존재하는 닉네임입니다.");
         }
+
         userNameLogService.save(user, user.getName(), name);
+
         user.modifyName(name);
     }
 }
