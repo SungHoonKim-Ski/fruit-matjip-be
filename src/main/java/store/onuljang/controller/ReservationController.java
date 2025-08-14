@@ -28,7 +28,7 @@ public class ReservationController {
     @PostMapping("/")
     public ResponseEntity<?> create(
             @RequestHeader(value="Authorization") String bearerToken,
-            @Valid ReservationRequest request
+            @RequestBody @Valid ReservationRequest request
     ) {
         String uId = jwtUtil.getBearerUid(bearerToken);
 
@@ -50,7 +50,7 @@ public class ReservationController {
     @GetMapping("/")
     public ResponseEntity<ReservationListResponse> getList(
         @RequestHeader(value="Authorization") String bearerToken,
-        @Valid @ModelAttribute ReservationListRequest request
+        @Valid @ModelAttribute @RequestBody ReservationListRequest request
     ) {
         String uId = jwtUtil.getBearerUid(bearerToken);
 

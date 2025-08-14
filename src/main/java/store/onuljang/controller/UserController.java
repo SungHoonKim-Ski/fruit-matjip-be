@@ -1,9 +1,7 @@
 package store.onuljang.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,7 +25,7 @@ public class UserController {
     }
 
     @GetMapping("/auth/name/{name}")
-    public ResponseEntity<Boolean> existName(@PathVariable @Valid @NotNull @Min(3) @Max(10) String name) {
+    public ResponseEntity<Boolean> existName(@PathVariable @Valid @NotNull @NotBlank @Size(min=3, max=10) String name) {
         return ResponseEntity.ok(userAppService.existName(name));
     }
 }
