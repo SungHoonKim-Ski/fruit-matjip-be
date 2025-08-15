@@ -10,13 +10,11 @@ import java.time.LocalDate;
 public record ReservationListRequest(
     @RequestParam
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    @FutureOrPresent
     @NotNull
     LocalDate from,
 
     @RequestParam
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    @FutureOrPresent
     @NotNull
     LocalDate to
 ) {

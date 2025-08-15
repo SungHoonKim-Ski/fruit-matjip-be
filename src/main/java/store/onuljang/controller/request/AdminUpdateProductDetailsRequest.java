@@ -9,8 +9,6 @@ public record AdminUpdateProductDetailsRequest(
     @Size(max = 100, message = "상품명은 100자 이하여야 합니다")
     String name,
 
-    @Size(max = 100, message = "상품명은 30자 이하여야 합니다")
-    @Min(value = 1, message = "가격은 1 이상이어야 합니다")
     Integer price,
 
     @Min(value = -1000, message = "재고 증감치는 -1000 이상이어야 합니다")
