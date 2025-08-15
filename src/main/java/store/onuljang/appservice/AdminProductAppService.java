@@ -72,7 +72,7 @@ public class AdminProductAppService {
         }
 
         if (!removeKey.isEmpty()) {
-            adminUploadService.softRemoveAll(removeKey);
+            adminUploadService.softDeleteAllImages(removeKey);
         }
     }
 

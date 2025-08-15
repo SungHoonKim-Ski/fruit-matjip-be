@@ -76,10 +76,11 @@ public class AdminUploadService {
         return ext.toLowerCase(Locale.ROOT);
     }
 
-    public void softRemoveAll(List<String> removeKey) {
+    public void softDeleteAllImages(List<String> removeKey) {
         String bucket = s3Config.getBucket();
         for (String key : removeKey) {
-            s3.copyObject(bucket, key, bucket, "delete/%s".formatted(key));
+            String destKey = key.replaceFirst("^images/", "images/delete/");
+            s3.copyObject(bucket, key, bucket, destKey);
         }
 
         DeleteObjectsRequest req = new DeleteObjectsRequest(bucket)
