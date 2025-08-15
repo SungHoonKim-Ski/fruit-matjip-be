@@ -1,4 +1,4 @@
-package store.onuljang.component;
+package store.onuljang.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;

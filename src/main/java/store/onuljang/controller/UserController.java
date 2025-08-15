@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.UserAppService;
-import store.onuljang.component.JwtUtil;
+import store.onuljang.auth.JwtUtil;
 
 @RequestMapping("/api")
 @RestController

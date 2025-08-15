@@ -1,4 +1,4 @@
-package store.onuljang.config.auth;
+package store.onuljang.auth;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import store.onuljang.component.JwtUtil;
 
 @Configuration
 @RequiredArgsConstructor

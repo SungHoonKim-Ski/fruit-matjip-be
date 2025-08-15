@@ -9,7 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.component.JwtUtil;
+import store.onuljang.auth.JwtUtil;
 import store.onuljang.config.JwtConfigDto;
 import store.onuljang.exception.InvalidRefreshTokenException;
 import store.onuljang.repository.RefreshTokenRepository;

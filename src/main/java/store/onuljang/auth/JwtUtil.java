@@ -1,4 +1,4 @@
-package store.onuljang.component;
+package store.onuljang.auth;
 
 import io.jsonwebtoken.*;
 import lombok.AccessLevel;

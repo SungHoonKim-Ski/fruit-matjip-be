@@ -1,10 +1,10 @@
-package store.onuljang.component;
+package store.onuljang.util;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import store.onuljang.config.auth.AdminAuthenticationToken;
+import store.onuljang.auth.AdminAuthenticationToken;
 
 @UtilityClass
 public class SessionUtil {

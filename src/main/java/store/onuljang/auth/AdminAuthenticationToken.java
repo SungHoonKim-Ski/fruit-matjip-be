@@ -1,4 +1,4 @@
-package store.onuljang.config.auth;
+package store.onuljang.auth;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;

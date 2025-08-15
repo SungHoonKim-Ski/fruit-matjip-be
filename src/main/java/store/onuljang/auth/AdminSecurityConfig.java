@@ -1,4 +1,4 @@
-package store.onuljang.config.auth;
+package store.onuljang.auth;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;

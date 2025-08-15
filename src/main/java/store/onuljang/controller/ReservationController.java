@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.ReservationAppService;
-import store.onuljang.component.JwtUtil;
+import store.onuljang.auth.JwtUtil;
 import store.onuljang.controller.request.ReservationListRequest;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;

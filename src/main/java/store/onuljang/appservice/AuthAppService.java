@@ -3,11 +3,9 @@ package store.onuljang.appservice;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.component.JwtUtil;
+import store.onuljang.auth.JwtUtil;
 import store.onuljang.controller.request.LoginRequest;
 import store.onuljang.controller.response.LoginResponse;
 import store.onuljang.feign.dto.KakaoLoginResponse;
@@ -18,7 +16,6 @@ import store.onuljang.service.KakaoService;
 import store.onuljang.service.TokenService;
 import store.onuljang.service.UserService;
 import store.onuljang.service.UserSignupService;
-import store.onuljang.service.dto.JwtToken;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
