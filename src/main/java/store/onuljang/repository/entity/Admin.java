@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "admins")
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE admins SET deleted_at = NOW() WHERE id = ?")
 public class Admin extends BaseEntity {
 
     @Getter

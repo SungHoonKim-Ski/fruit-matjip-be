@@ -14,7 +14,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @Entity
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
+@Table(name = "users")
+@SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
 public class Users extends BaseEntity {
 
     @Column(nullable = false, unique = true)

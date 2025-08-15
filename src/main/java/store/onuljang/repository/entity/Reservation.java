@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "reservations")
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE reservations SET deleted_at = NOW() WHERE id = ?")
 public class Reservation extends BaseEntity {
 
     @Getter

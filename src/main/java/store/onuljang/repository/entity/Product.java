@@ -17,7 +17,7 @@ import java.util.List;
 @Entity
 @Table(name = "products")
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE products SET deleted_at = NOW() WHERE id = ?")
 public class Product extends BaseEntity {
     @Getter
     @Column(name = "product_url", nullable = false)

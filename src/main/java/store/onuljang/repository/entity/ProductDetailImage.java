@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "product_detail_images")
 @SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
+@SQLDelete(sql = "UPDATE product_detail_images SET deleted_at = NOW() WHERE id = ?")
 public class ProductDetailImage extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -24,6 +24,10 @@ public class ProductDetailImage extends BaseEntity {
     @Getter
     @Column(name = "detail_url", nullable = false)
     private String detailUrl;
+
+    @Getter
+    @Column(name = "ordering", nullable = false)
+    private Integer ordering;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
