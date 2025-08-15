@@ -3,15 +3,11 @@ package store.onuljang.appservice;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.config.auth.AdminAuthenticationToken;
 import store.onuljang.controller.request.AdminSignupRequest;
 import store.onuljang.exception.ExistAdminException;
-import store.onuljang.exception.UnauthorizedException;
 import store.onuljang.repository.entity.Admin;
 import store.onuljang.service.AdminService;
 
@@ -24,18 +20,8 @@ public class AdminAppService {
     AdminService adminService;
     PasswordEncoder passwordEncoder;
 
-    public void validate() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new UnauthorizedException("인증되지 않은 사용자입니다");
-        }
-
-        if (authentication instanceof AdminAuthenticationToken authToken) {
-            long id = authToken.getAdminId();
-            adminService.findById(id);
-        } else {
-            throw new UnauthorizedException("유효하지 않은 인증 토큰입니다");
-        }
+    public void validate(long adminId) {
+        adminService.findById(adminId);
     }
 
     @Transactional

@@ -45,8 +45,8 @@ public class AdminController {
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<Void> validateSession() {
-        adminAppService.validate();
+    public ResponseEntity<Void> validateSession(@AuthenticationPrincipal AdminUserDetails admin) {
+        adminAppService.validate(admin.getAdminId());
 
         return ResponseEntity.ok().build();
     }
