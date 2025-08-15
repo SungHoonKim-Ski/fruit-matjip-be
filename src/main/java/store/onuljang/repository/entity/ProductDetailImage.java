@@ -26,9 +26,14 @@ public class ProductDetailImage extends BaseEntity {
     private String detailUrl;
 
     @Getter
-    @Column(name = "ordering", nullable = false)
-    private Integer ordering;
+    @Setter
+    @Column(name = "sort_order", nullable = false)
+    private Integer sortOrder;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
+
+    public void delete() {
+        this.deletedAt = LocalDateTime.now();
+    }
 }

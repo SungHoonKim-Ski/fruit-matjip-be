@@ -25,6 +25,11 @@ public class ProductsService {
         return productsRepository.findAll();
     }
 
+    public Product findById(long id) {
+        return productsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
+    }
+
     public Product findByIdWithLock(long id) {
         return productsRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));

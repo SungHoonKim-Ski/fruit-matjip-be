@@ -2,7 +2,10 @@ package store.onuljang.service;
 
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.amazonaws.services.s3.model.MultiObjectDeleteException;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Service;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import store.onuljang.config.S3Config;
 import store.onuljang.controller.response.PresignedUrlResponse;
+import store.onuljang.repository.entity.Product;
 
 import java.net.URL;
 import java.time.Duration;
@@ -22,6 +26,7 @@ public class AdminUploadService {
     AmazonS3 s3;
     S3Config s3Config;
     Duration DEFAULT_EXPIRE = Duration.ofMinutes(10);
+    ProductsService productsService;
 
     public void move(String srcKey, String destKey) {
         String bucket = s3Config.getBucket();
@@ -29,27 +34,23 @@ public class AdminUploadService {
         s3.deleteObject(bucket, srcKey);
     }
 
-
     public PresignedUrlResponse issueTempImageUrl(String filename, String contentType) {
         String ext = extOf(filename);
         String key = "images/temp/%s.%s".formatted(UUID.randomUUID(), ext);
         return presignPut(key, contentType, DEFAULT_EXPIRE);
     }
 
-    public PresignedUrlResponse issueMainImageUrl(Long productId, String filename, String contentType) {
-        String ext = extOf(filename);
-        String key = "images/images/products/%d/main/%s.%s".formatted(productId, UUID.randomUUID(), ext);
-        return presignPut(key, contentType, DEFAULT_EXPIRE);
-    }
+    public List<PresignedUrlResponse> issueDetailImageUrls(long productId, List<String> filenames, String contentType) {
+        productsService.findById(productId); // validate
 
-    public List<PresignedUrlResponse> issueDetailImageUrls(Long productId, List<String> filenames, String contentType) {
         List<PresignedUrlResponse> list = new ArrayList<>();
-        int n = filenames.size();
-        for (int i = 0; i < n; i++) {
+
+        for (int i = 0; i < filenames.size(); i++) {
             String ext = extOf(filenames.get(i));
-            String key = "images/products/%d/details/%s-%02d.%s".formatted(productId, UUID.randomUUID(), i + 1, ext);
+            String key = "images/temp/%d/%s-%02d.%s".formatted(productId, UUID.randomUUID(), i + 1, ext);
             list.add(presignPut(key, contentType, DEFAULT_EXPIRE));
         }
+
         return list;
     }
 
@@ -77,5 +78,16 @@ public class AdminUploadService {
         int i = filename.lastIndexOf('.');
         String ext = (i >= 0 && i < filename.length() - 1) ? filename.substring(i + 1) : "bin";
         return ext.toLowerCase(Locale.ROOT);
+    }
+
+
+    public void removeAll(List<String> removeKey) {
+        String bucket = s3Config.getBucket();
+
+        DeleteObjectsRequest req = new DeleteObjectsRequest(bucket)
+            .withQuiet(false)
+            .withKeys(removeKey.toArray(new String[0]));
+
+        s3.deleteObjects(req);
     }
 }

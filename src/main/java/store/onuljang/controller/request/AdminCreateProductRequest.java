@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 public record AdminCreateProductRequest (
     @NotBlank(message = "상품명은 필수입니다")
-    @Size(max = 20, message = "상품명은 20자 이하로 입력해주세요")
+    @Size(min = 1, max = 20, message = "상품명은 20자 이하로 입력해주세요")
     String name,
 
     @NotNull(message = "가격은 필수입니다")

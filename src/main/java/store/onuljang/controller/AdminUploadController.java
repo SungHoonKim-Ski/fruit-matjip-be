@@ -1,6 +1,8 @@
 package store.onuljang.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,25 +30,11 @@ public class AdminUploadController {
         return ResponseEntity.ok(res);
     }
 
-    // 대표 이미지 교체
-    @PatchMapping("/products/{productId}/presigned-url")
-    public ResponseEntity<PresignedUrlResponse> getMainUploadUrl(
-            @PathVariable Long productId, @Valid @RequestBody PresignedUrlRequest req)
-    {
-
-        PresignedUrlResponse res = uploadService.issueMainImageUrl(productId, req.fileName(), req.contentType());
-        return ResponseEntity.ok(res);
-    }
-
     // 상세 이미지 N개 교체/추가
     @PatchMapping("/products/{productId}/detail/presigned-url")
-    public ResponseEntity<List<PresignedUrlResponse>> getDetailUploadUrls(
-            @PathVariable Long productId,
+    public ResponseEntity<List<PresignedUrlResponse>> getTempUploadUrls(
+            @Valid @Positive @NotNull @PathVariable Long productId,
             @Valid @RequestBody PresignedUrlBatchRequest req) {
-
-        if (!productId.equals(req.productId())) {
-            return ResponseEntity.badRequest().build();
-        }
 
         List<PresignedUrlResponse> res = uploadService.issueDetailImageUrls(productId, req.fileNames(), req.contentType());
         return ResponseEntity.ok(res);
