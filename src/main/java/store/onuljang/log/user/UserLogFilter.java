@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponseWrapper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,6 +34,7 @@ public class UserLogFilter extends OncePerRequestFilter {
         if (!matcher.match("/api/auth/**", uri)) return true;
 
         if ("GET".equalsIgnoreCase(method) || "OPTIONS".equalsIgnoreCase(method)) return true;
+
         if (matcher.match("/api/login", uri)
             || matcher.match("/api/logout", uri)
             || matcher.match("/api/refresh", uri)
@@ -53,34 +55,29 @@ public class UserLogFilter extends OncePerRequestFilter {
         res.setHeader("X-Request-Id", requestId);
 
         long start = System.nanoTime();
-        int statusOnError = 500;
+        StatusCaptureResponseWrapper resp = new StatusCaptureResponseWrapper(res);
 
         try {
-            chain.doFilter(req, res);
-            long durationMs = (System.nanoTime() - start) / 1_000_000L;
-
-            publisher.publishEvent(UserLogEvent.builder()
-                .userUid(currentUserIdOrNull(req))
-                .requestId(requestId)
-                .status(statusOnError)
-                .path(req.getRequestURI())
-                .durationMs(durationMs)
-                .method(req.getMethod())
-                .build()
-            );
+            chain.doFilter(req, resp);
         } catch (Throwable t) {
-            long durationMs = (System.nanoTime() - start) / 1_000_000L;
-            publisher.publishEvent(UserLogEvent.builder()
-                .userUid(currentUserIdOrNull(req))
-                .status(statusOnError)
-                .path(req.getRequestURI())
-                .durationMs(durationMs)
-                .requestId(requestId)
-                .method(req.getMethod())
-                .build()
-            );
-
+            if (resp.getStatus() < 400) {
+                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            }
             throw t;
+        } finally {
+            long durationMs = (System.nanoTime() - start) / 1_000_000L;
+            int status = resp.getStatus();
+
+            publisher.publishEvent(
+                UserLogEvent.builder()
+                    .userUid(currentUserIdOrNull(req))
+                    .requestId(requestId)
+                    .status(status)
+                    .path(req.getRequestURI())
+                    .durationMs(durationMs)
+                    .method(req.getMethod())
+                    .build()
+            );
         }
     }
     @Nullable
@@ -94,5 +91,20 @@ public class UserLogFilter extends OncePerRequestFilter {
             }
         }
         return null;
+    }
+
+    static class StatusCaptureResponseWrapper extends HttpServletResponseWrapper {
+        private int httpStatus = SC_OK;
+
+        StatusCaptureResponseWrapper(HttpServletResponse response) { super(response); }
+
+        @Override public void setStatus(int sc) { super.setStatus(sc); this.httpStatus = sc; }
+        @Override public void sendError(int sc) throws IOException { super.sendError(sc); this.httpStatus = sc; }
+        @Override public void sendError(int sc, String msg) throws IOException { super.sendError(sc, msg); this.httpStatus = sc; }
+        @Override public void sendRedirect(String location) throws IOException {
+            super.sendRedirect(location);
+            this.httpStatus = SC_FOUND;
+        }
+        @Override public int getStatus() { return this.httpStatus; }
     }
 }
