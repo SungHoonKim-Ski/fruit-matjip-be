@@ -63,7 +63,7 @@ public class AdminProductAppService {
         List<String> removeKey = new ArrayList<>();
 
         if (request.productUrl() != null) {
-            removeKey.add(request.productUrl());
+            removeKey.add(product.getProductUrl());
             product.setProductUrl(request.productUrl());
         }
 
