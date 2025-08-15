@@ -69,4 +69,25 @@ public class Reservation extends BaseEntity {
         this.status = status;
         statusChangedAt = LocalDateTime.now();
     }
+
+    public String getReservationUserName() {
+        return this.user.getName();
+    }
+
+    public String getReservationProductName() {
+        return this.product.getName();
+    }
+
+    public String getReservationProductUrl() {
+        return this.product.getProductUrl();
+    }
+
+    public void togglePicked() {
+        if (this.status == ReservationStatus.PENDING) {
+            this.status = ReservationStatus.PICKED;
+        } else if (this.status == ReservationStatus.PICKED) {
+            this.status = ReservationStatus.PENDING;
+        }
+        this.status = ReservationStatus.CANCELED;
+    }
 }

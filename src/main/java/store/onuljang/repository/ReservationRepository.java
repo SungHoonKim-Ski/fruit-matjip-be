@@ -12,4 +12,7 @@ import java.util.List;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     @EntityGraph(attributePaths = {"product"})
     List<Reservation> findAllByUserAndOrderDateBetween(Users user, LocalDate from, LocalDate to);
+
+    @EntityGraph(attributePaths = {"user", "product"})
+    List<Reservation> findAllByOrderDate(LocalDate date);
 }

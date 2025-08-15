@@ -18,6 +18,7 @@ import store.onuljang.repository.entity.enums.ReservationStatus;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -57,6 +58,11 @@ public class ReservationService {
     @Transactional
     public void cancel(Reservation entity) {
         entity.changeStatus(ReservationStatus.CANCELED);
+    }
+
+    @Transactional
+    public List<Reservation> finAllByDateWithUserAndProduct(LocalDate date) {
+        return reservationRepository.findAllByOrderDate(date);
     }
 
     @Transactional
