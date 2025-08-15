@@ -34,7 +34,7 @@ public class ReservationAppService {
             throw new ProductExceedException("상품의 재고가 부족합니다.");
         }
 
-        product.addStock(-request.quantity());
+        product.removeStock(request.quantity());
         return reservationService.save(uId, request.productId(), request.quantity(), request.amount());
     }
 

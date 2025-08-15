@@ -3,14 +3,8 @@ package store.onuljang.controller.request;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import store.onuljang.repository.entity.Admin;
 
-public record AdminSignupRequest(
-    @NotBlank(message = "이름은 필수입니다")
-    @Size(min = 1, max = 5, message = "이름은 1자 이상 5자 이하여야 합니다")
-    String name,
-
-    @NotBlank(message = "아이디는 필수입니다")
+public record AdminLoginRequest(
     @Size(min = 5, max = 15, message = "아이디는 5자 이상 15자 이하여야 합니다")
     @Pattern(
         regexp = "^[a-zA-Z0-9]+$",
@@ -26,11 +20,4 @@ public record AdminSignupRequest(
     )
     String password
 ) {
-    public static Admin toEntity(AdminSignupRequest request, String encodedPassword) {
-        return Admin.builder()
-            .name(request.name)
-            .email(request.email)
-            .password(encodedPassword)
-            .build();
-    }
 }
