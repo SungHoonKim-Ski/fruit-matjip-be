@@ -1,16 +1,15 @@
 package store.onuljang.appservice;
 
-import jakarta.persistence.LockModeType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.ReservationListRequest;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
 import store.onuljang.exception.ProductExceedException;
+import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
@@ -63,7 +62,7 @@ public class ReservationAppService {
 
     public void validateReservation(Users user, Reservation reservation) {
         if (!user.getUid().equals(reservation.getUser().getUid())) {
-            throw new IllegalArgumentException("다른 유저가 예약한 상품");
+            throw new UserValidateException("다른 유저가 예약한 상품입니다.");
         }
     }
 }
