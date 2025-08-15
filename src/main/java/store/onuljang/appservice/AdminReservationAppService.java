@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.response.AdminReservationListResponse;
+import store.onuljang.controller.response.AdminReservationReportResponse;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.service.ReservationService;
 
@@ -34,9 +35,9 @@ public class AdminReservationAppService {
     }
 
     @Transactional(readOnly = true)
-    public AdminReservationListResponse getReports(LocalDate from, LocalDate to) {
+    public AdminReservationReportResponse getReports(LocalDate from, LocalDate to) {
         List<Reservation> entities = reservationService.findAllByStatusAndOrderDateBetween(from, to);
 
-        return AdminReservationListResponse.from(entities);
+        return AdminReservationReportResponse.from(entities);
     }
 }

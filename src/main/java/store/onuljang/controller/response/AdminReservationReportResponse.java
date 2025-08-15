@@ -2,41 +2,38 @@ package store.onuljang.controller.response;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 @Builder
-public record AdminReservationListResponse(
+public record AdminReservationReportResponse(
     List<AdminReservationResponse> response
 ) {
     @Builder
     public record AdminReservationResponse(
-        long id,
         LocalDate orderDate,
         String productName,
         String userName,
+        int price,
         long quantity,
-        BigDecimal amount,
-        ReservationStatus status)
-    {
+        BigDecimal amount) {
+
         public static AdminReservationResponse from(Reservation entity) {
             return AdminReservationResponse.builder()
-                .id(entity.getId())
                 .orderDate(entity.getOrderDate())
                 .productName(entity.getReservationProductName())
                 .userName(entity.getReservationUserName())
+                .price(entity.getQuantity())
                 .quantity(entity.getQuantity())
                 .amount(entity.getAmount())
-                .status(entity.getStatus())
-                .build();
+            .build();
         }
     }
 
-    public static AdminReservationListResponse from(List<Reservation> entities) {
-        return AdminReservationListResponse.builder()
+    public static AdminReservationReportResponse from(List<Reservation> entities) {
+        return AdminReservationReportResponse.builder()
             .response(entities.stream()
                 .map(AdminReservationResponse::from).toList())
             .build();

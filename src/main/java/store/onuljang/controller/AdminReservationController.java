@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminReservationAppService;
 import store.onuljang.controller.request.AdminReservationReportRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
+import store.onuljang.controller.response.AdminReservationReportResponse;
 
 import java.time.LocalDate;
 
@@ -40,7 +41,7 @@ public class AdminReservationController {
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<AdminReservationListResponse> getReports(@RequestBody @ModelAttribute AdminReservationReportRequest request) {
+    public ResponseEntity<AdminReservationReportResponse> getReports(@RequestBody @ModelAttribute AdminReservationReportRequest request) {
         return ResponseEntity.ok(adminReservationAppService.getReports(request.from(), request.to()));
     }
 }
