@@ -49,7 +49,7 @@ public class ReservationController {
     @GetMapping("/")
     public ResponseEntity<ReservationListResponse> getList(
         @RequestHeader(value="Authorization") String bearerToken,
-        @Valid @ModelAttribute @RequestBody ReservationListRequest request
+        @Valid @RequestBody ReservationListRequest request
     ) {
         String uId = jwtUtil.getBearerUid(bearerToken);
 

@@ -22,7 +22,7 @@ public class ProductsController {
     ProductsAppService productsAppService;
 
     @GetMapping
-    public ResponseEntity<ProductListResponse> getProducts(@Valid @ModelAttribute ProductListRequest request) {
+    public ResponseEntity<ProductListResponse> getProducts(@Valid ProductListRequest request) {
         return ResponseEntity.ok(productsAppService.getProducts(request));
     }
 
