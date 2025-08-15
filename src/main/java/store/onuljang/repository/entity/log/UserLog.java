@@ -1,19 +1,24 @@
 package store.onuljang.repository.entity.log;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import store.onuljang.log.admin.AdminLogEvent;
+import store.onuljang.log.user.UserLogEvent;
 import store.onuljang.repository.entity.base.BaseLogEntity;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "admin_logs")
+@Table(name = "user_logs")
 @Builder
-public class AdminLog extends BaseLogEntity {
+public class UserLog extends BaseLogEntity {
 
-    @Column(name = "admin_id", nullable = false)
-    private Long adminId;
+    @Column(name = "user_uid", nullable = false, length = 50)
+    private String userUid;
 
     @Column(name = "path", nullable = false, length = 255)
     private String path;
@@ -30,9 +35,9 @@ public class AdminLog extends BaseLogEntity {
     @Column(name = "request_id", length = 64)
     private String requestId;
 
-    public static AdminLog from(AdminLogEvent e) {
-        return AdminLog.builder()
-            .adminId(e.adminId())
+    public static UserLog from(UserLogEvent e) {
+        return UserLog.builder()
+            .userUid(e.userUid())
             .path(truncate(e.path(), 255))
             .method(e.method())
             .status(e.status())

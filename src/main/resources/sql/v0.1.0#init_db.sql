@@ -107,18 +107,6 @@ CREATE TABLE admin_product_logs (
             REFERENCES products(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE admin_logs (
-    id          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    admin_id    BIGINT UNSIGNED NULL,
-    request_api VARCHAR(255) NOT NULL,
-    created_at  DATETIME NOT NULL,
-    PRIMARY KEY (id),
-    KEY idx_al_admin (admin_id),
-    CONSTRAINT fk_al_admin
-        FOREIGN KEY (admin_id)
-            REFERENCES admins(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 CREATE TABLE name_pool (
    id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
    base_name    VARCHAR(255) NOT NULL,
@@ -181,3 +169,42 @@ CREATE TABLE refresh_tokens (
     KEY idx_user_exp (user_uid, expires_at),
     KEY idx_revoked (revoked, expires_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE `user_logs` (
+     `id`           BIGINT NOT NULL AUTO_INCREMENT,
+     `created_at`   TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+     `user_uid`     CHAR(36),
+     `path`         VARCHAR(255) NOT NULL,
+     `method`       VARCHAR(10)  NOT NULL,
+     `status`       INT          NOT NULL,
+     `duration_ms`  BIGINT       NOT NULL,
+     `request_id`   VARCHAR(64)  NULL,
+     PRIMARY KEY (`id`),
+     KEY `idx_user_logs_created` (`created_at`),
+     KEY `idx_user_logs_user`    (`user_uid`),
+     KEY `idx_user_logs_status`  (`status`),
+     KEY `idx_user_logs_reqid`   (`request_id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci
+  COMMENT='User API audit logs (minimal)';
+
+CREATE TABLE `admin_logs` (
+      `id`           BIGINT NOT NULL AUTO_INCREMENT,
+      `created_at`   TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+      `admin_id`     BIGINT NULL,
+      `path`         VARCHAR(255) NOT NULL,
+      `method`       VARCHAR(10)  NOT NULL,
+      `status`       INT          NOT NULL,
+      `duration_ms`  BIGINT       NOT NULL,
+      `request_id`   VARCHAR(64)  NULL,
+
+      PRIMARY KEY (`id`),
+      KEY `idx_admin_logs_created` (`created_at`),
+      KEY `idx_admin_logs_admin`   (`admin_id`),
+      KEY `idx_admin_logs_status`  (`status`),
+      KEY `idx_admin_logs_reqid`   (`request_id`)
+) ENGINE=InnoDB
+  DEFAULT CHARSET = utf8mb4
+  COLLATE = utf8mb4_0900_ai_ci
+  COMMENT='Admin API audit logs (minimal)';

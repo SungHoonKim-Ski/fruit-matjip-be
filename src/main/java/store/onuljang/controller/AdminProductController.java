@@ -13,7 +13,7 @@ import store.onuljang.controller.request.AdminCreateProductRequest;
 import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
-import store.onuljang.service.AdminProductAppService;
+import store.onuljang.appservice.AdminProductAppService;
 
 @RestController
 @RequestMapping("/api/admin/products")
@@ -41,7 +41,7 @@ public class AdminProductController {
     @PatchMapping("/{productId}")
     public ResponseEntity<?> updateDetail(
         @Valid @NotNull @Positive @PathVariable("productId") Long productId,
-        @Valid @ModelAttribute AdminUpdateProductDetailsRequest request
+        @Valid @RequestBody AdminUpdateProductDetailsRequest request
     ) {
         adminProductAppService.updateDetail(productId, request);
 

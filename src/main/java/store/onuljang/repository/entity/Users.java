@@ -46,4 +46,17 @@ public class Users extends BaseEntity {
     public void modifyName(String name) {
         this.name = name;
     }
+
+    public void addTotalOrders(long totalOrders) {
+        this.totalOrders += totalOrders;
+    }
+
+    public void removeTotalOrders(long totalOrders) {
+        this.totalOrders -= totalOrders;
+    }
+
+    public void reserve(int quantity) {
+        lastOrderDate = LocalDate.now();
+        addTotalOrders(quantity);
+    }
 }

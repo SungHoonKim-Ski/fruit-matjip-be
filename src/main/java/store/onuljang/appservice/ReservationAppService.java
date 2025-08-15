@@ -29,12 +29,16 @@ public class ReservationAppService {
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
+        Users user = userService.findByUId(uId);
+
         Product product = productsService.findByIdWithLock(request.productId());
         if (product.getStock() < request.quantity()) {
             throw new ProductExceedException("상품의 재고가 부족합니다.");
         }
 
         product.removeStock(request.quantity());
+        user.reserve(product.getStock());
+
         return reservationService.save(uId, request.productId(), request.quantity(), request.amount());
     }
 
@@ -49,6 +53,8 @@ public class ReservationAppService {
         product.addStock(reservation.getQuantity());
 
         reservationService.cancel(reservation);
+
+        user.removeTotalOrders(reservation.getQuantity());
     }
 
     @Transactional(readOnly = true)

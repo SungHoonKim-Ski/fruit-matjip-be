@@ -6,6 +6,7 @@ import jakarta.validation.Validator;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -18,6 +19,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
+import store.onuljang.log.admin.AdminLogFilter;
 import store.onuljang.service.dto.AdminUserDetails;
 
 @Configuration
@@ -27,6 +30,7 @@ import store.onuljang.service.dto.AdminUserDetails;
 public class AdminSecurityConfig {
     AuthenticationProvider adminAuthProvider;
     AuthenticationManager authManager;
+    ApplicationEventPublisher publisher;
 
     @Bean
     @Order(1)
@@ -54,6 +58,7 @@ public class AdminSecurityConfig {
                     })
                 )
             .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new AdminLogFilter(publisher), SecurityContextHolderFilter.class)
             .cors(cors -> {});
         return http.build();
     }
