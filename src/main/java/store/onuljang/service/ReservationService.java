@@ -46,8 +46,9 @@ public class ReservationService {
         Reservation entity = Reservation.builder()
             .user(user)
             .product(product)
-                .quantity(quantity)
-                .amount(amount)
+            .quantity(quantity)
+            .amount(amount)
+            .orderDate(product.getSellDate())
             .build();
 
         reservationRepository.save(entity);

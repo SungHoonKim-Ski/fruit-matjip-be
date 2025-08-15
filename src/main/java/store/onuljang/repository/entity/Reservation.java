@@ -58,11 +58,12 @@ public class Reservation extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Reservation(Users user, Product product, Integer quantity, BigDecimal amount) {
+    public Reservation(Users user, Product product, Integer quantity, BigDecimal amount, LocalDate orderDate) {
         this.user = user;
         this.product = product;
         this.quantity = quantity;
         this.amount = amount;
+        this.orderDate = orderDate;
     }
 
     public void changeStatus(ReservationStatus status) {
