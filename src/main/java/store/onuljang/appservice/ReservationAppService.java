@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.controller.request.ReservationListRequest;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
 import store.onuljang.exception.ProductExceedException;
@@ -17,6 +16,7 @@ import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -58,10 +58,10 @@ public class ReservationAppService {
     }
 
     @Transactional(readOnly = true)
-    public ReservationListResponse getReservations(String uId, ReservationListRequest request) {
+    public ReservationListResponse getReservations(String uId, LocalDate from, LocalDate to) {
         Users user = userService.findByUId(uId);
 
-        List<Reservation> entities = reservationService.findAllByUserAndOrderDateBetweenWithProduct(user, request.from(), request.to());
+        List<Reservation> entities = reservationService.findAllByUserAndOrderDateBetweenWithProduct(user, from, to);
 
         return ReservationListResponse.from(entities);
     }

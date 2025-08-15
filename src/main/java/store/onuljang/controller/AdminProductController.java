@@ -39,7 +39,7 @@ public class AdminProductController {
     }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<?> updateDetail(
+    public ResponseEntity<Void> updateDetail(
         @Valid @NotNull @Positive @PathVariable("productId") Long productId,
         @Valid @RequestBody AdminUpdateProductDetailsRequest request
     ) {
@@ -49,21 +49,21 @@ public class AdminProductController {
     }
 
     @PatchMapping("/sold-out/{productId}")
-    public ResponseEntity<?> setSoldOut(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
+    public ResponseEntity<Void> setSoldOut(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
         adminProductAppService.setSoldOut(productId);
 
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/visible/{productId}")
-    public ResponseEntity<?> toggleVisible(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
+    public ResponseEntity<Void> toggleVisible(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
         adminProductAppService.toggleVisible(productId);
 
         return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<?> delete(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
+    public ResponseEntity<Void> delete(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
         adminProductAppService.delete(productId);
 
         return ResponseEntity.ok().build();

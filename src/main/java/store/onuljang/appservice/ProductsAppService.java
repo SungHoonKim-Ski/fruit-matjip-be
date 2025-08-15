@@ -5,12 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.controller.request.ProductListRequest;
 import store.onuljang.controller.response.ProductDetailResponse;
 import store.onuljang.controller.response.ProductListResponse;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.service.ProductsService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -20,8 +20,8 @@ public class ProductsAppService {
     ProductsService productsService;
 
     @Transactional(readOnly = true)
-    public ProductListResponse getProducts(ProductListRequest request) {
-        List<Product> products = productsService.findAllBetween(request.from(), request.to());
+    public ProductListResponse getProducts(LocalDate from, LocalDate to) {
+        List<Product> products = productsService.findAllBetween(from, to);
 
         return ProductListResponse.from(products);
     }

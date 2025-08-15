@@ -6,14 +6,16 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.ReservationAppService;
 import store.onuljang.auth.JwtUtil;
-import store.onuljang.controller.request.ReservationListRequest;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/auth/reservations")
@@ -25,9 +27,9 @@ public class ReservationController {
     ReservationAppService reservationAppService;
 
     @PostMapping("/")
-    public ResponseEntity<?> create(
-            @RequestHeader(value="Authorization") String bearerToken,
-            @RequestBody @Valid ReservationRequest request
+    public ResponseEntity<Long> create(
+        @RequestHeader(value="Authorization") String bearerToken,
+        @RequestBody @Valid ReservationRequest request
     ) {
         String uId = jwtUtil.getBearerUid(bearerToken);
 
@@ -47,13 +49,13 @@ public class ReservationController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<ReservationListResponse> getList(
-        @RequestHeader(value="Authorization") String bearerToken,
-        @Valid @RequestBody ReservationListRequest request
+    public ResponseEntity<ReservationListResponse> getList(@Valid @RequestHeader(value="Authorization") String bearerToken,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate to
     ) {
         String uId = jwtUtil.getBearerUid(bearerToken);
 
-        return ResponseEntity.ok(reservationAppService.getReservations(uId, request));
+        return ResponseEntity.ok(reservationAppService.getReservations(uId, from, to));
     }
 }
 

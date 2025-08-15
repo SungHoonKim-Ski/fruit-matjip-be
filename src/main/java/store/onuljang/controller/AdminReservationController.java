@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminReservationAppService;
-import store.onuljang.controller.request.AdminReservationReportRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
 
@@ -41,8 +40,11 @@ public class AdminReservationController {
     }
 
     @GetMapping("/sails")
-    public ResponseEntity<AdminReservationReportResponse> getSails(@RequestBody @ModelAttribute AdminReservationReportRequest request) {
-        return ResponseEntity.ok(adminReservationAppService.getSails(request.from(), request.to()));
+    public ResponseEntity<AdminReservationReportResponse> getSails(@Valid
+       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,
+       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate to)
+    {
+        return ResponseEntity.ok(adminReservationAppService.getSails(from, to));
     }
 }
 
