@@ -4,13 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.stereotype.Component;
 import store.onuljang.controller.request.AdminLoginRequest;
@@ -52,7 +51,7 @@ public class AdminLoginFilter extends UsernamePasswordAuthenticationFilter {
     private void validate(AdminLoginRequest request) {
         Set<ConstraintViolation<AdminLoginRequest>> violations = validator.validate(request);
         if (!violations.isEmpty()) {
-            throw new ConstraintViolationException(violations);
+            throw new AuthenticationServiceException("login validation failed");
         }
     }
 }

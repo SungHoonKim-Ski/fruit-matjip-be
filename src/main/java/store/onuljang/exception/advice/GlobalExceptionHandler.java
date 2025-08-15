@@ -1,5 +1,6 @@
 package store.onuljang.exception.advice;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,14 @@ public class GlobalExceptionHandler {
         log.info("AuthenticationException: {}", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("UNAUTHORIZED", ex.getMessage()));
     }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        log.info("ConstraintViolationException: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
+    }
+
+    // custom exception
 
     @ExceptionHandler(AccessTokenParseException.class)
     public ResponseEntity<ErrorResponse> handleTokenParse(AccessTokenParseException ex) {
