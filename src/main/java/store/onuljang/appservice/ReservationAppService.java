@@ -37,7 +37,7 @@ public class ReservationAppService {
         }
 
         product.removeStock(request.quantity());
-        user.reserve(product.getStock());
+        user.reserve(request.quantity());
 
         return reservationService.save(uId, request.productId(), request.quantity(), request.amount());
     }
