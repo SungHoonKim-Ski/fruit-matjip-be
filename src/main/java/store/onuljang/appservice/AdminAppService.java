@@ -38,7 +38,7 @@ public class AdminAppService {
     private void validateEmail(String email) {
         Optional<Admin> admin = adminService.existEmail(email);
         if (admin.isPresent()) {
-            throw new ExistAdminException("이미 존재하는 아이디입니다");
+            throw new ExistAdminException("이미 존재하는 아이디입니다.");
         }
     }
 }
