@@ -32,12 +32,14 @@ public class AdminReservationController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<Void> togglePicked(@PathVariable Long id, @RequestParam Boolean picked) {
+    public ResponseEntity<Void> togglePicked(@Valid @PathVariable Long id) {
+        adminReservationAppService.togglePicked(id);
+
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<Void> getReports() {
+    public ResponseEntity<Void> getReports(@RequestBody @ModelAttribute AdminReservationListRequest request) {
         return ResponseEntity.ok().build();
     }
 }

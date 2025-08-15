@@ -24,4 +24,16 @@ public class AdminReservationAppService {
 
         return AdminReservationListResponse.from(entities);
     }
+
+    @Transactional
+    public void togglePicked(long id) {
+        Reservation entity = reservationService.findById(id);
+
+        entity.togglePicked();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminReservationListResponse getAll() {
+        return null;
+    }
 }
