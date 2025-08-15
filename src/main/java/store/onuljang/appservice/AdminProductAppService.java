@@ -18,6 +18,7 @@ import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -72,15 +73,21 @@ public class AdminProductAppService {
         if (request.name() != null) product.setName(request.name());
         if (request.price() != null) product.setPrice(request.price());
         if (request.stockChange() != null) product.addStock(Math.max(0, product.getStock() + request.stockChange()));
-        if (request.productUrl() != null) product.setProductUrl(request.productUrl());
         if (request.sellDate() != null) {product.setSellDate(LocalDate.parse(request.sellDate()));}
         if (request.description() != null) product.setDescription(request.description());
+        List<String> removeKey = new ArrayList<>();
+
+        if (request.productUrl() != null) {
+            removeKey.add(request.productUrl());
+            product.setProductUrl(request.productUrl());
+        }
 
         if (request.detailUrls() != null) {
-            List<String> removeKey = product.replaceDetailImagesInOrder(request.detailUrls());
-            if (!removeKey.isEmpty()) {
-                adminUploadService.removeAll(removeKey);
-            }
+            removeKey = product.replaceDetailImagesInOrder(request.detailUrls());
+        }
+
+        if (!removeKey.isEmpty()) {
+            adminUploadService.softRemoveAll(productId, removeKey);
         }
     }
 

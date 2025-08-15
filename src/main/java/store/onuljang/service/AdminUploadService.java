@@ -3,17 +3,13 @@ package store.onuljang.service;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.DeleteObjectsResult;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.amazonaws.services.s3.model.MultiObjectDeleteException;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
 import org.springframework.stereotype.Service;
-import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import store.onuljang.config.S3Config;
 import store.onuljang.controller.response.PresignedUrlResponse;
-import store.onuljang.repository.entity.Product;
 
 import java.net.URL;
 import java.time.Duration;
@@ -80,9 +76,11 @@ public class AdminUploadService {
         return ext.toLowerCase(Locale.ROOT);
     }
 
-
-    public void removeAll(List<String> removeKey) {
+    public void softRemoveAll(long productId, List<String> removeKey) {
         String bucket = s3Config.getBucket();
+        for (String key : removeKey) {
+            s3.copyObject(bucket, key, bucket, "delete/%d/%s".formatted(productId,key));
+        }
 
         DeleteObjectsRequest req = new DeleteObjectsRequest(bucket)
             .withQuiet(false)
