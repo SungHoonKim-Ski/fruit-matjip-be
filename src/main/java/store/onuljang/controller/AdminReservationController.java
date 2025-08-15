@@ -40,8 +40,8 @@ public class AdminReservationController {
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<Void> getReports(@RequestBody @ModelAttribute AdminReservationReportRequest request) {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<AdminReservationListResponse> getReports(@RequestBody @ModelAttribute AdminReservationReportRequest request) {
+        return ResponseEntity.ok(adminReservationAppService.getReports(request.from(), request.to()));
     }
 }
 

@@ -14,23 +14,21 @@ public record AdminReservationListResponse(
 ) {
     @Builder
     public record AdminReservationResponse(
-        long id,
         LocalDate orderDate,
         String productName,
         String userName,
+        int price,
         long quantity,
-        BigDecimal amount,
-        ReservationStatus status) {
+        BigDecimal amount) {
 
         public static AdminReservationResponse from(Reservation entity) {
             return AdminReservationResponse.builder()
-                .id(entity.getId())
                 .orderDate(entity.getOrderDate())
                 .productName(entity.getReservationProductName())
                 .userName(entity.getReservationUserName())
+                .price(entity.getQuantity())
                 .quantity(entity.getQuantity())
                 .amount(entity.getAmount())
-                .status(entity.getStatus())
             .build();
         }
     }

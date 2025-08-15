@@ -69,4 +69,9 @@ public class ReservationService {
     public List<Reservation> findAllByUserAndOrderDateBetweenWithProduct(Users user, LocalDate from, LocalDate to) {
         return reservationRepository.findAllByUserAndOrderDateBetween(user, from, to);
     }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> findAllByStatusAndOrderDateBetween(LocalDate from, LocalDate to) {
+        return reservationRepository.findAllByStatusAndOrderDateBetween(ReservationStatus.PICKED ,from, to);
+    }
 }

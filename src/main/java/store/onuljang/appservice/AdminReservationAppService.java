@@ -1,5 +1,6 @@
 package store.onuljang.appservice;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,7 +34,9 @@ public class AdminReservationAppService {
     }
 
     @Transactional(readOnly = true)
-    public AdminReservationListResponse getAll() {
-        return null;
+    public AdminReservationListResponse getReports(LocalDate from, LocalDate to) {
+        List<Reservation> entities = reservationService.findAllByStatusAndOrderDateBetween(from, to);
+
+        return AdminReservationListResponse.from(entities);
     }
 }
