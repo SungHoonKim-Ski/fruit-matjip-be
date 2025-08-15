@@ -31,7 +31,7 @@ public class AdminUploadController {
     }
 
     // 상세 이미지 N개 교체/추가
-    @PatchMapping("/products/{productId}/detail/presigned-url")
+    @PatchMapping("/products/{productId}/presigned-url")
     public ResponseEntity<List<PresignedUrlResponse>> getTempUploadUrls(
             @Valid @Positive @NotNull @PathVariable Long productId,
             @Valid @RequestBody PresignedUrlBatchRequest req) {
