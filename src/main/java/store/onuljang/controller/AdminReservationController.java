@@ -3,6 +3,7 @@ package store.onuljang.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminReservationAppService;
-import store.onuljang.controller.request.AdminReservationListRequest;
+import store.onuljang.controller.request.AdminReservationReportRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 
 import java.time.LocalDate;
@@ -32,14 +33,14 @@ public class AdminReservationController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<Void> togglePicked(@Valid @PathVariable Long id) {
+    public ResponseEntity<Void> togglePicked(@Valid @PathVariable @Positive @NotNull Long id) {
         adminReservationAppService.togglePicked(id);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/reports")
-    public ResponseEntity<Void> getReports(@RequestBody @ModelAttribute AdminReservationListRequest request) {
+    public ResponseEntity<Void> getReports(@RequestBody @ModelAttribute AdminReservationReportRequest request) {
         return ResponseEntity.ok().build();
     }
 }
