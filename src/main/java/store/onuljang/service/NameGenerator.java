@@ -27,7 +27,9 @@ public class NameGenerator {
     public String generate() {
         List<NamePool> namePools = namePoolRepository.findAll();
         int size = namePools.size();
-        if (size == 0) throw new IllegalStateException("NamePool is empty");
+        if (size == 0) {
+            throw new IllegalStateException("이름 생성 서버 에러입니다. 관리자에게 문의하세요.");
+        }
 
         int offset = ThreadLocalRandom.current().nextInt(size);
         NamePool name = namePools.get(offset);
