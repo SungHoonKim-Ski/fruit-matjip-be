@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ProductsRepository extends JpaRepository<Product, Long> {
-    List<Product> findAllBySellDateBetween(LocalDate from, LocalDate to);
+    List<Product> findAllBySellDateBetweenAndIsVisible(LocalDate sellDate, LocalDate sellDate2, boolean isVisible);
 
     @EntityGraph(attributePaths = {"productDetailImages"})
     Optional<Product> findAllById(long id);

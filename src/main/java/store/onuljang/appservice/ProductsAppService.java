@@ -21,7 +21,7 @@ public class ProductsAppService {
 
     @Transactional(readOnly = true)
     public ProductListResponse getProducts(LocalDate from, LocalDate to) {
-        List<Product> products = productsService.findAllBetween(from, to);
+        List<Product> products = productsService.findAllVisibleBetween(from, to, true);
 
         return ProductListResponse.from(products);
     }

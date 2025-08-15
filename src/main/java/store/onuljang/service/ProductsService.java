@@ -35,8 +35,8 @@ public class ProductsService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
     }
 
-    public List<Product> findAllBetween(LocalDate from, LocalDate to) {
-        return productsRepository.findAllBySellDateBetween(from, to);
+    public List<Product> findAllVisibleBetween(LocalDate from, LocalDate to, boolean visible) {
+        return productsRepository.findAllBySellDateBetweenAndIsVisible(from, to, visible);
     }
 
     public Product findByIdWithDetailImages(long id) {
