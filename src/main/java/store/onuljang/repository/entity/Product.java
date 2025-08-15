@@ -2,6 +2,8 @@ package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.repository.entity.base.BaseEntity;
 
 import java.time.LocalDate;
@@ -14,6 +16,8 @@ import java.util.List;
 @Builder
 @Entity
 @Table(name = "products")
+@SQLRestriction("deleted_at IS NULL")
+@SQLDelete(sql = "UPDATE user SET deleted_at = NOW() WHERE id = ?")
 public class Product extends BaseEntity {
     @Getter
     @Column(name = "product_url", nullable = false)
