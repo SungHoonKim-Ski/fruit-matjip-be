@@ -32,24 +32,9 @@ public class AdminProductAppService {
 
     @Transactional
     public Long saveAndMoveTempImage(AdminCreateProductRequest request) {
-        String tempImageUrl = request.imageUrl();
-        if (!tempImageUrl.startsWith("images/temp/")) {
-            throw new IllegalArgumentException("잘못된 temp 경로: " + tempImageUrl);
-        }
-
-        String imageUrl = moveImage(tempImageUrl);
-
         Admin admin = adminService.findById(SessionUtil.getAdminId());
 
-        return productsService.save(AdminCreateProductRequest.toEntity(request, imageUrl, admin));
-    }
-
-    private String moveImage(String tempUrl) {
-        String destKey = "images/" + tempUrl.substring("images/temp/".length());
-
-        adminUploadService.move(tempUrl, destKey);
-
-        return destKey;
+        return productsService.save(AdminCreateProductRequest.toEntity(request, admin));
     }
 
     @Transactional(readOnly = true)
@@ -87,7 +72,7 @@ public class AdminProductAppService {
         }
 
         if (!removeKey.isEmpty()) {
-            adminUploadService.softRemoveAll(productId, removeKey);
+            adminUploadService.softRemoveAll(removeKey);
         }
     }
 

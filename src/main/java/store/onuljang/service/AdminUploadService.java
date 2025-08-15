@@ -30,9 +30,9 @@ public class AdminUploadService {
         s3.deleteObject(bucket, srcKey);
     }
 
-    public PresignedUrlResponse issueTempImageUrl(String filename, String contentType) {
+    public PresignedUrlResponse issueImageUrl(String filename, String contentType) {
         String ext = extOf(filename);
-        String key = "images/temp/%s.%s".formatted(UUID.randomUUID(), ext);
+        String key = "images/%s.%s".formatted(UUID.randomUUID(), ext);
         return presignPut(key, contentType, DEFAULT_EXPIRE);
     }
 
@@ -43,7 +43,7 @@ public class AdminUploadService {
 
         for (int i = 0; i < filenames.size(); i++) {
             String ext = extOf(filenames.get(i));
-            String key = "images/temp/%d/%s-%02d.%s".formatted(productId, UUID.randomUUID(), i + 1, ext);
+            String key = "images/%d/%s-%02d.%s".formatted(productId, UUID.randomUUID(), i + 1, ext);
             list.add(presignPut(key, contentType, DEFAULT_EXPIRE));
         }
 
@@ -76,10 +76,10 @@ public class AdminUploadService {
         return ext.toLowerCase(Locale.ROOT);
     }
 
-    public void softRemoveAll(long productId, List<String> removeKey) {
+    public void softRemoveAll(List<String> removeKey) {
         String bucket = s3Config.getBucket();
         for (String key : removeKey) {
-            s3.copyObject(bucket, key, bucket, "delete/%d/%s".formatted(productId,key));
+            s3.copyObject(bucket, key, bucket, "delete/%s".formatted(key));
         }
 
         DeleteObjectsRequest req = new DeleteObjectsRequest(bucket)

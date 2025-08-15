@@ -26,13 +26,19 @@ public class AdminUploadController {
 
     @PostMapping("/products/presigned-url")
     public ResponseEntity<PresignedUrlResponse> getTempUploadUrl(@Valid @RequestBody PresignedUrlRequest req) {
-        PresignedUrlResponse res = uploadService.issueTempImageUrl(req.fileName(), req.contentType());
+        PresignedUrlResponse res = uploadService.issueImageUrl(req.fileName(), req.contentType());
+        return ResponseEntity.ok(res);
+    }
+
+    @PatchMapping("/products/presigned-url")
+    public ResponseEntity<PresignedUrlResponse> getUploadUrl(@Valid @RequestBody PresignedUrlRequest req) {
+        PresignedUrlResponse res = uploadService.issueImageUrl(req.fileName(), req.contentType());
         return ResponseEntity.ok(res);
     }
 
     // 상세 이미지 N개 교체/추가
     @PatchMapping("/products/{productId}/presigned-url")
-    public ResponseEntity<List<PresignedUrlResponse>> getTempUploadUrls(
+    public ResponseEntity<List<PresignedUrlResponse>> getDetailUploadUrl(
             @Valid @Positive @NotNull @PathVariable Long productId,
             @Valid @RequestBody PresignedUrlBatchRequest req) {
 

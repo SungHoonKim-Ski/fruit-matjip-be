@@ -29,12 +29,12 @@ public record AdminCreateProductRequest (
     @NotNull(message = "상품 상태는 필수입니다")
     Boolean visible
 ) {
-    public static Product toEntity(AdminCreateProductRequest request, String imageUrl, Admin admin) {
+    public static Product toEntity(AdminCreateProductRequest request, Admin admin) {
         return Product.builder()
             .price(request.price)
             .name(request.name)
             .stock(request.stock)
-            .productUrl(imageUrl)
+            .productUrl(request.imageUrl)
             .sellDate(LocalDate.parse(request.sellDate))
             .isVisible(request.visible)
             .registeredAdmin(admin)
