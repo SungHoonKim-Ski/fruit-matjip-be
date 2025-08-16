@@ -1,5 +1,6 @@
 package store.onuljang.service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
@@ -7,6 +8,7 @@ import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import store.onuljang.config.S3Config;
 import store.onuljang.controller.response.PresignedUrlResponse;
@@ -18,6 +20,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+@Slf4j
 public class AdminUploadService {
     AmazonS3 s3;
     S3Config s3Config;
@@ -70,23 +73,39 @@ public class AdminUploadService {
         );
     }
 
-    private static String extOf(String filename) {
-        int i = filename.lastIndexOf('.');
-        String ext = (i >= 0 && i < filename.length() - 1) ? filename.substring(i + 1) : "bin";
-        return ext.toLowerCase(Locale.ROOT);
-    }
-
     public void softDeleteAllImages(List<String> removeKey) {
         String bucket = s3Config.getBucket();
         for (String key : removeKey) {
             String destKey = key.replaceFirst("^images/", "images/delete/");
-            s3.copyObject(bucket, key, bucket, destKey);
+            copyWithTryCatch(bucket, key, destKey);
         }
 
         DeleteObjectsRequest req = new DeleteObjectsRequest(bucket)
             .withQuiet(false)
             .withKeys(removeKey.toArray(new String[0]));
 
-        s3.deleteObjects(req);
+        deleteWithTryCatch(req);
+    }
+
+    private static String extOf(String filename) {
+        int i = filename.lastIndexOf('.');
+        String ext = (i >= 0 && i < filename.length() - 1) ? filename.substring(i + 1) : "bin";
+        return ext.toLowerCase(Locale.ROOT);
+    }
+
+    private void copyWithTryCatch(String bucket, String key, String destKey) {
+        try {
+            s3.copyObject(bucket, key, bucket, destKey);
+        } catch (AmazonServiceException e) {
+            log.error(e.getMessage());
+        }
+    }
+
+    private void deleteWithTryCatch(DeleteObjectsRequest deleteObjects) {
+        try {
+            s3.deleteObjects(deleteObjects);
+        } catch (AmazonServiceException e) {
+            log.error(e.getMessage());
+        }
     }
 }
