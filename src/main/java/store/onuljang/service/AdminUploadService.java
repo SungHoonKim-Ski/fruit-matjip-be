@@ -2,6 +2,7 @@ package store.onuljang.service;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.HttpMethod;
+import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.DeleteObjectsRequest;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
@@ -96,7 +97,7 @@ public class AdminUploadService {
     private void copyWithTryCatch(String bucket, String key, String destKey) {
         try {
             s3.copyObject(bucket, key, bucket, destKey);
-        } catch (AmazonServiceException e) {
+        } catch (SdkClientException e) {
             log.error(e.getMessage());
         }
     }
@@ -104,7 +105,7 @@ public class AdminUploadService {
     private void deleteWithTryCatch(DeleteObjectsRequest deleteObjects) {
         try {
             s3.deleteObjects(deleteObjects);
-        } catch (AmazonServiceException e) {
+        } catch (SdkClientException e) {
             log.error(e.getMessage());
         }
     }
