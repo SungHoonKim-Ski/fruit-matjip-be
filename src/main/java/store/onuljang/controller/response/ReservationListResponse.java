@@ -19,6 +19,7 @@ public record ReservationListResponse(
         String productImage,
         String productName,
         LocalDate orderDate,
+        int quantity,
         ReservationStatus status) {
 
         public static ReservationResponse from(Reservation entity) {
@@ -28,6 +29,7 @@ public record ReservationListResponse(
                 .productImage(entity.getReservationProductUrl())
                 .productName(entity.getReservationProductName())
                 .orderDate(entity.getOrderDate())
+                .quantity(entity.getQuantity())
                 .status(entity.getStatus())
             .build();
         }

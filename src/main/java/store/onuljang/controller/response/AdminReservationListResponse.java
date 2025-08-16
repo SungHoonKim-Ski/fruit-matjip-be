@@ -18,7 +18,7 @@ public record AdminReservationListResponse(
         LocalDate orderDate,
         String productName,
         String userName,
-        long quantity,
+        int quantity,
         BigDecimal amount,
         ReservationStatus status)
     {
