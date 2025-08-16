@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminReservationAppService;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
 
@@ -27,20 +28,23 @@ public class AdminReservationController {
 
     @GetMapping
     public ResponseEntity<AdminReservationListResponse> getReservationsByDate(
-        @Valid @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate date)
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate date)
     {
         return ResponseEntity.ok(adminReservationAppService.getAllByDate(date));
     }
 
-    @PostMapping("/{id}")
-    public ResponseEntity<Void> togglePicked(@Valid @PathVariable @Positive @NotNull Long id) {
-        adminReservationAppService.togglePicked(id);
+    @PatchMapping("/{id}/{status}")
+    public ResponseEntity<Void> updateReservationStatus(
+        @PathVariable @Positive @NotNull Long id,
+        @PathVariable @NotNull ReservationStatus status)
+    {
+        adminReservationAppService.updateReservationStatus(id, status);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/sails")
-    public ResponseEntity<AdminReservationReportResponse> getSails(@Valid
+    public ResponseEntity<AdminReservationReportResponse> getSails(
        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,
        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate to)
     {

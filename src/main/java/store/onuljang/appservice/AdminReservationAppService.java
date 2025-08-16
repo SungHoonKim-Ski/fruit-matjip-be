@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
 import store.onuljang.repository.entity.Reservation;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.ReservationService;
 
 import java.time.LocalDate;
@@ -27,10 +28,10 @@ public class AdminReservationAppService {
     }
 
     @Transactional
-    public void togglePicked(long id) {
+    public void updateReservationStatus(long id, ReservationStatus status) {
         Reservation entity = reservationService.findById(id);
 
-        entity.togglePicked();
+        entity.setStatus(status);
     }
 
     @Transactional(readOnly = true)

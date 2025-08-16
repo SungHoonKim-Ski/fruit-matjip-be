@@ -83,12 +83,7 @@ public class Reservation extends BaseEntity {
         return this.product.getProductUrl();
     }
 
-    public void togglePicked() {
-        if (this.status == ReservationStatus.PENDING) {
-            this.status = ReservationStatus.PICKED;
-        } else if (this.status == ReservationStatus.PICKED) {
-            this.status = ReservationStatus.PENDING;
-        }
-        this.status = ReservationStatus.CANCELED;
+    public void setStatus(ReservationStatus status) {
+        this.status = status;
     }
 }
