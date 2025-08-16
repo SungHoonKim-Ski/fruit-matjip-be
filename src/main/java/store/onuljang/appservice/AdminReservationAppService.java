@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
 import store.onuljang.repository.entity.Reservation;
+import store.onuljang.repository.entity.ReservationAll;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.ReservationService;
 
@@ -36,7 +37,8 @@ public class AdminReservationAppService {
 
     @Transactional(readOnly = true)
     public AdminReservationReportResponse getSails(LocalDate from, LocalDate to) {
-        List<Reservation> entities = reservationService.findAllByStatusAndOrderDateBetween(from, to);
+        List<ReservationAll> entities = reservationService.findAllByStatusAndOrderDateBetweenIncludingDeleted(
+                ReservationStatus.PICKED ,from, to);
 
         return AdminReservationReportResponse.from(entities);
     }

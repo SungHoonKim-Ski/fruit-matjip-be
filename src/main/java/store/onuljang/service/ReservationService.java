@@ -8,17 +8,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.ProductsRepository;
+import store.onuljang.repository.ReservationAllRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
+import store.onuljang.repository.entity.ReservationAll;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -27,6 +28,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class ReservationService {
     ReservationRepository reservationRepository;
+    ReservationAllRepository reservationAllRepository;
     ProductsRepository productsRepository;
     UserRepository userRepository;
 
@@ -72,7 +74,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByStatusAndOrderDateBetween(LocalDate from, LocalDate to) {
-        return reservationRepository.findAllByStatusAndOrderDateBetween(ReservationStatus.PICKED ,from, to);
+    public List<ReservationAll> findAllByStatusAndOrderDateBetweenIncludingDeleted(ReservationStatus status, LocalDate from, LocalDate to) {
+        return reservationAllRepository.findAllByStatusAndOrderDateBetween(status ,from, to);
     }
 }

@@ -2,6 +2,7 @@ package store.onuljang.controller.response;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.Reservation;
+import store.onuljang.repository.entity.ReservationAll;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ public record AdminReservationReportResponse(
         long quantity,
         BigDecimal amount) {
 
-        public static AdminReservationResponse from(Reservation entity) {
+        public static AdminReservationResponse from(ReservationAll entity) {
             return AdminReservationResponse.builder()
                 .orderDate(entity.getOrderDate())
                 .productName(entity.getReservationProductName())
@@ -32,7 +33,7 @@ public record AdminReservationReportResponse(
         }
     }
 
-    public static AdminReservationReportResponse from(List<Reservation> entities) {
+    public static AdminReservationReportResponse from(List<ReservationAll> entities) {
         return AdminReservationReportResponse.builder()
             .response(entities.stream()
                 .map(AdminReservationResponse::from).toList())
