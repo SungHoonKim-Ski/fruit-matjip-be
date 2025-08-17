@@ -10,7 +10,7 @@ CREATE TABLE users (
     deleted_at       DATETIME,
     PRIMARY KEY (id),
     UNIQUE KEY uq_users_social_id   (social_id),
-    UNIQUE KEY uq_users_internal_uid(internal_uid),
+    UNIQUE KEY uq_users_uid(uid),
     UNIQUE KEY uq_users_name    (name),
     CHECK (total_orders >= 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -82,7 +82,7 @@ CREATE TABLE reservations (
     KEY idx_res_status    (status, status_changed_at),
     CONSTRAINT fk_res_user
       FOREIGN KEY (user_uid)
-          REFERENCES users(internal_uid),
+          REFERENCES users(uid),
     CONSTRAINT fk_res_product
       FOREIGN KEY (product_id)
           REFERENCES products(id),
@@ -98,13 +98,7 @@ CREATE TABLE admin_product_logs (
     created_at  DATETIME NOT NULL,
     PRIMARY KEY (id),
     KEY idx_apl_product (product_id),
-    KEY idx_apl_admin   (admin_id),
-    CONSTRAINT fk_apl_admin
-        FOREIGN KEY (admin_id)
-            REFERENCES admins(id),
-    CONSTRAINT fk_apl_product
-        FOREIGN KEY (product_id)
-            REFERENCES products(id)
+    KEY idx_apl_admin   (admin_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE name_pool (
