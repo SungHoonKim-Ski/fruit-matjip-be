@@ -6,6 +6,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.repository.entity.enums.AdminProductAction;
+import store.onuljang.repository.entity.log.AdminProductLog;
+import store.onuljang.service.AdminProductLogService;
 import store.onuljang.service.AdminService;
 import store.onuljang.service.AdminUploadService;
 import store.onuljang.service.ProductsService;
@@ -29,12 +32,17 @@ public class AdminProductAppService {
     ProductsService productsService;
     AdminUploadService adminUploadService;
     AdminService adminService;
+    AdminProductLogService adminProductLogService;
 
     @Transactional
     public Long saveAndMoveTempImage(AdminCreateProductRequest request) {
         Admin admin = adminService.findById(SessionUtil.getAdminId());
 
-        return productsService.save(AdminCreateProductRequest.toEntity(request, admin));
+        long productId = productsService.save(AdminCreateProductRequest.toEntity(request, admin));
+
+        saveProductLog(productId, AdminProductAction.CREATE);
+
+        return productId;
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +62,8 @@ public class AdminProductAppService {
     @Transactional
     public void updateDetail(long productId, AdminUpdateProductDetailsRequest request) {
         Product product = productsService.findByIdWithDetailImages(productId);
+
+        saveProductLog(productId, AdminProductAction.UPDATE);
 
         if (request.name() != null) product.setName(request.name());
         if (request.price() != null) product.setPrice(request.price());
@@ -78,16 +88,33 @@ public class AdminProductAppService {
 
     @Transactional
     public void delete(long productId) {
+        saveProductLog(productId, AdminProductAction.DELETE);
+
         productsService.findById(productId).delete();
     }
 
     @Transactional
     public void toggleVisible(long productId) {
+        saveProductLog(productId, AdminProductAction.UPDATE);
+
         productsService.findByIdWithLock(productId).toggleVisible();
     }
 
     @Transactional
     public void setSoldOut(long productId) {
+        saveProductLog(productId, AdminProductAction.UPDATE);
+
         productsService.findByIdWithLock(productId).soldOut();
+    }
+
+    @Transactional
+    public void saveProductLog(long productId, AdminProductAction action) {
+        adminProductLogService.save(
+            AdminProductLog.builder()
+                .adminId(SessionUtil.getAdminId())
+                .productId(productId)
+                .action(action)
+                .build()
+        );
     }
 }
