@@ -52,7 +52,6 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ap-northeast-2
 
       - name: Deploy to EC2 via SSH
         env:
@@ -63,24 +62,28 @@ jobs:
           
           ssh -i key.pem -o StrictHostKeyChecking=no "ubuntu@$EC2_HOST" \
             ENV="${{ env.PROFILE }}" \
-            AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
-            AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             DB_URL="${{ secrets.DB_URL }}" \
             DB_USERNAME="${{ secrets.DB_USERNAME }}" \
             DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
             API_KAKAO_KEY="${{ secrets.API_KAKAO_KEY }}" \
             JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             S3_APP_BUCKET_NAME="${{ env.S3_APP_BUCKET_NAME }}" \
+            S3_DEPLOY_BUCKET_NAME="${{ secrets.S3_DEPLOY_BUCKET_NAME }}" \
+            AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
+            AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             bash -s << 'EOF'
-            set -e
+            set -euo pipefail
             cd /home/ubuntu/onuljang-backend
           
             echo "Downloading jar from S3..."
-            aws s3 cp "s3://${{ secrets.S3_DEPLOY_BUCKET_NAME }}/springboot/app.jar" onuljang.jar
+            aws s3 cp "s3://${S3_DEPLOY_BUCKET_NAME}/springboot/app.jar" onuljang.jar
           
             echo "Stopping previous process if exists..."
             pkill -f 'onuljang.jar' || true
             sleep 1
+          
+            export AWS_ACCESS_KEY="$AWS_ACCESS_KEY_ID"
+            export AWS_SECRET_KEY="$AWS_SECRET_ACCESS_KEY"
           
             echo "Starting new application with profile: $ENV"
             nohup java -Dspring.profiles.active="$ENV" -jar onuljang.jar --server.port=8088 \
