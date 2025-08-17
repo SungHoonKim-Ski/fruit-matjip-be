@@ -17,16 +17,13 @@
 ---
 
 ## 🖼️ 시스템 아키텍처
-
-서비스는 다음과 같은 구조로 구성됩니다.
-
-![architecture](F3F0C576-F361-41E3-992B-EC60FC7C083F.jpeg)
+<img width="1778" height="638" alt="image" src="https://github.com/user-attachments/assets/df914dc7-d0c4-4757-8d97-e8c36d80ab85" />
 
 ---
 
 ## 📐 코드 계층 구조
 
-해당 백엔드 프로젝트는 **도메인 계층 구분을 명확히 적용한 구조**로 설계되었습니다.
+해당 백엔드 프로젝트는 **도메인 계층 구분을 적용한 구조**로 설계했습니다.
 
 ```text
 Controller
@@ -52,14 +49,14 @@ Repository (JPA 기반 DB 접근)
 
 | 테이블 | 설명 |
 |--------|------|
-| `users` | 사용자 정보 저장 (카카오 ID, 닉네임 등) |
+| `users` | 사용자 정보 저장 (카카오 ID, 닉네임) |
 | `reservations` | 사용자 예약 내역 및 수량 정보 |
-| `products` | 상품 정보 및 상태 (재고, 활성 여부 등) |
-| `admins` | 관리자 계정 및 권한 정보 (OWNER/MANAGER 등) |
+| `products` | 상품 정보 및 상태 (재고, 상품 노출 여부) |
+| `admins` | 관리자 계정 및 권한 정보 (OWNER/MANAGER/NONE) |
 | `admin_logs`, `user_logs` | API 호출 로깅 (메서드/응답 시간/상태 등) |
-| `refresh_tokens` | 사용자 인증용 Refresh Token 관리 |
 
-![ERD](./erd.png)
+ERD
+<img width="3448" height="2428" alt="prod-onuljang-server" src="https://github.com/user-attachments/assets/541891e3-00f5-48fd-b507-a5f216adad54" />
 
 ---
 
@@ -107,11 +104,11 @@ on:
 
 | 이슈                                  | 해결 방법 | 관련 파일 |
 |-------------------------------------|-----------|-----------|
-| 재고 관련 동시성 문제                        | JPA의 `@Lock(LockModeType.PESSIMISTIC_WRITE)` 적용 | [`ReservationRepository.java`](./src/main/java/store/onuljang/repository/ReservationRepository.java) |
-| 카카오 로그인 시 자동 회원가입 + 고유 닉네임 생성 |1. 카카오 인증 시도<br>2. 고유 ID 반환<br>3. DB에서 유저 확인<br>4. 미존재 시 닉네임 생성기 호출 (`@Lock` 사용)<br>5. 고유 닉네임 생성 및 회원가입<br>6. 로그인 처리 |[`UserService.java`](./src/main/java/store/onuljang/service/UserService.java)<br>[`NicknameGenerator.java`](./src/main/java/store/onuljang/service/NicknameGenerator.java) |
-| 파일 업로드 메모리 초과                       | AWS S3 Presigned URL 방식 적용 | [`CreateProductService.java`](./src/main/java/store/onuljang/service/CreateProductService.java) |
-| 과도한 카카오 로그인 API 요청                  | Refresh Token 저장 + 로그인 시 `/auth/refresh` 호출로 개선 | [`KakaoService.java`](./src/main/java/store/onuljang/service/KakaoService.java) |
-| N+1 문제                              | JPA Fetch Join + `@EntityGraph` 적용 | [`ProductsRepository.java`](./src/main/java/store/onuljang/repository/ProductsRepository.java) |
+| 재고 관련 동시성 문제                        | JPA의 `@Lock(LockModeType.PESSIMISTIC_WRITE)` 적용 | [`ProductRepository.java`](./src/main/java/store/onuljang/repository/ProductRepository.java) |
+| 카카오 로그인 시 자동 회원가입 + 고유 닉네임 생성 |1. 카카오 인증 -> 고유 ID 반환<br>2. DB에서 유저 확인<br>3. 미존재 시 닉네임 생성기 호출 (`@Lock` 사용)<br>4. 고유 닉네임 생성 및 회원가입<br>5. 로그인 처리 |[`AuthAppService.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java)<br>[`NameGenerator.java`](./src/main/java/store/onuljang/service/NameGenerator.java) |
+| 파일 업로드 메모리 초과                       | AWS S3 Presigned URL 방식 적용 | [`AdminUploadService.java`](./src/main/java/store/onuljang/service/AdminUploadService.java) |
+| 과도한 카카오 로그인 API 요청                  | Refresh Token 저장 + 로그인 시 `/auth/refresh` 호출로 개선 | [`AuthAppService.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java) |
+| N+1 문제                              | JPA Fetch Join + `@EntityGraph` 적용 | [`ReservationAllRepository.java`](./src/main/java/store/onuljang/repository/ReservationAllRepository.java) |
 
 ---
 
