@@ -104,11 +104,11 @@ on:
 
 | 이슈                                  | 해결 방법 | 관련 파일 |
 |-------------------------------------|-----------|-----------|
-| 재고 관련 동시성 문제                        | JPA의 `@Lock(LockModeType.PESSIMISTIC_WRITE)` 적용 | [`ProductRepository.java`](./src/main/java/store/onuljang/repository/ProductRepository.java) |
+| 재고 관련 동시성 문제                        | JPA의 `@Lock(LockModeType.PESSIMISTIC_WRITE)` 적용 | [`ProductsRepository.java`](./src/main/java/store/onuljang/repository/ProductsRepository.java) |
 | 카카오 로그인 시 자동 회원가입 + 고유 닉네임 생성 |1. 카카오 인증 -> 고유 ID 반환<br>2. DB에서 유저 확인<br>3. 미존재 시 닉네임 생성기 호출 (`@Lock` 사용)<br>4. 고유 닉네임 생성 및 회원가입<br>5. 로그인 처리 |[`AuthAppService.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java)<br>[`NameGenerator.java`](./src/main/java/store/onuljang/service/NameGenerator.java) |
 | 파일 업로드 메모리 초과                       | AWS S3 Presigned URL 방식 적용 | [`AdminUploadService.java`](./src/main/java/store/onuljang/service/AdminUploadService.java) |
 | 과도한 카카오 로그인 API 요청                  | Refresh Token 저장 + 로그인 시 `/auth/refresh` 호출로 개선 | [`AuthAppService.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java) |
-| N+1 문제                              | JPA Fetch Join + `@EntityGraph` 적용 | [`ReservationAllRepository.java`](./src/main/java/store/onuljang/repository/ReservationAllRepository.java) |
+| N+1 문제                              | JPA Fetch Join(`@EntityGraph`) 적용 | [`ReservationAllRepository.java`](./src/main/java/store/onuljang/repository/ReservationAllRepository.java) |
 
 ---
 
@@ -117,10 +117,10 @@ on:
 | 기능 | 설명 | 관련 파일 |
 |------|------|-----------|
 | Refresh Token 관리 | DB에 해시 형태로 저장되고 `replaced_by` 컬럼으로 linked-list 형식 추적 가능 | [`RefreshToken.java`](./src/main/java/store/onuljang/repository/entity/RefreshToken.java) |
-| 관리자 권한 검증 강화 | Spring Security 필터, `hasRole`, validate API 추가로 미검증 방지 | [`SecurityConfig.java`](./src/main/java/store/onuljang/config/SecurityConfig.java) |
-| 관리자 인증 커스터마이징 | 세션에 관리자 ID 저장 위해 `AdminUserDetail`, `AdminAuthenticationToken` 구현 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/config/AdminSecurityConfig.java)<br>[`AdminUserDetail.java`](./src/main/java/store/onuljang/security/AdminUserDetail.java)<br>[`AdminAuthenticationToken.java`](./src/main/java/store/onuljang/security/AdminAuthenticationToken.java) |
-| 유저/관리자 행위 로깅 | `UserLog`, `AdminLog` 테이블을 통해 주요 행동 기록 | [`UserLog.java`](./src/main/java/store/onuljang/repository/entity/UserLog.java)<br>[`AdminLog.java`](./src/main/java/store/onuljang/repository/entity/AdminLog.java) |
-| 환경 설정 분기 | CI 스크립트에서 dev/prod 프로필 분기 | [`deploy.yml`](.github/workflows/deploy.yml) |
+| 관리자 권한 검증 강화 | Spring Security 필터, `hasRole`, validate API 추가로 미검증 방지 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/auth/AdminSecurityConfig.java) |
+| 관리자 인증 커스터마이징 | 세션에 관리자 ID 저장 위해 `AdminUserDetail`, `AdminAuthenticationToken` 구현 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/config/AdminSecurityConfig.java)<br>[`AdminUserDetail.java`](./src/main/java/store/onuljang/service/dto/AdminUserDetails.java)<br>[`AdminAuthenticationToken.java`](./src/main/java/store/onuljang/auth/AdminAuthenticationToken.java) |
+| 유저/관리자 행위 로깅 | `UserLog`, `AdminLog` 테이블을 통해 주요 행동 기록 | [`UserLog.java`](./src/main/java/store/onuljang/repository/entity/log/UserLog.java)<br>[`AdminLog.java`](./src/main/java/store/onuljang/repository/entity/log/AdminLog.java) |
+| 환경 설정 분기 | CI 스크립트에서 dev/prod 프로필 분기 | [`deploy.yml`](.github/workflows/aws.yml) |
 
 ---
 
