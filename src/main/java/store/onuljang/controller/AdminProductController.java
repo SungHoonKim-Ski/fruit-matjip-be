@@ -35,7 +35,7 @@ public class AdminProductController {
 
     @PostMapping
     public ResponseEntity<Long> create(@Valid @RequestBody AdminCreateProductRequest request) {
-        return ResponseEntity.ok(adminProductAppService.saveAndMoveTempImage(request));
+        return ResponseEntity.ok(adminProductAppService.save(request));
     }
 
     @PatchMapping("/{productId}")

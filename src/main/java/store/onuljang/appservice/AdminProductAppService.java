@@ -35,7 +35,7 @@ public class AdminProductAppService {
     AdminProductLogService adminProductLogService;
 
     @Transactional
-    public Long saveAndMoveTempImage(AdminCreateProductRequest request) {
+    public Long save(AdminCreateProductRequest request) {
         Admin admin = adminService.findById(SessionUtil.getAdminId());
 
         long productId = productsService.save(AdminCreateProductRequest.toEntity(request, admin));
