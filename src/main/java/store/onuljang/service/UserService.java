@@ -27,7 +27,7 @@ public class UserService {
             .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
     }
 
-    public boolean findByName(String name) {
+    public boolean existUserByName(String name) {
         return userRepository.findByName(name).isPresent();
     }
 }

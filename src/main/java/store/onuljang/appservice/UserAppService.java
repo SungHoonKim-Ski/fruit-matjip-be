@@ -19,7 +19,7 @@ public class UserAppService {
 
     @Transactional(readOnly = true)
     public boolean existName(String name) {
-        return !userService.findByName(name);
+        return !userService.existUserByName(name);
     }
 
     @Transactional
