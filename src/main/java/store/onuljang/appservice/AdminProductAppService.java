@@ -4,8 +4,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.log.admin_product.AdminProductLogEvent;
 import store.onuljang.repository.entity.enums.AdminProductAction;
 import store.onuljang.repository.entity.log.AdminProductLog;
 import store.onuljang.service.AdminProductLogService;
@@ -33,6 +35,7 @@ public class AdminProductAppService {
     AdminUploadService adminUploadService;
     AdminService adminService;
     AdminProductLogService adminProductLogService;
+    ApplicationEventPublisher applicationEventPublisher;
 
     @Transactional
     public Long save(AdminCreateProductRequest request) {
@@ -107,14 +110,12 @@ public class AdminProductAppService {
         productsService.findByIdWithLock(productId).soldOut();
     }
 
-    @Transactional
-    public void saveProductLog(long productId, AdminProductAction action) {
-        adminProductLogService.save(
-            AdminProductLog.builder()
+    private void saveProductLog(long productId, AdminProductAction action) {
+        applicationEventPublisher.publishEvent(
+            AdminProductLogEvent.builder()
                 .adminId(SessionUtil.getAdminId())
                 .productId(productId)
                 .action(action)
-                .build()
-        );
+                .build());
     }
 }
