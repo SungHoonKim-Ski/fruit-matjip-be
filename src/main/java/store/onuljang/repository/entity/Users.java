@@ -48,11 +48,11 @@ public class Users extends BaseEntity {
     }
 
     public void addTotalOrders(long totalOrders) {
-        this.totalOrders += totalOrders;
+        this.totalOrders = Math.max(this.totalOrders, this.totalOrders + totalOrders);
     }
 
     public void removeTotalOrders(long totalOrders) {
-        this.totalOrders -= totalOrders;
+        this.totalOrders = Math.max(this.totalOrders - totalOrders, 0);
     }
 
     public void reserve(int quantity) {

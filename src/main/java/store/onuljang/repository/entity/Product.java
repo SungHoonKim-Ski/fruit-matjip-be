@@ -81,11 +81,11 @@ public class Product extends BaseEntity {
     }
 
     public void addStock(int quantity) {
-        this.stock += quantity;
+        this.stock = Math.max(this.stock + quantity, 0);
     }
 
     public void removeStock(int quantity) {
-        this.stock -= quantity;
+        this.stock = Math.max(this.stock - quantity, 0);
     }
 
     public List<String> replaceDetailImagesInOrder(List<String> replaceDetailImages) {
