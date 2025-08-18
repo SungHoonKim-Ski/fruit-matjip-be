@@ -1,9 +1,11 @@
 package store.onuljang.controller;
 
+import jakarta.validation.Valid;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AuthAppService;
 import store.onuljang.controller.request.LoginRequest;
@@ -14,11 +16,12 @@ import store.onuljang.service.dto.JwtToken;
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@Validated
 public class LoginController {
     AuthAppService authAppService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authAppService.socialLogin(request));
     }
 

@@ -26,7 +26,7 @@ public class ProductsController {
     ProductsAppService productsAppService;
 
     @GetMapping
-    public ResponseEntity<ProductListResponse> getProducts(@Valid
+    public ResponseEntity<ProductListResponse> getProducts(
        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate from,
        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate to
     ) {
@@ -34,7 +34,7 @@ public class ProductsController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDetailResponse> detail(@PathVariable @Valid @PositiveOrZero Long id) {
+    public ResponseEntity<ProductDetailResponse> detail(@PathVariable @PositiveOrZero Long id) {
         return ResponseEntity.ok(productsAppService.getDetail(id));
     }
 }

@@ -39,7 +39,7 @@ public class ReservationController {
     @PatchMapping("/cancel/{id}")
     public ResponseEntity<Void> cancel(
         @RequestHeader(value="Authorization") String bearerToken,
-        @Valid @NotNull @PositiveOrZero @PathVariable("id") Long reservationId
+        @Valid @PositiveOrZero @PathVariable("id") Long reservationId
     ) {
         String uId = jwtUtil.getBearerUid(bearerToken);
 
