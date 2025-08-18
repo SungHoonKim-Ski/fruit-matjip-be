@@ -5,7 +5,8 @@ import lombok.Builder;
 @Builder
 public record LoginResponse(
     String name,
-    String access
+    String access,
+    boolean changeName
 ) {
 
 }
