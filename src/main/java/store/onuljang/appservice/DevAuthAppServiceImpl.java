@@ -30,6 +30,7 @@ public class DevAuthAppServiceImpl implements AuthAppService {
         return LoginResponse
             .builder()
             .name(user.getName())
+            .changeName(user.getChangeName())
             .access(accessToken)
             .build();
     }
