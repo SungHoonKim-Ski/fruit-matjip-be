@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.UserAppService;
 import store.onuljang.auth.JwtUtil;
 
-@RequestMapping("/api")
+@RequestMapping("/api/auth")
 @RestController
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
