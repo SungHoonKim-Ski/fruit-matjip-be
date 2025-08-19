@@ -12,7 +12,8 @@ public record AdminCreateProductRequest (
     String name,
 
     @NotNull(message = "가격은 필수입니다")
-    @Min(value = 1, message = "가격은 0 이상이어야 합니다")
+    @Min(value = 100, message = "가격은 100원 이상이어야 합니다")
+    @Max(value = 1_000_000, message = "가격은 1,000,000원 이하여야 합니다")
     Integer price,
 
     @NotNull(message = "재고 수량은 필수입니다")
