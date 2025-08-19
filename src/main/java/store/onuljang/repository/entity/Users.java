@@ -62,12 +62,12 @@ public class Users extends BaseEntity {
     }
 
     public void reserve(int quantity) {
-        validateUserNameChanged();
+        assertNicknameChanged();
         lastOrderDate = LocalDate.now();
         addTotalOrders(quantity);
     }
 
-    private void validateUserNameChanged() {
+    private void assertNicknameChanged() {
         if (!changeName) {
             throw new UserValidateException("닉네임 변경 후 주문이 가능합니다.");
         }

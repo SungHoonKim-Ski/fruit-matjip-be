@@ -14,9 +14,12 @@ import store.onuljang.feign.dto.KakaoMeRespone;
 import store.onuljang.repository.entity.RefreshToken;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.service.KakaoService;
+import store.onuljang.service.NameGenerator;
 import store.onuljang.service.TokenService;
 import store.onuljang.service.UserService;
-import store.onuljang.service.UserSignupService;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -24,21 +27,18 @@ import store.onuljang.service.UserSignupService;
 @Profile("PROD")
 public class ProdAuthAppServiceImpl implements AuthAppService {
     KakaoService kakaoService;
-    UserSignupService userSignupService;
     UserService userService;
     TokenService tokenService;
+    NameGenerator nameGenerator;
     JwtUtil jwtUtil;
 
+    @Transactional
     public LoginResponse socialLogin(LoginRequest request) {
         KakaoLoginResponse token = kakaoService.kakaoLogin(request.code(), request.redirectUri());
         KakaoMeRespone me = kakaoService.getKakaoUserInfo(token);
 
-        Users user = userSignupService.ensureUserBySocialId(me.id());
+        Users user = ensureUserBySocialId(me.id());
 
-        return afterSocialLogin(user);
-    }
-
-    public LoginResponse afterSocialLogin(Users user) {
         String accessToken = tokenService.generateToken(user);
 
         return LoginResponse
@@ -49,6 +49,20 @@ public class ProdAuthAppServiceImpl implements AuthAppService {
             .build();
     }
 
+    @Transactional
+    public Users ensureUserBySocialId(String socialId) {
+        return userService.findOptionalBySocialId(socialId)
+            .orElseGet(() -> {
+                String uniqueName = nameGenerator.generate();
+                Users newUser = Users.builder()
+                    .name(uniqueName)
+                    .socialId(socialId)
+                    .uid(UUID.randomUUID())
+                    .build();
+
+                return userService.save(newUser);
+            });
+    }
 
     @Transactional
     public String refresh(String accessBearerToken, String refreshToken) {
