@@ -1,9 +1,13 @@
 package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import store.onuljang.exception.ProductExceedException;
+import store.onuljang.exception.ProductUnavailableException;
 import store.onuljang.repository.entity.base.BaseEntity;
 import jakarta.persistence.OrderBy;
 
@@ -144,5 +148,22 @@ public class Product extends BaseEntity {
 
     public void delete() {
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void assertPurchasable(int quantity) {
+        if (Boolean.FALSE.equals(isVisible)) {
+            throw new ProductUnavailableException("판매가 중단된 상품입니다.");
+        }
+        if (quantity <= 0) {
+            throw new ProductUnavailableException("구매 수량은 1개 이상이어야 합니다.");
+        }
+        if (this.stock < quantity) {
+            throw new ProductExceedException("상품의 재고가 부족합니다.");
+        }
+    }
+
+    public void reserve(int quantity) {
+        assertPurchasable(quantity);
+        removeStock(quantity);
     }
 }

@@ -32,30 +32,17 @@ public class ReservationService {
     ProductsRepository productsRepository;
     UserRepository userRepository;
 
-    public Reservation findById(long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약"));
+    @Transactional
+    public Reservation findByIdWithLock(long id) {
+        return reservationRepository.findByIdWithLock(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
     }
 
     @Transactional
-    public long save(String uId, long productId, int quantity, BigDecimal amount) {
-        Product product = productsRepository.findById(productId)
-            .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));;
+    public long save(Reservation reservation) {
+        reservationRepository.save(reservation);
 
-        Users user = userRepository.findByUid(uId)
-            .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
-
-        Reservation entity = Reservation.builder()
-            .user(user)
-            .product(product)
-            .quantity(quantity)
-            .amount(amount)
-            .orderDate(product.getSellDate())
-            .build();
-
-        reservationRepository.save(entity);
-
-        return entity.getId();
+        return reservation.getId();
     }
 
     @Transactional

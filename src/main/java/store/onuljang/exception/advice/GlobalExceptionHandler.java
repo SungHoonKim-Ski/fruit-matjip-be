@@ -96,8 +96,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserValidateException.class)
     public ResponseEntity<ErrorResponse> handleRefreshTokenNotFound(UserValidateException ex) {
         log.info("UserValidateException: {}", ex.getMessage());
-        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("UserVailidateException", ex.getMessage()));
+        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("UserValidateException", ex.getMessage()));
     }
+
+    @ExceptionHandler(ProductUnavailableException.class)
+    public ResponseEntity<ErrorResponse> handleProductUnavailable(ProductUnavailableException ex) {
+        log.info("ProductUnavailableException: {}", ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("ProductUnavailableException", ex.getMessage()));
+    }
+
+    // Runtime Exception, Exception
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntime(RuntimeException ex) {

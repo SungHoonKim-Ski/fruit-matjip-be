@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
+import store.onuljang.exception.NotFoundException;
 import store.onuljang.exception.ProductExceedException;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
@@ -29,17 +31,21 @@ public class ReservationAppService {
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
-        Users user = userService.findByUId(uId);
-
+        Users user = userService.findByuIdWithLock(uId);
         Product product = productsService.findByIdWithLock(request.productId());
-        if (product.getStock() < request.quantity()) {
-            throw new ProductExceedException("상품의 재고가 부족합니다.");
-        }
 
-        product.removeStock(request.quantity());
+        product.reserve(request.quantity());
         user.reserve(request.quantity());
 
-        return reservationService.save(uId, request.productId(), request.quantity(), request.amount());
+        Reservation entity = Reservation.builder()
+            .user(user)
+            .product(product)
+            .quantity(request.quantity())
+            .amount(request.amount())
+            .orderDate(product.getSellDate())
+            .build();
+
+        return reservationService.save(entity);
     }
 
     @Transactional
