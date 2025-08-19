@@ -50,8 +50,8 @@ public class ReservationAppService {
 
     @Transactional
     public void cancel(String uId, long reservationId) {
-        Users user = userService.findByUId(uId);
-        Reservation reservation = reservationService.findById(reservationId);
+        Users user = userService.findByuIdWithLock(uId);
+        Reservation reservation = reservationService.findByIdWithLock(reservationId);
 
         validateReservation(user, reservation);
 
@@ -75,6 +75,9 @@ public class ReservationAppService {
     public void validateReservation(Users user, Reservation reservation) {
         if (!user.getUid().equals(reservation.getUser().getUid())) {
             throw new UserValidateException("다른 유저가 예약한 상품입니다.");
+        }
+        if (reservation.getStatus() != ReservationStatus.PENDING) {
+            throw new UserValidateException("취소할 수 없는 예약입니다.");
         }
     }
 }

@@ -10,12 +10,18 @@ import store.onuljang.exception.UserNotFoundException;
 import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.Users;
 
+import java.util.Optional;
+
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
 public class UserService {
     UserRepository userRepository;
+
+    public Optional<Users> findOptionalBySocialId(String socialId) {
+        return userRepository.findBySocialId(socialId);
+    }
 
     public Users findBySocialId(String socialId) {
         return userRepository.findBySocialId(socialId)
@@ -27,7 +33,16 @@ public class UserService {
             .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
     }
 
+    public Users findByuIdWithLock(String uId) {
+        return userRepository.findByUid(uId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
+    }
+
     public boolean existUserByName(String name) {
         return userRepository.findByName(name).isPresent();
+    }
+
+    public Users save(Users user) {
+        return userRepository.save(user);
     }
 }

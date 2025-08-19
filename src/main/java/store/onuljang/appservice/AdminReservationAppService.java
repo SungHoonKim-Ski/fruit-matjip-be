@@ -30,7 +30,7 @@ public class AdminReservationAppService {
 
     @Transactional
     public void updateReservationStatus(long id, ReservationStatus status) {
-        Reservation entity = reservationService.findById(id);
+        Reservation entity = reservationService.findByIdWithLock(id);
 
         entity.setStatus(status);
     }
