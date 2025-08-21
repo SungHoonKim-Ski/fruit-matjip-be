@@ -88,6 +88,10 @@ public class Product extends BaseEntity {
         this.stock = Math.max(this.stock + quantity, 0);
     }
 
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
     public void removeStock(int quantity) {
         this.stock = Math.max(this.stock - quantity, 0);
     }

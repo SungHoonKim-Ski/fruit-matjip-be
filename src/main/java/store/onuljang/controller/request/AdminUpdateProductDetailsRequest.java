@@ -13,9 +13,8 @@ public record AdminUpdateProductDetailsRequest(
     @Max(value = 1_000_000, message = "가격은 1,000,000원 이하여야 합니다")
     Integer price,
 
-    @Min(value = -100, message = "재고 증감치는 -1000 이상이어야 합니다")
-    @Max(value = 100,  message = "재고 증감치는 1000 이하여야 합니다")
-    Integer stockChange,
+    @Min(value = 0, message = "재고 변경값은 0 이상이어야 합니다")
+    Integer stock,
 
     @Size(max = 300, message = "이미지 경로는 300자 이하여야 합니다")
     @Pattern(regexp = "^[A-Za-z0-9._/\\-:]*$", message = "이미지 경로에는 영문/숫자/._-/:/만 허용됩니다")

@@ -64,13 +64,13 @@ public class AdminProductAppService {
 
     @Transactional
     public void updateDetail(long productId, AdminUpdateProductDetailsRequest request) {
-        Product product = productsService.findByIdWithDetailImages(productId);
+        Product product = productsService.findByIdWithDetailImagesWithLock(productId);
 
         saveProductLog(productId, AdminProductAction.UPDATE);
 
         if (request.name() != null) product.setName(request.name());
         if (request.price() != null) product.setPrice(request.price());
-        if (request.stockChange() != null) product.addStock(product.getStock() + request.stockChange());
+        if (request.stock() != null) product.setStock(request.stock());
         if (request.sellDate() != null) {product.setSellDate(LocalDate.parse(request.sellDate()));}
         if (request.description() != null) product.setDescription(request.description());
         List<String> removeKey = new ArrayList<>();

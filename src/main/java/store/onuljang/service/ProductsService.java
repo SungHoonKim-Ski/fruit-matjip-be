@@ -44,6 +44,11 @@ public class ProductsService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
     }
 
+    public Product findByIdWithDetailImagesWithLock(long id) {
+        return productsRepository.findAllByIdWithLock(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
+    }
+
     @Transactional
     public long save(Product product) {
         return productsRepository.save(product).getId();
