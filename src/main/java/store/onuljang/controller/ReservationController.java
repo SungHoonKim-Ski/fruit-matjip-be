@@ -48,6 +48,18 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/self-pick/{id}")
+    public ResponseEntity<Void> selfPick(
+            @RequestHeader(value="Authorization") String bearerToken,
+            @Valid @PositiveOrZero @PathVariable("id") Long reservationId
+    ) {
+        String uId = jwtUtil.getBearerUid(bearerToken);
+
+        reservationAppService.selfPick(uId, reservationId);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/")
     public ResponseEntity<ReservationListResponse> getList(@Valid @RequestHeader(value="Authorization") String bearerToken,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,

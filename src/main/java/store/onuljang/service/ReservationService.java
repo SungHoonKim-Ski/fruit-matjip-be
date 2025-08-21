@@ -49,6 +49,11 @@ public class ReservationService {
     }
 
     @Transactional
+    public void selfPick(Reservation entity) {
+        entity.changeStatus(ReservationStatus.SELF_PICK);
+    }
+
+    @Transactional
     public List<Reservation> finAllByDateWithUserAndProduct(LocalDate date) {
         return reservationRepository.findAllByPickupDate(date);
     }
