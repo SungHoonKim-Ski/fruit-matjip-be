@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface ProductsRepository extends JpaRepository<Product, Long> {
     List<Product> findAllBySellDateBetweenAndIsVisible(LocalDate sellDate, LocalDate sellDate2, boolean isVisible);
 
+    List<Product> findAllByOrderBySellDateDesc();
+
     @EntityGraph(attributePaths = {"productDetailImages"})
     Optional<Product> findAllById(long id);
 

@@ -7,8 +7,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
-import store.onuljang.exception.NotFoundException;
-import store.onuljang.exception.ProductExceedException;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
@@ -67,7 +65,7 @@ public class ReservationAppService {
     public ReservationListResponse getReservations(String uId, LocalDate from, LocalDate to) {
         Users user = userService.findByUId(uId);
 
-        List<Reservation> entities = reservationService.findAllByUserAndOrderDateBetweenWithProduct(user, from, to);
+        List<Reservation> entities = reservationService.findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(user, from, to);
 
         return ReservationListResponse.from(entities);
     }

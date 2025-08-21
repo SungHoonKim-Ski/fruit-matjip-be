@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     @EntityGraph(attributePaths = {"product"})
-    List<Reservation> findAllByUserAndOrderDateBetween(Users user, LocalDate from, LocalDate to);
+    List<Reservation> findAllByUserAndOrderDateBetweenOrderByOrderDateDesc(Users user, LocalDate from, LocalDate to);
 
     @EntityGraph(attributePaths = {"user", "product"})
     List<Reservation> findAllByOrderDate(LocalDate date);

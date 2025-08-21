@@ -21,8 +21,8 @@ import java.util.List;
 public class ProductsService {
     ProductsRepository productsRepository;
 
-    public List<Product> findAll() {
-        return productsRepository.findAll();
+    public List<Product> findAllOrderBySellDateDesc() {
+        return productsRepository.findAllByOrderBySellDateDesc();
     }
 
     public Product findById(long id) {

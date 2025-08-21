@@ -11,13 +11,11 @@ import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.ReservationAllRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.UserRepository;
-import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.ReservationAll;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -56,12 +54,12 @@ public class ReservationService {
     }
 
     @Transactional
-    public List<Reservation> findAllByUserAndOrderDateBetweenWithProduct(Users user, LocalDate from, LocalDate to) {
-        return reservationRepository.findAllByUserAndOrderDateBetween(user, from, to);
+    public List<Reservation> findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(Users user, LocalDate from, LocalDate to) {
+        return reservationRepository.findAllByUserAndOrderDateBetweenOrderByOrderDateDesc(user, from, to);
     }
 
     @Transactional(readOnly = true)
     public List<ReservationAll> findAllByStatusAndOrderDateBetweenIncludingDeleted(ReservationStatus status, LocalDate from, LocalDate to) {
-        return reservationAllRepository.findAllByStatusAndOrderDateBetween(status ,from, to);
+        return reservationAllRepository.findAllByStatusAndOrderDateBetweenOrderByOrderDateDesc(status ,from, to);
     }
 }

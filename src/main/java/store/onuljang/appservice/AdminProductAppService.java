@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.log.admin_product.AdminProductLogEvent;
 import store.onuljang.repository.entity.enums.AdminProductAction;
-import store.onuljang.repository.entity.log.AdminProductLog;
 import store.onuljang.service.AdminProductLogService;
 import store.onuljang.service.AdminService;
 import store.onuljang.service.AdminUploadService;
@@ -50,7 +49,7 @@ public class AdminProductAppService {
 
     @Transactional(readOnly = true)
     public AdminProductListItems getAll() {
-        List<Product> entities = productsService.findAll();
+        List<Product> entities = productsService.findAllOrderBySellDateDesc();
 
         return AdminProductListItems.from(entities);
     }
