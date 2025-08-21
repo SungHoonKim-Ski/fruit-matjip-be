@@ -32,8 +32,8 @@ public class ReservationAll extends BaseEntity {
     private Users user;
 
     @Getter
-    @Column(name = "order_date", nullable = false)
-    private LocalDate orderDate = LocalDate.now();
+    @Column(name = "pickup_date", nullable = false)
+    private LocalDate pickupDate = LocalDate.now();
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -60,12 +60,12 @@ public class ReservationAll extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public ReservationAll(Users user, Product product, Integer quantity, BigDecimal amount, LocalDate orderDate) {
+    public ReservationAll(Users user, Product product, Integer quantity, BigDecimal amount, LocalDate pickupDate) {
         this.user = user;
         this.product = product;
         this.quantity = quantity;
         this.amount = amount;
-        this.orderDate = orderDate;
+        this.pickupDate = pickupDate;
     }
 
     public void changeStatus(ReservationStatus status) {

@@ -64,7 +64,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationAll> findAllByStatusAndOrderDateBetweenIncludingDeleted(ReservationStatus status, LocalDate from, LocalDate to) {
-        return reservationAllRepository.findAllByStatusAndOrderDateBetweenOrderByOrderDateDesc(status ,from, to);
+    public List<ReservationAll> findAllByStatusInAndPickupDateBetweenIncludingDeleted(List<ReservationStatus> statusList, LocalDate from, LocalDate to) {
+        return reservationAllRepository.findAllByStatusInAndPickupDateBetweenOrderByPickupDateDesc(statusList ,from, to);
     }
 }

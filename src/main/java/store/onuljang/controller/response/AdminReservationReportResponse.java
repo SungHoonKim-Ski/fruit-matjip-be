@@ -14,7 +14,7 @@ public record AdminReservationReportResponse(
 ) {
     @Builder
     public record AdminReservationResponse(
-        LocalDate orderDate,
+        LocalDate pickupDate,
         String productName,
         String userName,
         int price,
@@ -23,7 +23,7 @@ public record AdminReservationReportResponse(
 
         public static AdminReservationResponse from(ReservationAll entity) {
             return AdminReservationResponse.builder()
-                .orderDate(entity.getOrderDate())
+                .pickupDate(entity.getPickupDate())
                 .productName(entity.getReservationProductName())
                 .userName(entity.getReservationUserName())
                 .price(entity.getQuantity())

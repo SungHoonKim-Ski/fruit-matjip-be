@@ -37,8 +37,8 @@ public class AdminReservationAppService {
 
     @Transactional(readOnly = true)
     public AdminReservationReportResponse getSails(LocalDate from, LocalDate to) {
-        List<ReservationAll> entities = reservationService.findAllByStatusAndOrderDateBetweenIncludingDeleted(
-                ReservationStatus.PICKED ,from, to);
+        List<ReservationAll> entities = reservationService.findAllByStatusInAndPickupDateBetweenIncludingDeleted(
+                List.of(ReservationStatus.PICKED, ReservationStatus.SELF_PICK) ,from, to);
 
         return AdminReservationReportResponse.from(entities);
     }
