@@ -25,7 +25,7 @@ public record AdminReservationListResponse(
         public static AdminReservationResponse from(Reservation entity) {
             return AdminReservationResponse.builder()
                 .id(entity.getId())
-                .orderDate(entity.getOrderDate())
+                .orderDate(entity.getPickupDate())
                 .productName(entity.getReservationProductName())
                 .userName(entity.getReservationUserName())
                 .quantity(entity.getQuantity())

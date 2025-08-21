@@ -15,10 +15,10 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     @EntityGraph(attributePaths = {"product"})
-    List<Reservation> findAllByUserAndOrderDateBetweenOrderByOrderDateDesc(Users user, LocalDate from, LocalDate to);
+    List<Reservation> findAllByUserAndPickupDateBetweenOrderByPickupDateDesc(Users user, LocalDate from, LocalDate to);
 
     @EntityGraph(attributePaths = {"user", "product"})
-    List<Reservation> findAllByOrderDate(LocalDate date);
+    List<Reservation> findAllByPickupDate(LocalDate date);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Reservation r where r.id = :id")

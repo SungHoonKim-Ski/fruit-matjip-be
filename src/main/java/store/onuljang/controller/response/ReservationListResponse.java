@@ -28,7 +28,7 @@ public record ReservationListResponse(
                 .amount(entity.getAmount())
                 .productImage(entity.getReservationProductUrl())
                 .productName(entity.getReservationProductName())
-                .orderDate(entity.getOrderDate())
+                .orderDate(entity.getPickupDate())
                 .quantity(entity.getQuantity())
                 .status(entity.getStatus())
             .build();
