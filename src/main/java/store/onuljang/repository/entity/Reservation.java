@@ -4,12 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -64,6 +64,31 @@ public class Reservation extends BaseEntity {
         this.quantity = quantity;
         this.amount = amount;
         this.pickupDate = pickupDate;
+    }
+
+    public void cancelByUser(LocalDate today) {
+        if (this.pickupDate.isBefore(today)) {
+            throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
+        }
+        if (this.status != ReservationStatus.PENDING && this.status != ReservationStatus.SELF_PICK) {
+            throw new UserValidateException("취소할 수 없는 예약입니다.");
+        }
+        this.changeStatus(ReservationStatus.CANCELED);
+    }
+
+    public void requestSelfPick(LocalDate today, LocalTime deadline, ZoneId zone) {
+        if (this.pickupDate.isBefore(today)) {
+            throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
+        }
+        if (this.status != ReservationStatus.PENDING) {
+            throw new UserValidateException("셀프 수령이 불가능한 예약입니다.");
+        }
+
+        ZonedDateTime deadLine = this.pickupDate.atTime(deadline).atZone(zone);
+        if (ZonedDateTime.now(zone).isAfter(deadLine)) {
+            throw new UserValidateException("셀프 수령 신청이 마감됐습니다.");
+        }
+        this.changeStatus(ReservationStatus.SELF_PICK);
     }
 
     public void changeStatus(ReservationStatus status) {

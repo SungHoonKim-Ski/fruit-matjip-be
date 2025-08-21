@@ -7,16 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
-import store.onuljang.repository.ProductsRepository;
+import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.ReservationAllRepository;
 import store.onuljang.repository.ReservationRepository;
-import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.ReservationAll;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -27,8 +29,6 @@ import java.util.List;
 public class ReservationService {
     ReservationRepository reservationRepository;
     ReservationAllRepository reservationAllRepository;
-    ProductsRepository productsRepository;
-    UserRepository userRepository;
 
     @Transactional
     public Reservation findByIdWithLock(long id) {
@@ -41,16 +41,6 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         return reservation.getId();
-    }
-
-    @Transactional
-    public void cancel(Reservation entity) {
-        entity.changeStatus(ReservationStatus.CANCELED);
-    }
-
-    @Transactional
-    public void selfPick(Reservation entity) {
-        entity.changeStatus(ReservationStatus.SELF_PICK);
     }
 
     @Transactional

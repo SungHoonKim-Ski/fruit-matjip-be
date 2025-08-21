@@ -11,7 +11,6 @@ import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
-import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
@@ -19,7 +18,6 @@ import store.onuljang.service.UserService;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -30,17 +28,17 @@ public class ReservationAppService {
     UserService userService;
     ProductsService productsService;
 
-    ZoneId KST = ZoneId.of("Asia/Seoul");
-    LocalTime SELF_PICK_DEADLINE = LocalTime.of(18, 30);
-    ZonedDateTime nowKst = ZonedDateTime.now(KST);
+    static ZoneId KST = ZoneId.of("Asia/Seoul");
+    static LocalTime SELF_PICK_DEADLINE = LocalTime.of(18, 30);
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
-        Users user = userService.findByuIdWithLock(uId);
+        Users user = userService.findByUidWithLock(uId);
         Product product = productsService.findByIdWithLock(request.productId());
 
         product.reserve(request.quantity());
-        user.reserve(request.quantity());
+
+        user.reserve(request.quantity(), LocalDate.now(KST));
 
         Reservation entity = Reservation.builder()
             .user(user)
@@ -55,33 +53,29 @@ public class ReservationAppService {
 
     @Transactional
     public void cancel(String uId, long reservationId) {
-        Users user = userService.findByuIdWithLock(uId);
+        Users user = userService.findByUidWithLock(uId);
         Reservation reservation = reservationService.findByIdWithLock(reservationId);
 
-        if (reservation.getStatus() == ReservationStatus.PENDING) {
-            validateCancelReservation(user, reservation);
-        } else if (reservation.getStatus() == ReservationStatus.SELF_PICK) {
-            validateSelfPickCancelReservation(user, reservation);
-        }
+        validateUserReservation(user, reservation);
+
+        user.cancelReservation(reservation.getQuantity(), reservation.getStatus());
 
         Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
         product.addStock(reservation.getQuantity());
 
-        user.cancelReservation(reservation.getQuantity(), reservation.getStatus());
-
-        reservationService.cancel(reservation);
+        reservation.cancelByUser(LocalDate.now(KST));
     }
 
     @Transactional
     public void selfPick(String uId, long reservationId) {
-        Users user = userService.findByUId(uId);
+        Users user = userService.findByUidWithLock(uId);
         Reservation reservation = reservationService.findByIdWithLock(reservationId);
 
-        validateSelfPickReservation(user, reservation);
-
+        validateUserReservation(user, reservation);
+        user.assertCanSelfPick();
         productsService.findById(reservation.getProduct().getId());
 
-        reservationService.selfPick(reservation);
+        reservation.requestSelfPick(LocalDate.now(KST), SELF_PICK_DEADLINE, KST);
     }
 
     @Transactional(readOnly = true)
@@ -93,48 +87,9 @@ public class ReservationAppService {
         return ReservationListResponse.from(entities);
     }
 
-    private void validateSelfPickReservation(Users user, Reservation reservation) {
+    private void validateUserReservation(Users user, Reservation reservation) {
         if (!user.getUid().equals(reservation.getUser().getUid())) {
             throw new UserValidateException("다른 유저가 예약한 상품입니다.");
-        }
-        if (reservation.getStatus() != ReservationStatus.PENDING) {
-            throw new UserValidateException("셀프 수령으로 변경할 수 없는 예약입니다.");
-        }
-
-        if (user.exceedMaxWarnCount()) {
-            throw new UserValidateException("이번달에는 더이상 셀프 수령 신청을 할 수 없습니다.");
-        }
-
-        ZonedDateTime deadline = reservation.getPickupDate().atTime(SELF_PICK_DEADLINE).atZone(KST);
-        if (nowKst.isAfter(deadline)) {
-            throw new UserValidateException("셀프 수령 신청이 마감됬습니다.");
-        }
-    }
-
-    private void validateCancelReservation(Users user, Reservation reservation) {
-        if (!user.getUid().equals(reservation.getUser().getUid())) {
-            throw new UserValidateException("다른 유저가 예약한 상품입니다.");
-        }
-        if (reservation.getStatus() != ReservationStatus.PENDING) {
-            throw new UserValidateException("취소할 수 없는 예약입니다.");
-        }
-        if (reservation.getPickupDate().isBefore(LocalDate.now(KST))) {
-            throw new UserValidateException("과거 예약은 취소할 수 없습니다.");
-        }
-    }
-
-    private void validateSelfPickCancelReservation(Users user, Reservation reservation) {
-        if (!user.getUid().equals(reservation.getUser().getUid())) {
-            throw new UserValidateException("다른 유저가 예약한 상품입니다.");
-        }
-        if (reservation.getStatus() != ReservationStatus.SELF_PICK) {
-            throw new UserValidateException("취소할 수 없는 예약입니다.");
-        }
-        if (user.exceedMaxWarnCount()) {
-            throw new UserValidateException("이번달 셀프 수령 취소 가능 횟수를 초과했습니다.");
-        }
-        if (reservation.getPickupDate().isBefore(LocalDate.now(KST))) {
-            throw new UserValidateException("과거 예약은 취소할 수 없습니다.");
         }
     }
 }

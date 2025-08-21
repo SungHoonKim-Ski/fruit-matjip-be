@@ -33,8 +33,8 @@ public class UserService {
             .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
     }
 
-    public Users findByuIdWithLock(String uId) {
-        return userRepository.findByUid(uId)
+    public Users findByUidWithLock(String uId) {
+        return userRepository.findByUidWithLock(uId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저"));
     }
 

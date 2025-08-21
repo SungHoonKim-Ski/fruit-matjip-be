@@ -61,20 +61,27 @@ public class Users extends BaseEntity {
     }
 
     public void addTotalOrders(long totalOrders) {
-        this.totalOrders = Math.max(this.totalOrders, this.totalOrders + totalOrders);
+        this.totalOrders = Math.max(0, this.totalOrders + totalOrders);
     }
 
     public void cancelReservation(long totalOrders, ReservationStatus status) {
-        this.totalOrders = Math.max(this.totalOrders - totalOrders, 0);
         if (status == ReservationStatus.SELF_PICK) {
+            assertCanSelfPick();
             warnCount++;
         }
+        this.totalOrders = Math.max(0, this.totalOrders - totalOrders);
     }
 
-    public void reserve(int quantity) {
+    public void reserve(int quantity, LocalDate today) {
         assertNicknameChanged();
-        lastOrderDate = LocalDate.now();
+        lastOrderDate = today;
         addTotalOrders(quantity);
+    }
+
+    public void assertCanSelfPick() {
+        if (exceedMaxWarnCount()) {
+            throw new UserValidateException("이번 달 셀프 수령 취소 가능 횟수를 초과했습니다.");
+        }
     }
 
     private void assertNicknameChanged() {
@@ -83,7 +90,7 @@ public class Users extends BaseEntity {
         }
     }
 
-    public boolean exceedMaxWarnCount() {
+    private boolean exceedMaxWarnCount() {
         return warnCount >= 2;
     }
 }
