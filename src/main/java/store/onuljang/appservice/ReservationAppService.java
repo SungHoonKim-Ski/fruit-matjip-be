@@ -29,7 +29,7 @@ public class ReservationAppService {
     ProductsService productsService;
 
     static ZoneId KST = ZoneId.of("Asia/Seoul");
-    static LocalTime SELF_PICK_DEADLINE = LocalTime.of(18, 30);
+    static LocalTime SELF_PICK_DEADLINE = LocalTime.of(18, 50);
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
@@ -58,12 +58,12 @@ public class ReservationAppService {
 
         validateUserReservation(user, reservation);
 
-        user.cancelReservation(reservation.getQuantity(), reservation.getStatus());
+        user.cancelReservation(reservation.getQuantity());
 
         Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
         product.addStock(reservation.getQuantity());
 
-        reservation.cancelByUser(LocalDate.now(KST));
+        reservation.cancelByUser(LocalDate.now(KST), SELF_PICK_DEADLINE, KST);
     }
 
     @Transactional
