@@ -66,12 +66,18 @@ public class Reservation extends BaseEntity {
         this.pickupDate = pickupDate;
     }
 
-    public void cancelByUser(LocalDate today) {
+    public void cancelByUser(LocalDate today, LocalTime deadline, ZoneId zone) {
         if (this.pickupDate.isBefore(today)) {
             throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
         }
         if (this.status != ReservationStatus.PENDING && this.status != ReservationStatus.SELF_PICK) {
             throw new UserValidateException("취소할 수 없는 예약입니다.");
+        }
+        if (this.status == ReservationStatus.SELF_PICK) {
+            ZonedDateTime deadLine = this.pickupDate.atTime(deadline).atZone(zone);
+            if (ZonedDateTime.now(zone).isAfter(deadLine)) {
+                throw new UserValidateException("셀프 수령 마감 후 취소는 불가능합니다.");
+            }
         }
         this.changeStatus(ReservationStatus.CANCELED);
     }

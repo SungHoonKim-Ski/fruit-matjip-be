@@ -1,7 +1,5 @@
 package store.onuljang.controller;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
@@ -31,6 +29,14 @@ public class AdminReservationController {
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate date)
     {
         return ResponseEntity.ok(adminReservationAppService.getAllByDate(date));
+    }
+
+    @PatchMapping("/{id}/warn")
+    public ResponseEntity<Void> warnReservationUser(@PathVariable @Positive @NotNull Long id)
+    {
+        adminReservationAppService.warnReservationUser(id);
+
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}/{status}")

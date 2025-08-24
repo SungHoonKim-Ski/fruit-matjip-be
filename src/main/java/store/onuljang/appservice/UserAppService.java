@@ -33,4 +33,11 @@ public class UserAppService {
 
         user.modifyName(name);
     }
+
+    @Transactional(readOnly = true)
+    public boolean canSelfPick(String uid) {
+        Users user = userService.findByUId(uid);
+
+        return !user.exceedMaxWarnCount();
+    }
 }

@@ -45,4 +45,13 @@ public class UserController {
     ) {
         return ResponseEntity.ok(userAppService.existName(name));
     }
+
+    @GetMapping("/reservation/self-pick")
+    public ResponseEntity<Boolean> canSelfPick(
+        @RequestHeader("Authorization") String authorization
+    ) {
+        String uid = jwtUtil.getBearerUid(authorization);
+
+        return ResponseEntity.ok(userAppService.canSelfPick(uid));
+    }
 }

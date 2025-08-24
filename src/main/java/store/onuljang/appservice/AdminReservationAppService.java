@@ -9,8 +9,10 @@ import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.ReservationAll;
+import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.ReservationService;
+import store.onuljang.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminReservationAppService {
     ReservationService reservationService;
+    UserService userService;
 
     @Transactional(readOnly = true)
     public AdminReservationListResponse getAllByDate(LocalDate date) {
@@ -33,6 +36,15 @@ public class AdminReservationAppService {
         Reservation entity = reservationService.findByIdWithLock(id);
 
         entity.setStatus(status);
+    }
+
+    @Transactional
+    public void warnReservationUser(long id) {
+        Reservation reservation = reservationService.findById(id);
+
+        Users user = userService.findByUidWithLock(reservation.getUser().getUid());
+
+        user.warn();
     }
 
     @Transactional(readOnly = true)

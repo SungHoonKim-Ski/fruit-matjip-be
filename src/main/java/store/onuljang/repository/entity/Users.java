@@ -48,6 +48,10 @@ public class Users extends BaseEntity {
     @Column
     private Integer warnCount = 0;
 
+    @Getter
+    @Column
+    private Integer totalWarnCount = 0;
+
     @Builder
     public Users(String socialId, String name, UUID uid) {
         this.socialId = socialId;
@@ -64,11 +68,7 @@ public class Users extends BaseEntity {
         this.totalOrders = Math.max(0, this.totalOrders + totalOrders);
     }
 
-    public void cancelReservation(long totalOrders, ReservationStatus status) {
-        if (status == ReservationStatus.SELF_PICK) {
-            assertCanSelfPick();
-            warnCount++;
-        }
+    public void cancelReservation(long totalOrders) {
         this.totalOrders = Math.max(0, this.totalOrders - totalOrders);
     }
 
@@ -78,10 +78,19 @@ public class Users extends BaseEntity {
         addTotalOrders(quantity);
     }
 
+    public boolean exceedMaxWarnCount() {
+        return warnCount >= getMaxWarnCount();
+    }
+
     public void assertCanSelfPick() {
         if (exceedMaxWarnCount()) {
             throw new UserValidateException("이번 달 셀프 수령 취소 가능 횟수를 초과했습니다.");
         }
+    }
+
+    public void warn() {
+        totalWarnCount++;
+        warnCount++;
     }
 
     private void assertNicknameChanged() {
@@ -90,7 +99,7 @@ public class Users extends BaseEntity {
         }
     }
 
-    private boolean exceedMaxWarnCount() {
-        return warnCount >= 2;
+    private int getMaxWarnCount() {
+        return 2;
     }
 }
