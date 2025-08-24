@@ -18,8 +18,8 @@
 
 | 환경 | 유저용 | 관리자용                              |
 |------|--------|-----------------------------------|
-| 운영 | https://onuljang.store | https://onuljang.store/admin      |
-| 테스트 | https://dev.onuljang.store | https://dev.onuljang.store/admin |
+| 운영 | https://fruit-matjip.store | https://fruit-matjip.store/admin      |
+| 테스트 | https://dev.fruit-matjip.store | https://dev.fruit-matjip.store/admin |
 
 + 프론트엔드 레포: [onuljang-fe](https://github.com/SungHoonKim-Ski/onuljang-fe)
 
