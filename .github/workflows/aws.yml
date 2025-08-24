@@ -96,9 +96,9 @@ jobs:
       - name: Health Check
         run: |
           if [[ "${{ steps.env.outputs.ENV }}" == "DEV" ]]; then
-            HEALTH_URL="https://dev.api.onuljang.store/api/health"
+            HEALTH_URL="https://dev.api.fruit-matjip.store/api/health"
           else
-            HEALTH_URL="https://api.onuljang.store/api/health"
+            HEALTH_URL="https://api.fruit-matjip.store/api/health"
           fi
           
           ATTEMPTS=12   # 최대 1분
