@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
-import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.ReservationAllRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.entity.Reservation;
@@ -16,9 +15,6 @@ import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -43,12 +39,18 @@ public class ReservationService {
         return reservation.getId();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
+    public Reservation findById(long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+    }
+
+    @Transactional(readOnly = true)
     public List<Reservation> finAllByDateWithUserAndProduct(LocalDate date) {
         return reservationRepository.findAllByPickupDate(date);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(Users user, LocalDate from, LocalDate to) {
         return reservationRepository.findAllByUserAndPickupDateBetweenOrderByPickupDateDesc(user, from, to);
     }
