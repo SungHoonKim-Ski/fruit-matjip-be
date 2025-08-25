@@ -169,5 +169,14 @@ public class Product extends BaseEntity {
     public void reserve(int quantity) {
         assertPurchasable(quantity);
         removeStock(quantity);
+        addTotalSold(quantity);
+    }
+
+    public void removeTotalSold(int quantity) {
+        this.totalSold = Math.max(this.totalSold - quantity, 0);
+    }
+
+    private void addTotalSold(int quantity) {
+        this.totalSold += quantity;
     }
 }
