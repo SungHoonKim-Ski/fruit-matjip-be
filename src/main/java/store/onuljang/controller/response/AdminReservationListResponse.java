@@ -6,6 +6,7 @@ import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -20,7 +21,8 @@ public record AdminReservationListResponse(
         String userName,
         int quantity,
         BigDecimal amount,
-        ReservationStatus status)
+        ReservationStatus status,
+        LocalDateTime createdAt)
     {
         public static AdminReservationResponse from(Reservation entity) {
             return AdminReservationResponse.builder()
@@ -31,6 +33,7 @@ public record AdminReservationListResponse(
                 .quantity(entity.getQuantity())
                 .amount(entity.getAmount())
                 .status(entity.getStatus())
+                .createdAt(entity.getCreatedAt())
                 .build();
         }
     }
