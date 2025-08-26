@@ -17,7 +17,7 @@ import store.onuljang.repository.entity.base.BaseLogEntity;
 @Builder
 public class UserLog extends BaseLogEntity {
 
-    @Column(name = "user_uid", nullable = false, length = 50)
+    @Column(name = "user_uid", nullable = false, length = 36)
     private String userUid;
 
     @Column(name = "path", nullable = false, length = 255)

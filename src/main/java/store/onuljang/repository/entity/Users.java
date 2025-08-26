@@ -24,7 +24,7 @@ public class Users extends BaseEntity {
     private String socialId;
 
     @Getter
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 36)
     private String uid;
 
     @Getter
