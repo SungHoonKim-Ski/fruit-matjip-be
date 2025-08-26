@@ -29,7 +29,7 @@ public class ReservationAppService {
     ProductsService productsService;
 
     static ZoneId KST = ZoneId.of("Asia/Seoul");
-    static LocalTime SELF_PICK_DEADLINE = LocalTime.of(18, 50);
+    static LocalTime SELF_PICK_DEADLINE = LocalTime.of(18, 0);
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
