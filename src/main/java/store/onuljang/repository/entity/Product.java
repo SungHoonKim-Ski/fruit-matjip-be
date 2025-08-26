@@ -172,7 +172,12 @@ public class Product extends BaseEntity {
         addTotalSold(quantity);
     }
 
-    public void removeTotalSold(int quantity) {
+    public void cancel(int quantity) {
+        addStock(quantity);
+        removeTotalSold(quantity);
+    }
+
+    private void removeTotalSold(int quantity) {
         this.totalSold = Math.max(this.totalSold - quantity, 0);
     }
 

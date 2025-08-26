@@ -61,7 +61,7 @@ public class ReservationAppService {
         user.cancelReservation(reservation.getQuantity());
 
         Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
-        product.addStock(reservation.getQuantity());
+        product.cancel(reservation.getQuantity());
 
         reservation.cancelByUser(LocalDate.now(KST), SELF_PICK_DEADLINE, KST);
     }
