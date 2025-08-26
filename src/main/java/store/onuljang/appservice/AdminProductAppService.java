@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.log.admin_product.AdminProductLogEvent;
 import store.onuljang.repository.entity.enums.AdminProductAction;
-import store.onuljang.service.AdminProductLogService;
 import store.onuljang.service.AdminService;
 import store.onuljang.service.AdminUploadService;
 import store.onuljang.service.ProductsService;
@@ -33,8 +32,7 @@ public class AdminProductAppService {
     ProductsService productsService;
     AdminUploadService adminUploadService;
     AdminService adminService;
-    AdminProductLogService adminProductLogService;
-    ApplicationEventPublisher applicationEventPublisher;
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public Long save(AdminCreateProductRequest request) {
@@ -111,6 +109,7 @@ public class AdminProductAppService {
 
     private void saveProductLog(long productId, AdminProductAction action) {
         applicationEventPublisher.publishEvent(
+        eventPublisher.publishEvent(
             AdminProductLogEvent.builder()
                 .adminId(SessionUtil.getAdminId())
                 .productId(productId)

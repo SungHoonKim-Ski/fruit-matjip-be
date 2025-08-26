@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 import store.onuljang.auth.AdminAuthenticationToken;
-import store.onuljang.log.user.UserLogFilter;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -21,7 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class AdminLogFilter extends OncePerRequestFilter {
-    ApplicationEventPublisher publisher;
+    ApplicationEventPublisher eventPublisher;
     AntPathMatcher matcher = new AntPathMatcher();
 
     @Override
@@ -59,7 +58,7 @@ public class AdminLogFilter extends OncePerRequestFilter {
             long durationMs = (System.nanoTime() - start) / 1_000_000L;
             int status = resp.getStatus();
 
-            publisher.publishEvent(AdminLogEvent.builder()
+            eventPublisher.publishEvent(AdminLogEvent.builder()
                 .adminId(currentAdminIdOrNull())
                 .requestId(requestId)
                 .status(status)

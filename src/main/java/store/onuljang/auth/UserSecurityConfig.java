@@ -22,7 +22,7 @@ import store.onuljang.log.user.UserLogFilter;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserSecurityConfig {
     JwtUtil jwtUtil;
-    ApplicationEventPublisher publisher;
+    ApplicationEventPublisher eventPublisher;
 
     @Bean
     @Order(2)
@@ -40,7 +40,7 @@ public class UserSecurityConfig {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new UserLogFilter(publisher, jwtUtil), JwtFilter.class)
+            .addFilterAfter(new UserLogFilter(eventPublisher, jwtUtil), JwtFilter.class)
             .cors(cors -> {});
         return http.build();
     }

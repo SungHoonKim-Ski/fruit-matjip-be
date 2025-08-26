@@ -30,7 +30,7 @@ import store.onuljang.service.dto.AdminUserDetails;
 public class AdminSecurityConfig {
     AuthenticationProvider adminAuthProvider;
     AuthenticationManager authManager;
-    ApplicationEventPublisher publisher;
+    ApplicationEventPublisher eventPublisher;
 
     @Bean
     @Order(1)
@@ -58,7 +58,7 @@ public class AdminSecurityConfig {
                     })
                 )
             .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new AdminLogFilter(publisher), SecurityContextHolderFilter.class)
+            .addFilterAfter(new AdminLogFilter(eventPublisher), SecurityContextHolderFilter.class)
             .cors(cors -> {});
         return http.build();
     }

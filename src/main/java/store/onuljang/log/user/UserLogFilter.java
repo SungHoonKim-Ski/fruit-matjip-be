@@ -10,10 +10,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.lang.Nullable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import store.onuljang.auth.AdminAuthenticationToken;
 import store.onuljang.auth.JwtUtil;
 
 import java.io.IOException;
@@ -22,7 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class UserLogFilter extends OncePerRequestFilter {
-    ApplicationEventPublisher publisher;
+    ApplicationEventPublisher eventPublisher;
     AntPathMatcher matcher = new AntPathMatcher();
     JwtUtil jwtUtil;
 
@@ -68,7 +66,7 @@ public class UserLogFilter extends OncePerRequestFilter {
             long durationMs = (System.nanoTime() - start) / 1_000_000L;
             int status = resp.getStatus();
 
-            publisher.publishEvent(
+            eventPublisher.publishEvent(
                 UserLogEvent.builder()
                     .userUid(currentUserIdOrNull(req))
                     .requestId(requestId)
