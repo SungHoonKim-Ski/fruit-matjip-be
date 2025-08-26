@@ -72,6 +72,9 @@ public class AdminReservationAppService {
             throw new IllegalArgumentException("예약이 없습니다.");
         }
 
+        if (beforeStatus == ReservationStatus.CANCELED) {
+            throw new IllegalStateException("예약 취소는 한번에 변경이 불가능합니다.");
+        }
 
         Reservation first = reservationSet.iterator().next();
 
