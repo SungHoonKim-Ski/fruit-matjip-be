@@ -1,10 +1,13 @@
 package store.onuljang.appservice;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
 import store.onuljang.repository.entity.Reservation;
@@ -45,6 +48,11 @@ public class AdminReservationAppService {
         Users user = userService.findByUidWithLock(reservation.getUser().getUid());
 
         user.warn();
+    }
+
+    @Transactional
+    public int updateReservationsStatus(AdminUpdateReservationsRequest request) {
+        return reservationService.updateReservationsStatus(request.reservationIds(), request.status());
     }
 
     @Transactional(readOnly = true)

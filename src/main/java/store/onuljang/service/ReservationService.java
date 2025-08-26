@@ -1,5 +1,8 @@
 package store.onuljang.service;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,6 +19,7 @@ import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -37,6 +41,11 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         return reservation.getId();
+    }
+
+    @Transactional
+    public int updateReservationsStatus(Set<Long> reservationIdSet, ReservationStatus updateStatus) {
+        return reservationRepository.updateStatusIdIn(reservationIdSet, updateStatus);
     }
 
     @Transactional(readOnly = true)

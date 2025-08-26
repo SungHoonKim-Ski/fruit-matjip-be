@@ -2,16 +2,16 @@ package store.onuljang.repository;
 
 
 import jakarta.persistence.LockModeType;
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
+import org.springframework.data.repository.query.Param;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     @EntityGraph(attributePaths = {"product"})
@@ -23,4 +23,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select r from Reservation r where r.id = :id")
     Optional<Reservation> findByIdWithLock(long id);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("update Reservation r set r.status = :status where r.id in :ids")
+    int updateStatusIdIn(@Param("ids") Set<Long> ids, @Param("status") ReservationStatus status);
 }

@@ -1,5 +1,6 @@
 package store.onuljang.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
@@ -10,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminReservationAppService;
+import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
+import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
 import store.onuljang.repository.entity.enums.ReservationStatus;
@@ -47,6 +50,13 @@ public class AdminReservationController {
         adminReservationAppService.updateReservationStatus(id, status);
 
         return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/status")
+    public ResponseEntity<Integer> updateReservationsStatus(
+        @Valid @NotNull @RequestBody AdminUpdateReservationsRequest request)
+    {
+        return ResponseEntity.ok(adminReservationAppService.updateReservationsStatus(request));
     }
 
     @GetMapping("/sails")
