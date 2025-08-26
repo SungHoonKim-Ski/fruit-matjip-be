@@ -40,7 +40,7 @@ public class AdminProductAppService {
 
         long productId = productsService.save(AdminCreateProductRequest.toEntity(request, admin));
 
-        saveProductLog(productId, AdminProductAction.CREATE);
+        saveProductLog(productId, request.stock(), AdminProductAction.CREATE);
 
         return productId;
     }
@@ -63,7 +63,7 @@ public class AdminProductAppService {
     public void updateDetail(long productId, AdminUpdateProductDetailsRequest request) {
         Product product = productsService.findByIdWithDetailImagesWithLock(productId);
 
-        saveProductLog(productId, AdminProductAction.UPDATE);
+        saveProductLog(productId, request.stock(), AdminProductAction.UPDATE);
 
         if (request.name() != null) product.setName(request.name());
         if (request.price() != null) product.setPrice(request.price());
@@ -88,31 +88,31 @@ public class AdminProductAppService {
 
     @Transactional
     public void delete(long productId) {
-        saveProductLog(productId, AdminProductAction.DELETE);
+        saveProductLog(productId, -1, AdminProductAction.DELETE);
 
         productsService.findById(productId).delete();
     }
 
     @Transactional
     public void toggleVisible(long productId) {
-        saveProductLog(productId, AdminProductAction.UPDATE);
+        saveProductLog(productId, -1, AdminProductAction.UPDATE);
 
         productsService.findByIdWithLock(productId).toggleVisible();
     }
 
     @Transactional
     public void setSoldOut(long productId) {
-        saveProductLog(productId, AdminProductAction.UPDATE);
+        saveProductLog(productId, 0, AdminProductAction.UPDATE);
 
         productsService.findByIdWithLock(productId).soldOut();
     }
 
-    private void saveProductLog(long productId, AdminProductAction action) {
-        applicationEventPublisher.publishEvent(
+    private void saveProductLog(long productId, Integer quantity, AdminProductAction action) {
         eventPublisher.publishEvent(
             AdminProductLogEvent.builder()
                 .adminId(SessionUtil.getAdminId())
                 .productId(productId)
+                .quantity(quantity)
                 .action(action)
                 .build());
     }

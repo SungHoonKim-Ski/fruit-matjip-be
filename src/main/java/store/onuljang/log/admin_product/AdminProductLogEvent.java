@@ -8,6 +8,7 @@ import store.onuljang.repository.entity.log.AdminProductLog;
 public record AdminProductLogEvent(
     Long adminId,
     Long productId,
+    Integer quantity,
     AdminProductAction action
 )
 {
@@ -15,6 +16,7 @@ public record AdminProductLogEvent(
         return AdminProductLog.builder()
             .adminId(event.adminId)
             .productId(event.productId())
+            .quantity(event.quantity())
             .action(event.action())
             .build();
     }

@@ -24,4 +24,7 @@ public class AdminProductLog extends BaseLogEntity {
     @Column(name = "action", nullable = false)
     @Enumerated(EnumType.STRING)
     private AdminProductAction action;
+
+    @Column(name = "quantity")
+    private Integer quantity;
 }
