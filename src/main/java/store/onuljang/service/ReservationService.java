@@ -1,8 +1,5 @@
 package store.onuljang.service;
 
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -44,8 +41,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public int updateReservationsStatus(Set<Long> reservationIdSet, ReservationStatus updateStatus) {
+    public int bulkUpdateReservationsStatus(Set<Long> reservationIdSet, ReservationStatus updateStatus) {
         return reservationRepository.updateStatusIdIn(reservationIdSet, updateStatus);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> findAllUserIdInWithUser(Set<Long> reservationIdSet) {
+        return reservationRepository.findAllByIdInWithUser(reservationIdSet);
     }
 
     @Transactional(readOnly = true)

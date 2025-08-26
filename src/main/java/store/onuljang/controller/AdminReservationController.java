@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminReservationAppService;
-import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
 import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationReportResponse;
@@ -53,10 +52,10 @@ public class AdminReservationController {
     }
 
     @PatchMapping("/status")
-    public ResponseEntity<Integer> updateReservationsStatus(
+    public ResponseEntity<Integer> bulkUpdateReservationsStatus(
         @Valid @NotNull @RequestBody AdminUpdateReservationsRequest request)
     {
-        return ResponseEntity.ok(adminReservationAppService.updateReservationsStatus(request));
+        return ResponseEntity.ok(adminReservationAppService.bulkUpdateReservationsStatus(request));
     }
 
     @GetMapping("/sails")

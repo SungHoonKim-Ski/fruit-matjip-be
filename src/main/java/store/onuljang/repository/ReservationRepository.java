@@ -20,11 +20,21 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @EntityGraph(attributePaths = {"user", "product"})
     List<Reservation> findAllByPickupDate(LocalDate date);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select r from Reservation r where r.id = :id")
-    Optional<Reservation> findByIdWithLock(long id);
+    @Query("select r " +
+            "from Reservation r " +
+            "left join fetch r.user u " +
+            "where r.id in :ids")
+    List<Reservation> findAllByIdInWithUser(Set<Long> ids);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("update Reservation r set r.status = :status where r.id in :ids")
     int updateStatusIdIn(@Param("ids") Set<Long> ids, @Param("status") ReservationStatus status);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Reservation r where r.id = :id")
+    Optional<Reservation> findByIdWithLock(@Param("id") long id);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("select r from Reservation r where r.id in :ids")
+    Set<Reservation> findAllByIdInWithLock(@Param("ids") Set<Long> ids);
 }

@@ -1,7 +1,5 @@
 package store.onuljang.appservice;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,13 +25,6 @@ public class AdminReservationAppService {
     ReservationService reservationService;
     UserService userService;
 
-    @Transactional(readOnly = true)
-    public AdminReservationListResponse getAllByDate(LocalDate date) {
-        List<Reservation> entities = reservationService.finAllByDateWithUserAndProduct(date);
-
-        return AdminReservationListResponse.from(entities);
-    }
-
     @Transactional
     public void updateReservationStatus(long id, ReservationStatus status) {
         Reservation entity = reservationService.findByIdWithLock(id);
@@ -51,8 +42,13 @@ public class AdminReservationAppService {
     }
 
     @Transactional
-    public int updateReservationsStatus(AdminUpdateReservationsRequest request) {
-        return reservationService.updateReservationsStatus(request.reservationIds(), request.status());
+    public int bulkUpdateReservationsStatus(AdminUpdateReservationsRequest request) {
+        List<Reservation> reservationList = reservationService.findAllUserIdInWithUser(request.reservationIds());
+        if (reservationList.isEmpty()) return 0;
+
+        validateBulkReservationsUpdate(reservationList, request.status());
+
+        return reservationService.bulkUpdateReservationsStatus(request.reservationIds(), request.status());
     }
 
     @Transactional(readOnly = true)
@@ -62,5 +58,37 @@ public class AdminReservationAppService {
                 ,from, to);
 
         return AdminReservationReportResponse.from(entities);
+    }
+
+    @Transactional(readOnly = true)
+    public AdminReservationListResponse getAllByDate(LocalDate date) {
+        List<Reservation> entities = reservationService.finAllByDateWithUserAndProduct(date);
+
+        return AdminReservationListResponse.from(entities);
+    }
+
+    private void validateBulkReservationsUpdate(List<Reservation> reservationSet, ReservationStatus beforeStatus) {
+        if (reservationSet == null || reservationSet.isEmpty()) {
+            throw new IllegalArgumentException("예약이 없습니다.");
+        }
+
+
+        Reservation first = reservationSet.iterator().next();
+
+        ReservationStatus currentStatue = first.getStatus();
+        boolean allSameStatus = reservationSet.stream().allMatch(r -> r.getStatus() == currentStatue);
+        if (!allSameStatus) {
+            throw new IllegalArgumentException("동일한 상태의 예약만 한번에 변경할 수 있습니다.");
+        }
+
+        if (currentStatue == beforeStatus) {
+            throw new IllegalArgumentException("변경하려는 예약의 상태가 동일합니다.");
+        }
+
+        String uid = first.getUser().getUid();
+        boolean allSameUser = reservationSet.stream().allMatch(r -> r.getUser().getUid().equals(uid));
+        if (!allSameUser) {
+            throw new IllegalStateException("동일한 유저의 예약만 한번에 변경할 수 있습니다.");
+        }
     }
 }

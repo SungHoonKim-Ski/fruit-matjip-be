@@ -49,8 +49,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
     }
 
-    // custom exception
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalStateException(IllegalStateException ex) {
+        log.info("IllegalStateException: {}", ex.getMessage());
+        return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", ex.getMessage()));
+    }
 
+    // custom exception
     @ExceptionHandler(AccessTokenParseException.class)
     public ResponseEntity<ErrorResponse> handleTokenParse(AccessTokenParseException ex) {
         log.info("AccessTokenParseException: {}", ex.getMessage());
