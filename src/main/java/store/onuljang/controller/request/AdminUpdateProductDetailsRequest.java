@@ -3,6 +3,7 @@ package store.onuljang.controller.request;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.UniqueElements;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public record AdminUpdateProductDetailsRequest(
@@ -11,7 +12,7 @@ public record AdminUpdateProductDetailsRequest(
 
     @Min(value = 100, message = "가격은 100원 이상이어야 합니다")
     @Max(value = 1_000_000, message = "가격은 1,000,000원 이하여야 합니다")
-    Integer price,
+    BigDecimal price,
 
     @Min(value = 0, message = "재고 변경값은 0 이상이어야 합니다")
     Integer stock,

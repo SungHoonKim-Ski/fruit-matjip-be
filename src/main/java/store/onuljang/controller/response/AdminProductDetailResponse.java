@@ -4,6 +4,7 @@ package store.onuljang.controller.response;
 import lombok.Builder;
 import store.onuljang.repository.entity.Product;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
 public record AdminProductDetailResponse (
     long id,
     String name,
-    long price,
+    BigDecimal price,
     int stock,
     long totalSold,
     String productUrl,

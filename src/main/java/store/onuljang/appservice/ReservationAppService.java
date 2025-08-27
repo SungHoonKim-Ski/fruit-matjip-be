@@ -18,6 +18,7 @@ import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -47,7 +48,7 @@ public class ReservationAppService {
             .user(user)
             .product(product)
             .quantity(request.quantity())
-            .amount(request.amount())
+            .amount(product.getPrice().multiply(BigDecimal.valueOf(request.quantity())))
             .pickupDate(product.getSellDate())
             .build();
 

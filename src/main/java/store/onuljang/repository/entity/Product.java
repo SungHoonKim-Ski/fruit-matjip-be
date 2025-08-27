@@ -11,6 +11,7 @@ import store.onuljang.exception.ProductUnavailableException;
 import store.onuljang.repository.entity.base.BaseEntity;
 import jakarta.persistence.OrderBy;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -40,7 +41,7 @@ public class Product extends BaseEntity {
     @Getter
     @Setter
     @Column(name = "price", nullable = false)
-    private Integer price;
+    private BigDecimal price;
 
     @Getter
     @Setter

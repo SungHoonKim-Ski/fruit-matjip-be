@@ -3,6 +3,7 @@ package store.onuljang.controller.response;
 import lombok.Builder;
 import store.onuljang.repository.entity.Product;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -16,7 +17,7 @@ public record ProductListResponse(
         String name,
         String imageUrl,
         int stock,
-        int price,
+        BigDecimal price,
         LocalDate sellDate,
         boolean isVisible,
         long totalSold
