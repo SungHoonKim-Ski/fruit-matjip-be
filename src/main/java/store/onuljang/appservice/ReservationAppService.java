@@ -37,11 +37,10 @@ public class ReservationAppService {
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
-        Users user = userService.findByUidWithLock(uId);
         Product product = productsService.findByIdWithLock(request.productId());
+        Users user = userService.findByUidWithLock(uId);
 
         product.reserve(request.quantity());
-
         user.reserve(request.quantity(), LocalDate.now(KST));
 
         Reservation reservation = Reservation.builder()
@@ -61,17 +60,15 @@ public class ReservationAppService {
 
     @Transactional
     public void cancel(String uId, long reservationId) {
-        Users user = userService.findByUidWithLock(uId);
         Reservation reservation = reservationService.findByIdWithLock(reservationId);
+        Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
+        Users user = userService.findByUidWithLock(uId);
 
         validateUserReservation(user, reservation);
 
-        user.cancelReservation(reservation.getQuantity());
-
-        Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
-        product.cancel(reservation.getQuantity());
-
         reservation.cancelByUser(LocalDate.now(KST), SELF_PICK_DEADLINE, KST);
+        product.cancel(reservation.getQuantity());
+        user.cancelReservation(reservation.getQuantity());
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.DELETE);
     }
