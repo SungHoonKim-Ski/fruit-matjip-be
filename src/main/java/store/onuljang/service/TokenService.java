@@ -26,12 +26,12 @@ import java.time.temporal.ChronoUnit;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
+@Transactional(readOnly = true)
 public class TokenService {
     RefreshTokenRepository refreshTokenRepository;
     JwtUtil jwtUtil;
     JwtConfigDto jwtConfigDto;
     HttpServletResponse httpServletResponse;
-    PasswordEncoder passwordEncoder;
 
     @Transactional
     public String generateToken(Users user) {
@@ -50,21 +50,6 @@ public class TokenService {
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, CookieUtil.generateStr(jwtToken.refresh(), jwtConfigDto.getRefreshTtl()));
         return jwtToken.access();
     }
-
-    @Transactional(readOnly = true)
-    public RefreshToken validate(String userUid, String refreshToken) {
-        String tokenHash = HashUtil.sha256Hex(refreshToken);
-
-        RefreshToken token = refreshTokenRepository.findByUserUidAndTokenHashAndRevokedIsFalseAndExpiresAtAfter(
-                userUid, tokenHash, Instant.now())
-                .orElseThrow(() -> new InvalidRefreshTokenException("refresh token not found or expired"));
-
-        if (!HashUtil.constantTimeEqualsHex(tokenHash, token.getTokenHash())) {
-            throw new InvalidRefreshTokenException("refresh token hash mismatch");
-        }
-        return token;
-    }
-
 
     @Transactional
     public String generateToken(Users user, RefreshToken expriredToken) {
@@ -86,4 +71,19 @@ public class TokenService {
         httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, CookieUtil.generateStr(jwtToken.refresh(), jwtConfigDto.getRefreshTtl()));
         return jwtToken.access();
     }
+
+    @Transactional(readOnly = true)
+    public RefreshToken validate(String userUid, String refreshToken) {
+        String tokenHash = HashUtil.sha256Hex(refreshToken);
+
+        RefreshToken token = refreshTokenRepository.findByUserUidAndTokenHashAndRevokedIsFalseAndExpiresAtAfter(
+                        userUid, tokenHash, Instant.now())
+                .orElseThrow(() -> new InvalidRefreshTokenException("refresh token not found or expired"));
+
+        if (!HashUtil.constantTimeEqualsHex(tokenHash, token.getTokenHash())) {
+            throw new InvalidRefreshTokenException("refresh token hash mismatch");
+        }
+        return token;
+    }
+
 }

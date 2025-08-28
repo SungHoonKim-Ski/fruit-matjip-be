@@ -45,25 +45,9 @@ public class AdminProductAppService {
         return productId;
     }
 
-    @Transactional(readOnly = true)
-    public AdminProductListItems getAll() {
-        List<Product> entities = productsService.findAllOrderBySellDateDesc();
-
-        return AdminProductListItems.from(entities);
-    }
-
-    @Transactional(readOnly = true)
-    public AdminProductDetailResponse getDetail(long productId) {
-        Product product = productsService.findByIdWithDetailImages(productId);
-
-        return AdminProductDetailResponse.from(product);
-    }
-
     @Transactional
     public void updateDetail(long productId, AdminUpdateProductDetailsRequest request) {
         Product product = productsService.findByIdWithDetailImagesWithLock(productId);
-
-        saveProductLog(productId, request.stock(), AdminProductAction.UPDATE);
 
         if (request.name() != null) product.setName(request.name());
         if (request.price() != null) product.setPrice(request.price());
@@ -84,27 +68,43 @@ public class AdminProductAppService {
         if (!removeKey.isEmpty()) {
             adminUploadService.softDeleteAllImages(removeKey);
         }
+
+        saveProductLog(productId, request.stock(), AdminProductAction.UPDATE);
     }
 
     @Transactional
     public void delete(long productId) {
-        saveProductLog(productId, -1, AdminProductAction.DELETE);
-
         productsService.findById(productId).delete();
+
+        saveProductLog(productId, -1, AdminProductAction.DELETE);
     }
 
     @Transactional
     public void toggleVisible(long productId) {
-        saveProductLog(productId, -1, AdminProductAction.UPDATE);
-
         productsService.findByIdWithLock(productId).toggleVisible();
+
+        saveProductLog(productId, -1, AdminProductAction.UPDATE);
     }
 
     @Transactional
     public void setSoldOut(long productId) {
-        saveProductLog(productId, 0, AdminProductAction.UPDATE);
-
         productsService.findByIdWithLock(productId).soldOut();
+
+        saveProductLog(productId, 0, AdminProductAction.UPDATE);
+    }
+
+    @Transactional(readOnly = true)
+    public AdminProductListItems getAll() {
+        List<Product> entities = productsService.findAllOrderBySellDateDesc();
+
+        return AdminProductListItems.from(entities);
+    }
+
+    @Transactional(readOnly = true)
+    public AdminProductDetailResponse getDetail(long productId) {
+        Product product = productsService.findByIdWithDetailImages(productId);
+
+        return AdminProductDetailResponse.from(product);
     }
 
     private void saveProductLog(long productId, Integer quantity, AdminProductAction action) {

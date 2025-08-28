@@ -40,7 +40,7 @@ public class NameGenerator {
     @Transactional
     public String generateWithLock(NamePool namePool) {
         return namePoolRepository.findByIdWithLock(namePool.getId())
-                .orElseThrow(() -> new NamePoolException("이름 생성 서버 에러"))
-                .generate();
+            .orElseThrow(() -> new NamePoolException("이름 생성 서버 에러"))
+            .generate();
     }
 }

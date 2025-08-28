@@ -9,10 +9,10 @@ import store.onuljang.feign.dto.KakaoLoginResponse;
 public interface KakaoAuthFeignClient {
 
     @GetMapping(path = "/oauth/token", consumes = "application/x-www-form-urlencoded;charset=utf-8")
-    public KakaoLoginResponse login(
-            @RequestParam("grant_type") String grantType,
-            @RequestParam("client_id") String clientId,
-            @RequestParam("redirect_uri") String redirectUri,
-            @RequestParam("code") String code
+    KakaoLoginResponse login(
+        @RequestParam("grant_type") String grantType,
+        @RequestParam("client_id") String clientId,
+        @RequestParam("redirect_uri") String redirectUri,
+        @RequestParam("code") String code
     );
 }

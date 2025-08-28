@@ -21,29 +21,7 @@ import java.util.List;
 public class ProductsService {
     ProductsRepository productsRepository;
 
-    public List<Product> findAllOrderBySellDateDesc() {
-        return productsRepository.findAllByOrderBySellDateDesc();
-    }
-
-    public Product findById(long id) {
-        return productsRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
-    }
-
-    public Product findByIdWithLock(long id) {
-        return productsRepository.findByIdWithLock(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
-    }
-
-    public List<Product> findAllVisibleBetween(LocalDate from, LocalDate to, boolean visible) {
-        return productsRepository.findAllBySellDateBetweenAndIsVisible(from, to, visible);
-    }
-
-    public Product findByIdWithDetailImages(long id) {
-        return productsRepository.findAllById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
-    }
-
+    @Transactional
     public Product findByIdWithDetailImagesWithLock(long id) {
         return productsRepository.findAllByIdWithLock(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
@@ -52,5 +30,33 @@ public class ProductsService {
     @Transactional
     public long save(Product product) {
         return productsRepository.save(product).getId();
+    }
+
+    @Transactional
+    public Product findByIdWithLock(long id) {
+        return productsRepository.findByIdWithLock(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> findAllOrderBySellDateDesc() {
+        return productsRepository.findAllByOrderBySellDateDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public Product findById(long id) {
+        return productsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> findAllVisibleBetween(LocalDate from, LocalDate to, boolean visible) {
+        return productsRepository.findAllBySellDateBetweenAndIsVisible(from, to, visible);
+    }
+
+    @Transactional(readOnly = true)
+    public Product findByIdWithDetailImages(long id) {
+        return productsRepository.findAllById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
     }
 }

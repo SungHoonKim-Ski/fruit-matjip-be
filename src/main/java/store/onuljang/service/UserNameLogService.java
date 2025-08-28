@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.repository.UserNameLogRepository;
 import store.onuljang.repository.entity.log.UserNameLog;
 
@@ -15,6 +16,7 @@ import store.onuljang.repository.entity.log.UserNameLog;
 public class UserNameLogService {
     UserNameLogRepository userNameLogRepository;
 
+    @Transactional
     public void save(String uId, String before, String after) {
         userNameLogRepository.save(new UserNameLog(uId, before, after));
     }

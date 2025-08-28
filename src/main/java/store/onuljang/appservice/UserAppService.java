@@ -17,11 +17,6 @@ public class UserAppService {
     UserService userService;
     UserNameLogService userNameLogService;
 
-    @Transactional(readOnly = true)
-    public boolean existName(String name) {
-        return !userService.existUserByName(name);
-    }
-
     @Transactional
     public void modifyName(String uid, String name) {
         if (!existName(name)) {
@@ -32,6 +27,11 @@ public class UserAppService {
         userNameLogService.save(user.getUid(), user.getName(), name);
 
         user.modifyName(name);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existName(String name) {
+        return !userService.existUserByName(name);
     }
 
     @Transactional(readOnly = true)
