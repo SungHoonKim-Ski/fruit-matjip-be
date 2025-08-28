@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Service
@@ -34,16 +35,14 @@ public class ReservationAppService {
     ApplicationEventPublisher eventPublisher;
 
     static ZoneId KST = ZoneId.of("Asia/Seoul");
-    static LocalTime SELF_PICK_DEADLINE = LocalTime.of(18, 0);
+    static LocalTime RESERVE_DEADLINE = LocalTime.of(18, 0);
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
         Product product = productsService.findByIdWithLock(request.productId());
+        validateReserveTime(product.getSellDate());
+
         Users user = userService.findByUidWithLock(uId);
-
-        product.reserve(request.quantity());
-        user.reserve(request.quantity(), LocalDate.now(KST));
-
         Reservation reservation = Reservation.builder()
             .user(user)
             .product(product)
@@ -52,7 +51,9 @@ public class ReservationAppService {
             .pickupDate(product.getSellDate())
             .build();
 
+        product.reserve(request.quantity());
         reservationService.save(reservation);
+        user.reserve(request.quantity(), LocalDate.now(KST));
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.CREATE);
 
@@ -67,7 +68,7 @@ public class ReservationAppService {
 
         validateUserReservation(user, reservation);
 
-        reservation.cancelByUser(LocalDate.now(KST), SELF_PICK_DEADLINE, KST);
+        reservation.cancelByUser(LocalDate.now(KST), RESERVE_DEADLINE, KST);
         product.cancel(reservation.getQuantity());
         user.cancelReservation(reservation.getQuantity());
 
@@ -83,7 +84,7 @@ public class ReservationAppService {
         user.assertCanSelfPick();
         productsService.findById(reservation.getProduct().getId());
 
-        reservation.requestSelfPick(LocalDate.now(KST), SELF_PICK_DEADLINE, KST);
+        reservation.requestSelfPick(LocalDate.now(KST), RESERVE_DEADLINE, KST);
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
     }
@@ -110,5 +111,12 @@ public class ReservationAppService {
                 .reservationId(reservationId)
                 .action(action)
                 .build());
+    }
+
+    private void validateReserveTime(LocalDate sellDate) {
+        ZonedDateTime deadLine = sellDate.atTime(RESERVE_DEADLINE).atZone(KST);
+        if (ZonedDateTime.now(KST).isAfter(deadLine)) {
+            throw new UserValidateException("예약 가능한 시간이 지났습니다.");
+        }
     }
 }
