@@ -14,8 +14,11 @@ import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
+import store.onuljang.util.TimeUtil;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -48,7 +51,9 @@ public class AdminReservationAppService {
 
         validateBulkReservationsUpdate(reservationList, request.status());
 
-        return reservationService.bulkUpdateReservationsStatus(request.reservationIds(), request.status());
+        return reservationService.bulkUpdateReservationsStatus(
+            request.reservationIds(), request.status(), LocalDateTime.now(TimeUtil.KST)
+        );
     }
 
     @Transactional(readOnly = true)
