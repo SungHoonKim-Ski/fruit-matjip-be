@@ -11,7 +11,11 @@ import java.util.Optional;
 
 public interface NamePoolRepository extends JpaRepository<NamePool, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query("select n from NamePool n where n.id = :id")
+    @Query(
+        "select n " +
+        "from NamePool n " +
+        "where n.id = :id"
+    )
     Optional<NamePool> findByIdWithLock(long id);
 }
 

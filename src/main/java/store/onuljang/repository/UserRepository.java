@@ -14,12 +14,19 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByUid(String uid);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    @Query(value = " select u from Users u where u.uid = :uid")
+    @Query(
+        "select u " +
+        "from Users u " +
+        "where u.uid = :uid"
+    )
     Optional<Users> findByUidWithLock(String uid);
     Optional<Users> findByName(String name);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
-    @Query("update Users u set u.warnCount = 0")
+    @Query(
+        "update Users u " +
+        "set u.warnCount = 0"
+    )
     int resetAllUsersWarnCounts();
 }
 
