@@ -17,13 +17,14 @@ import store.onuljang.repository.entity.enums.UserProductAction;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
+import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
+
+import static store.onuljang.util.TimeUtil.*;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -33,9 +34,6 @@ public class ReservationAppService {
     UserService userService;
     ProductsService productsService;
     ApplicationEventPublisher eventPublisher;
-
-    static ZoneId KST = ZoneId.of("Asia/Seoul");
-    static LocalTime RESERVE_DEADLINE = LocalTime.of(18, 0);
 
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
@@ -53,7 +51,7 @@ public class ReservationAppService {
 
         product.reserve(request.quantity());
         reservationService.save(reservation);
-        user.reserve(request.quantity(), LocalDate.now(KST));
+        user.reserve(request.quantity(), TimeUtil.nowDate());
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.CREATE);
 
@@ -68,7 +66,7 @@ public class ReservationAppService {
 
         validateUserReservation(user, reservation);
 
-        reservation.cancelByUser(LocalDate.now(KST), RESERVE_DEADLINE, KST);
+        reservation.cancelByUser(TimeUtil.nowDate(), RESERVE_DEADLINE, KST);
         product.cancel(reservation.getQuantity());
         user.cancelReservation(reservation.getQuantity());
 
@@ -84,7 +82,7 @@ public class ReservationAppService {
         user.assertCanSelfPick();
         productsService.findById(reservation.getProduct().getId());
 
-        reservation.requestSelfPick(LocalDate.now(KST), RESERVE_DEADLINE, KST);
+        reservation.requestSelfPick(TimeUtil.nowDate(), RESERVE_DEADLINE, KST);
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
     }

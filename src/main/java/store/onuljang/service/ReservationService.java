@@ -15,6 +15,7 @@ import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -41,8 +42,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public int bulkUpdateReservationsStatus(Set<Long> reservationIdSet, ReservationStatus updateStatus) {
-        return reservationRepository.updateStatusIdIn(reservationIdSet, updateStatus);
+    public int bulkUpdateReservationsStatus(Set<Long> reservationIdSet, ReservationStatus updateStatus, LocalDateTime updateTime) {
+        return reservationRepository.updateStatusIdIn(reservationIdSet, updateStatus, updateTime);
     }
 
     @Transactional(readOnly = true)
