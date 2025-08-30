@@ -26,6 +26,10 @@ public class S3Config {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Getter
+    @Value("${cloud.aws.s3.log.bucket}")
+    private String logBucket;
+
     @Bean
     public S3Client s3Client() {
         return S3Client.builder()

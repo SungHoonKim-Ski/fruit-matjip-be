@@ -69,6 +69,7 @@ jobs:
             JWT_SECRET="${{ secrets.JWT_SECRET }}" \
             S3_APP_BUCKET_NAME="${{ env.S3_APP_BUCKET_NAME }}" \
             S3_DEPLOY_BUCKET_NAME="${{ secrets.S3_DEPLOY_BUCKET_NAME }}" \
+            S3_LOG_BUCKET_NAME="${{ secrets.S3_DEPLOY_BUCKET_NAME }}" \
             AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
             AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             bash -s << 'EOF'
@@ -86,8 +87,12 @@ jobs:
             export AWS_SECRET_KEY="$AWS_SECRET_ACCESS_KEY"
           
             echo "Starting new application with profile: $ENV"
-            nohup java -Dspring.profiles.active="$ENV" -jar onuljang.jar --server.port=8088 \
-              > app.log 2>&1 &
+            nohup java \
+              -Dspring.profiles.active="$ENV" \
+              -DLOG_HOME=/var/log/onuljang \
+              -jar onuljang.jar \
+              --server.port=8088 \
+              > /dev/null 2>&1 &
           
             echo "Tail last logs:"
             tail -n 50 app.log || true
