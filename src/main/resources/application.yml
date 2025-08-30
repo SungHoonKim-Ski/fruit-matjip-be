@@ -26,11 +26,12 @@ spring:
     hibernate:
       ddl-auto: none
     show-sql: true
-    database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
         format_sql: true
         default_batch_fetch_size: 200
+    open-in-view: false
+
 KAKAO:
   KEY: ${API_KAKAO_KEY}
 
