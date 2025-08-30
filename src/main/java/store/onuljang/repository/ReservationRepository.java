@@ -27,9 +27,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         "left join fetch r.user u " +
         "where r.id in :ids"
     )
-    List<Reservation> findAllByIdInWithUser(Set<Long> ids);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Reservation> findAllByIdInWithUserWithLock(@Param("ids") Set<Long> ids);
+
     @Query(
         "select r " +
         "from Reservation r " +
@@ -42,7 +42,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     update Reservation r
         set r.status = :status,
             r.statusChangedAt = :now
-        where r.id in :ids
+        where r.id in (:ids)
     """)
     int updateStatusIdIn(
         @Param("ids") Set<Long> ids,

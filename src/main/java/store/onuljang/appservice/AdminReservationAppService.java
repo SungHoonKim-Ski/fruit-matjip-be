@@ -18,7 +18,6 @@ import store.onuljang.util.TimeUtil;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -46,8 +45,10 @@ public class AdminReservationAppService {
 
     @Transactional
     public int bulkUpdateReservationsStatus(AdminUpdateReservationsRequest request) {
-        List<Reservation> reservationList = reservationService.findAllUserIdInWithUser(request.reservationIds());
-        if (reservationList.isEmpty()) return 0;
+        List<Reservation> reservationList = reservationService.findAllUserIdInWithUserWithLock(request.reservationIds());
+        if (reservationList.isEmpty()) {
+            return 0;
+        }
 
         validateBulkReservationsUpdate(reservationList, request.status());
 

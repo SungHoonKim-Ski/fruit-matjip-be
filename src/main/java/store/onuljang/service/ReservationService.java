@@ -47,8 +47,9 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllUserIdInWithUser(Set<Long> reservationIdSet) {
-        return reservationRepository.findAllByIdInWithUser(reservationIdSet);
+    @Transactional(readOnly = true)
+    public List<Reservation> findAllUserIdInWithUserWithLock(Set<Long> reservationIdSet) {
+        return reservationRepository.findAllByIdInWithUserWithLock(reservationIdSet);
     }
 
     @Transactional(readOnly = true)
