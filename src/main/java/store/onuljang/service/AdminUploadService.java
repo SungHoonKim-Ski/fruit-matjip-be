@@ -1,11 +1,5 @@
 package store.onuljang.service;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.HttpMethod;
-import com.amazonaws.SdkClientException;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.DeleteObjectsRequest;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
@@ -13,6 +7,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import store.onuljang.config.S3Config;
 import store.onuljang.controller.response.PresignedUrlResponse;
+
+import software.amazon.awssdk.core.exception.SdkClientException;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.Delete;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.net.URL;
 import java.time.Duration;
@@ -23,90 +29,95 @@ import java.util.*;
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Slf4j
 public class AdminUploadService {
-    AmazonS3 s3;
     S3Config s3Config;
-    Duration DEFAULT_EXPIRE = Duration.ofMinutes(10);
+    S3Client s3;
+    S3Presigner s3Presigner;
     ProductsService productsService;
+    Duration DEFAULT_EXPIRE = Duration.ofMinutes(10);
 
-    public void move(String srcKey, String destKey) {
-        String bucket = s3Config.getBucket();
-        s3.copyObject(bucket, srcKey, bucket, destKey);
-        s3.deleteObject(bucket, srcKey);
-    }
-
+    /** 단건 이미지 Presigned PUT URL 발급 */
     public PresignedUrlResponse issueImageUrl(String filename, String contentType) {
         String ext = extOf(filename);
         String key = "images/%s.%s".formatted(UUID.randomUUID(), ext);
         return presignPut(key, contentType, DEFAULT_EXPIRE);
     }
 
+    /** 상세 이미지 다건 Presigned PUT URL 발급 */
     public List<PresignedUrlResponse> issueDetailImageUrls(long productId, List<String> filenames, String contentType) {
-        productsService.findById(productId); // validate
+        productsService.findById(productId); // 존재 검증
 
-        List<PresignedUrlResponse> list = new ArrayList<>();
-
+        List<PresignedUrlResponse> list = new ArrayList<>(filenames.size());
         for (int i = 0; i < filenames.size(); i++) {
             String ext = extOf(filenames.get(i));
             String key = "images/%d/%s-%02d.%s".formatted(productId, UUID.randomUUID(), i + 1, ext);
             list.add(presignPut(key, contentType, DEFAULT_EXPIRE));
         }
-
         return list;
     }
 
+    /** 소프트 삭제: images/ → images/delete/ 로 복사 후 원본 삭제 */
+    public void softDeleteAllImages(List<String> removeKeys) {
+        if (removeKeys == null || removeKeys.isEmpty()) return;
+        String bucket = s3Config.getBucket();
+
+        for (String key : removeKeys) {
+            String destKey = key.replaceFirst("^images/", "images/delete/");
+            try {
+                s3.copyObject(CopyObjectRequest.builder()
+                .sourceBucket(bucket).sourceKey(key)
+                .destinationBucket(bucket).destinationKey(destKey)
+                .build());
+            } catch (S3Exception | SdkClientException e) {
+                log.error("S3 copy error (soft delete): {} -> {}, {}", key, destKey, e.getMessage(), e);
+            }
+        }
+
+        try {
+            List<ObjectIdentifier> ids = new ArrayList<>(removeKeys.size());
+            for (String key : removeKeys) {
+                ids.add(ObjectIdentifier.builder().key(key).build());
+            }
+
+            s3.deleteObjects(DeleteObjectsRequest.builder()
+                .bucket(bucket)
+                .delete(Delete.builder().objects(ids).quiet(false).build())
+                .build());
+        } catch (S3Exception | SdkClientException e) {
+            log.error("S3 deleteObjects error: {}", e.getMessage(), e);
+        }
+    }
+
+    /** Presigned PUT (Content-Type 포함 서명) */
     private PresignedUrlResponse presignPut(String key, String contentType, Duration ttl) {
-        Date expiration = new Date(System.currentTimeMillis() + ttl.toMillis());
+        String bucket = s3Config.getBucket();
 
-        GeneratePresignedUrlRequest req = new GeneratePresignedUrlRequest(s3Config.getBucket(), key)
-            .withMethod(HttpMethod.PUT)
-            .withExpiration(expiration);
+        PutObjectRequest put = PutObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .contentType(contentType)
+                .build();
 
-        req.addRequestParameter("Content-Type", contentType);
+        PutObjectPresignRequest presign = PutObjectPresignRequest.builder()
+                .signatureDuration(ttl)
+                .putObjectRequest(put)
+                .build();
 
-        URL url = s3.generatePresignedUrl(req);
+        PresignedPutObjectRequest result = s3Presigner.presignPutObject(presign);
+        URL url = result.url();
 
         return new PresignedUrlResponse(
-            url.toExternalForm(),
-            key,
-            "PUT",
-            contentType,
-            ttl.toSeconds()
+                url.toExternalForm(),
+                key,
+                "PUT",
+                contentType,
+                ttl.toSeconds()
         );
     }
 
-    public void softDeleteAllImages(List<String> removeKey) {
-        String bucket = s3Config.getBucket();
-        for (String key : removeKey) {
-            String destKey = key.replaceFirst("^images/", "images/delete/");
-            copyWithTryCatch(bucket, key, destKey);
-        }
-
-        DeleteObjectsRequest req = new DeleteObjectsRequest(bucket)
-            .withQuiet(false)
-            .withKeys(removeKey.toArray(new String[0]));
-
-        deleteWithTryCatch(req);
-    }
-
+    /* util */
     private static String extOf(String filename) {
-        int i = filename.lastIndexOf('.');
+        int i = (filename != null) ? filename.lastIndexOf('.') : -1;
         String ext = (i >= 0 && i < filename.length() - 1) ? filename.substring(i + 1) : "bin";
         return ext.toLowerCase(Locale.ROOT);
-    }
-
-    private void copyWithTryCatch(String bucket, String key, String destKey) {
-        try {
-            s3.copyObject(bucket, key, bucket, destKey);
-        } catch (SdkClientException e) {
-            log.error(e.getMessage());
-        }
-    }
-
-    private void deleteWithTryCatch(DeleteObjectsRequest deleteObjects) {
-        try {
-            s3.deleteObjects(deleteObjects);
-        } catch (SdkClientException e) {
-            log.error(e.getMessage());
-        }
     }
 }
