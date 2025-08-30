@@ -62,6 +62,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("UNAUTHORIZED", ex.getMessage()));
     }
 
+    @ExceptionHandler(ExistUserNameException.class)
+    public ResponseEntity<ErrorResponse> handleExistUserName(ExistUserNameException ex) {
+        log.info("ExistUserNameException: {}", ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("CONFLICT", ex.getMessage()));
+    }
+
+
     @ExceptionHandler(ExistAdminException.class)
     public ResponseEntity<ErrorResponse> handleExistAdmin(ExistAdminException ex) {
         log.info("ExistAdminException: {}", ex.getMessage());

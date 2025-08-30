@@ -1,11 +1,11 @@
 package store.onuljang.appservice;
 
-import com.amazonaws.services.cloudformation.model.NameAlreadyExistsException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.exception.ExistUserNameException;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.service.UserNameLogService;
 import store.onuljang.service.UserService;
@@ -20,7 +20,7 @@ public class UserAppService {
     @Transactional
     public void modifyName(String uid, String name) {
         if (!existName(name)) {
-            throw new NameAlreadyExistsException("이미 존재하는 닉네임입니다.");
+            throw new ExistUserNameException("이미 존재하는 닉네임입니다.");
         }
         Users user = userService.findByUId(uid);
 
