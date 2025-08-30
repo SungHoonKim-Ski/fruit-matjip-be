@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.ReservationAllRepository;
 import store.onuljang.repository.ReservationRepository;
+import store.onuljang.repository.entity.ProductRestockTarget;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.ReservationAll;
 import store.onuljang.repository.entity.Users;
@@ -46,7 +47,16 @@ public class ReservationService {
         return reservationRepository.updateStatusIdIn(reservationIdSet, updateStatus, updateTime);
     }
 
+    @Transactional
+    public int updateAllReservationsWhereIdIn(Set<Long> reservationIdSet, LocalDate today, ReservationStatus before, ReservationStatus after, LocalDateTime now) {
+        return reservationRepository.updateAllReservationStatus(reservationIdSet, today, before, after, now);
+    }
+
     @Transactional(readOnly = true)
+    public List<ProductRestockTarget> findAllByIdInAndStatusGroupByProductIdOrderByProductId(Set<Long> reservationIdSet, ReservationStatus status) {
+        return reservationRepository.findAllByIdInAndStatusGroupByProductIdOrderByProductId(reservationIdSet, status);
+    }
+
     @Transactional(readOnly = true)
     public List<Reservation> findAllUserIdInWithUserWithLock(Set<Long> reservationIdSet) {
         return reservationRepository.findAllByIdInWithUserWithLock(reservationIdSet);
@@ -71,5 +81,10 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationAll> findAllByStatusInAndPickupDateBetweenIncludingDeleted(List<ReservationStatus> statusList, LocalDate from, LocalDate to) {
         return reservationAllRepository.findAllByStatusInAndPickupDateBetweenOrderByPickupDateDesc(statusList ,from, to);
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Long> findIdsByPickupDateAndStatus(LocalDate today, ReservationStatus status) {
+        return reservationRepository.findIdsByPickupDateAndStatus(today, status);
     }
 }
