@@ -25,7 +25,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         "select r " +
         "from Reservation r " +
         "left join fetch r.user u " +
-        "where r.id in :ids"
+        "where r.id in (:ids)"
     )
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Reservation> findAllByIdInWithUserWithLock(@Param("ids") Set<Long> ids);
@@ -35,6 +35,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
         "from Reservation r " +
         "where r.id = :id"
     )
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Reservation> findByIdWithLock(@Param("id") long id);
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)
