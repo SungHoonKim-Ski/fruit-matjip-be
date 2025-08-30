@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.ReservationAppService;
@@ -23,51 +24,51 @@ import java.time.LocalDate;
 @Validated
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReservationController {
-    JwtUtil jwtUtil;
     ReservationAppService reservationAppService;
 
     @PostMapping("/")
     public ResponseEntity<Long> create(
-        @RequestHeader(value="Authorization") String bearerToken,
+        Authentication auth,
         @RequestBody @Valid ReservationRequest request
     ) {
-        String uId = jwtUtil.getBearerUid(bearerToken);
+        String uid = auth.getName();
 
-        return ResponseEntity.ok(reservationAppService.reserve(uId, request));
+        return ResponseEntity.ok(reservationAppService.reserve(uid, request));
     }
 
     @PatchMapping("/cancel/{id}")
     public ResponseEntity<Void> cancel(
-        @RequestHeader(value="Authorization") String bearerToken,
+        Authentication auth,
         @Valid @PositiveOrZero @PathVariable("id") Long reservationId
     ) {
-        String uId = jwtUtil.getBearerUid(bearerToken);
+        String uid = auth.getName();
 
-        reservationAppService.cancel(uId, reservationId);
+        reservationAppService.cancel(uid, reservationId);
 
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/self-pick/{id}")
     public ResponseEntity<Void> selfPick(
-            @RequestHeader(value="Authorization") String bearerToken,
-            @Valid @PositiveOrZero @PathVariable("id") Long reservationId
+        Authentication auth,
+        @Valid @PositiveOrZero @PathVariable("id") Long reservationId
     ) {
-        String uId = jwtUtil.getBearerUid(bearerToken);
+        String uid = auth.getName();
 
-        reservationAppService.selfPick(uId, reservationId);
+        reservationAppService.selfPick(uid, reservationId);
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/")
-    public ResponseEntity<ReservationListResponse> getList(@Valid @RequestHeader(value="Authorization") String bearerToken,
+    public ResponseEntity<ReservationListResponse> getList(
+        Authentication auth,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,
         @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate to
     ) {
-        String uId = jwtUtil.getBearerUid(bearerToken);
+        String uid = auth.getName();
 
-        return ResponseEntity.ok(reservationAppService.getReservations(uId, from, to));
+        return ResponseEntity.ok(reservationAppService.getReservations(uid, from, to));
     }
 }
 
