@@ -71,13 +71,13 @@ public class LogUploadScheduler {
         }
         try {
             PutObjectRequest putReq = PutObjectRequest.builder()
-                .bucket(s3Config.getBucket())
+                .bucket(s3Config.getLogBucket())
                 .key(s3Key)
                 .build();
 
             s3.putObject(putReq, RequestBody.fromFile(f.toPath()));
 
-            log.info("[LogUpload] uploaded: {} -> s3://{}/{}", localPath, s3Config.getBucket(), s3Key);
+            log.info("[LogUpload] uploaded: {} -> s3://{}/{}", localPath, s3Config.getLogBucket(), s3Key);
 
             if (f.delete()) {
                 log.info("[LogUpload] local deleted: {}", localPath);
@@ -85,7 +85,7 @@ public class LogUploadScheduler {
                 log.warn("[LogUpload] local delete failed: {}", localPath);
             }
         } catch (Exception e) {
-            log.error("[LogUpload] failed: {} -> s3://{}/{} : {}", localPath, s3Config.getBucket(), s3Key, e.getMessage(), e);
+            log.error("[LogUpload] failed: {} -> s3://{}/{} : {}", localPath, s3Config.getLogBucket(), s3Key, e.getMessage(), e);
         }
     }
 }
