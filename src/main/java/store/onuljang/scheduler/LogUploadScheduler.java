@@ -36,6 +36,10 @@ public class LogUploadScheduler {
      */
     @Scheduled(cron = "0 12 0 * * *", zone = "Asia/Seoul")
     public void uploadYesterdayLogs() {
+        log.info("[LogUpload] rollover trigger (INFO)");
+        log.warn("[LogUpload] rollover trigger (WARN)");
+        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+
         LocalDate y = LocalDate.now(TimeUtil.KST).minusDays(1);
         String date = DATE.format(y);
         String stage = resolveStage();
