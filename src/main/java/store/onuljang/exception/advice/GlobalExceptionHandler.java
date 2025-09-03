@@ -7,8 +7,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingRequestHeaderException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import store.onuljang.controller.response.ErrorResponse;
 import store.onuljang.exception.*;
 
@@ -61,6 +65,25 @@ public class GlobalExceptionHandler {
         log.info("Missing header: {}", ex.getHeaderName());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new ErrorResponse("UNAUTHORIZED", "Authorization header is required"));
+    }
+
+    @ExceptionHandler({ NoHandlerFoundException.class, NoResourceFoundException.class })
+    public ResponseEntity<Void> handleNotFound() {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    // 쿼리 파라미터가 없는 경우 (?from= 누락)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParam(MissingServletRequestParameterException ex) {
+        String msg = "'" + ex.getParameterName() + "' is required";
+        return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", msg));
+    }
+
+    // 타입/포맷이 잘못된 경우 (?from=2025-09-31)
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        String msg = "Invalid value for '" + ex.getName() + "'";
+        return ResponseEntity.badRequest().body(new ErrorResponse("BAD_REQUEST", msg));
     }
 
     // custom exception
