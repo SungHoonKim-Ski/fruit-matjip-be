@@ -33,10 +33,10 @@ public class AdminReservationController {
         return ResponseEntity.ok(adminReservationAppService.getAllByDate(date));
     }
 
-    @PatchMapping("/{id}/warn")
-    public ResponseEntity<Void> warnReservationUser(@PathVariable @Positive @NotNull Long id)
+    @PatchMapping("/{id}/no-show")
+    public ResponseEntity<Void> handleNoShow(@PathVariable @Positive @NotNull Long id)
     {
-        adminReservationAppService.warnReservationUser(id);
+        adminReservationAppService.handleNoShow(id);
 
         return ResponseEntity.ok().build();
     }

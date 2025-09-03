@@ -7,11 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
-import store.onuljang.controller.response.AdminReservationReportResponse;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.ReservationAll;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.controller.response.AdminReservationsTodayResponse;
+import store.onuljang.exception.UserValidateException;
+import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
 import store.onuljang.util.TimeUtil;
@@ -19,6 +19,7 @@ import store.onuljang.util.TimeUtil;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -26,21 +27,26 @@ import java.util.List;
 public class AdminReservationAppService {
     ReservationService reservationService;
     UserService userService;
+    ProductsService productService;
 
     @Transactional
     public void updateReservationStatus(long id, ReservationStatus status) {
-        Reservation entity = reservationService.findByIdWithLock(id);
+        Reservation reservation = reservationService.findByIdWithLock(id);
 
-        entity.setStatus(status);
+        reservation.setStatus(status);
     }
 
     @Transactional
-    public void warnReservationUser(long id) {
-        Reservation reservation = reservationService.findById(id);
-
+    public void handleNoShow(long id) {
+        Reservation reservation = reservationService.findByIdWithLock(id);
+        Product product = productService.findByIdWithLock(reservation.getProduct().getId());
         Users user = userService.findByUidWithLock(reservation.getUser().getUid());
 
-        user.warn();
+        validateUserReservation(user, reservation);
+
+        reservation.setStatus(ReservationStatus.CANCELED);
+        product.addStock(reservation.getQuantity());
+        user.noShow();
     }
 
     @Transactional
@@ -98,6 +104,12 @@ public class AdminReservationAppService {
         boolean allSameUser = reservationSet.stream().allMatch(r -> r.getUser().getUid().equals(uid));
         if (!allSameUser) {
             throw new IllegalStateException("동일한 유저의 예약만 한번에 변경할 수 있습니다.");
+        }
+    }
+
+    private void validateUserReservation(Users user, Reservation reservation) {
+        if (!user.getUid().equals(reservation.getUser().getUid())) {
+            throw new UserValidateException("다른 유저가 예약한 상품입니다.");
         }
     }
 }
