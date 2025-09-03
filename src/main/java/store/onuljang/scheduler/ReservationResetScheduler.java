@@ -48,7 +48,7 @@ public class ReservationResetScheduler {
         maxAttempts = 3,
         backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
     )
-    @Scheduled(cron = "0 5 18 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 5 19 * * *", zone = "Asia/Seoul")
     public void cancelNoShowDailyJob() {
         LocalDate today = TimeUtil.nowDate();
         LocalDateTime now = TimeUtil.nowDateTime();
