@@ -46,7 +46,7 @@ public class AdminReservationAppService {
         validateUserReservation(user, reservation);
 
         reservation.setStatus(ReservationStatus.CANCELED);
-        product.addStock(reservation.getQuantity());
+        product.cancel(reservation.getQuantity());
         user.noShow();
     }
 
