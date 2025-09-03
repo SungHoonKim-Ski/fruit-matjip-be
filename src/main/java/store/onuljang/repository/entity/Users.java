@@ -6,7 +6,6 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.base.BaseEntity;
-import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -88,7 +87,7 @@ public class Users extends BaseEntity {
         }
     }
 
-    public void warn() {
+    public void noShow() {
         totalWarnCount++;
         warnCount++;
     }
