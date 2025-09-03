@@ -34,7 +34,7 @@ public class LogUploadScheduler {
      * 매일 00:12 (KST)에 어제 날짜 로그 파일(app-all/app-warn)을
      * s3://{bucket}/logs/{dev|prod}/... 경로로 업로드 후 로컬 삭제
      */
-    @Scheduled(cron = "0 12 0 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
     public void uploadYesterdayLogs() {
         log.info("[LogUpload] rollover trigger (INFO)");
         log.warn("[LogUpload] rollover trigger (WARN)");
