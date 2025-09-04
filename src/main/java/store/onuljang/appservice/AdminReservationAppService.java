@@ -7,14 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
-//import store.onuljang.controller.response.AdminReservationsTodayResponse;
-import store.onuljang.controller.response.AdminReservationReportResponse;
+import store.onuljang.controller.response.AdminReservationsTodayResponse;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.*;
+import store.onuljang.repository.entity.enums.AggPhase;
 import store.onuljang.repository.entity.enums.ReservationStatus;
-import store.onuljang.service.ProductsService;
-import store.onuljang.service.ReservationService;
-import store.onuljang.service.UserService;
+import store.onuljang.service.*;
 import store.onuljang.util.TimeUtil;
 
 import java.time.LocalDate;
@@ -65,12 +63,13 @@ public class AdminReservationAppService {
     }
 
     @Transactional(readOnly = true)
-    public AdminReservationReportResponse getSails(LocalDate from, LocalDate to) {
-        List<ReservationAll> entities = reservationService.findAllByStatusInAndPickupDateBetweenIncludingDeleted(
-            List.of(ReservationStatus.PICKED, ReservationStatus.SELF_PICK, ReservationStatus.SELF_PICK_READY)
-            ,from, to);
+    public AdminReservationsTodayResponse getTodaySales() {
+        List<ReservationSalesRow> salesRows = reservationService.findPickupDateSales(
+            Set.of(ReservationStatus.PICKED, ReservationStatus.SELF_PICK, ReservationStatus.SELF_PICK_READY),
+            TimeUtil.nowDate()
+        );
 
-        return AdminReservationReportResponse.from(entities);
+        return AdminReservationsTodayResponse.from(salesRows);
     }
 
     @Transactional(readOnly = true)

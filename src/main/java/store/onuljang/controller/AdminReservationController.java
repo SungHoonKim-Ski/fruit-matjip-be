@@ -2,6 +2,7 @@ package store.onuljang.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -12,11 +13,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminReservationAppService;
 import store.onuljang.controller.request.AdminUpdateReservationsRequest;
+import store.onuljang.controller.response.AdminReservationDetailsResponse;
 import store.onuljang.controller.response.AdminReservationListResponse;
-import store.onuljang.controller.response.AdminReservationReportResponse;
+import store.onuljang.controller.response.AdminReservationSummaryResponse;
+import store.onuljang.controller.response.AdminReservationsTodayResponse;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/reservations")
@@ -58,12 +63,10 @@ public class AdminReservationController {
         return ResponseEntity.ok(adminReservationAppService.bulkUpdateReservationsStatus(request));
     }
 
-    @GetMapping("/sails")
-    public ResponseEntity<AdminReservationReportResponse> getSails(
-       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,
-       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate to)
+    @GetMapping("/sales/today")
+    public ResponseEntity<AdminReservationsTodayResponse> getTodaySails()
     {
-        return ResponseEntity.ok(adminReservationAppService.getSails(from, to));
+        return ResponseEntity.ok(adminReservationAppService.getTodaySales());
     }
 }
 

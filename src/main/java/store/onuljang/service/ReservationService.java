@@ -9,14 +9,12 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.ReservationAllRepository;
 import store.onuljang.repository.ReservationRepository;
-import store.onuljang.repository.entity.ProductRestockTarget;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.ReservationAll;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -79,8 +77,8 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationAll> findAllByStatusInAndPickupDateBetweenIncludingDeleted(List<ReservationStatus> statusList, LocalDate from, LocalDate to) {
-        return reservationAllRepository.findAllByStatusInAndPickupDateBetweenOrderByPickupDateDesc(statusList ,from, to);
+    public List<ReservationSalesRow> findPickupDateSales(Set<ReservationStatus> status, LocalDate date) {
+        return reservationAllRepository.findPickupDateSales(status.stream().map(Enum::name).toList(), date);
     }
 
     @Transactional(readOnly = true)
