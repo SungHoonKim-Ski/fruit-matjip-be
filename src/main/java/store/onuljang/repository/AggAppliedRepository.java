@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import store.onuljang.repository.entity.AggApplied;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public interface AggAppliedRepository extends JpaRepository<AggApplied, Long> {
 
@@ -50,10 +51,10 @@ public interface AggAppliedRepository extends JpaRepository<AggApplied, Long> {
     @Query(value = """
         update agg_applied
         set processed = 1,
-            processed_at = NOW(),
+            processed_at = :now,
             batch_uid = NULL
         WHERE batch_uid = :batchUid
         AND processed = 0
     """, nativeQuery = true)
-    int finishBatch(@Param("batchUid") String batchUid);
+    int finishBatch(@Param("batchUid") String batchUid, @Param("now") LocalDateTime now);
 }

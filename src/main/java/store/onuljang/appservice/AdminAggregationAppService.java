@@ -36,7 +36,7 @@ public class AdminAggregationAppService {
 
         productDailyAggService.upsertForBatch(batchUid);
 
-        int finished = aggAppliedService.finishBatch(batchUid);
+        int finished = aggAppliedService.finishBatch(batchUid, TimeUtil.nowDateTime());
 
         if (finished != claimed) {
             throw new IllegalStateException("finished != claimed: " + finished + " vs " + claimed);

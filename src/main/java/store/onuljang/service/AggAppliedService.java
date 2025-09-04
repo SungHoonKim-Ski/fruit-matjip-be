@@ -10,6 +10,7 @@ import store.onuljang.repository.AggAppliedRepository;
 import store.onuljang.repository.entity.enums.AggPhase;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -35,7 +36,7 @@ public class AggAppliedService {
     }
 
     @Transactional
-    public int finishBatch(String batchUid) {
-        return aggAppliedRepository.finishBatch(batchUid);
+    public int finishBatch(String batchUid, LocalDateTime now) {
+        return aggAppliedRepository.finishBatch(batchUid, now);
     }
 }
