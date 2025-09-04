@@ -10,7 +10,7 @@ import java.util.List;
 
 @Builder
 public record AdminReservationSummaryResponse(
-    List<AdminSummaryResponse> summary, BigDecimal sumAmount, int sumQuantity
+    List<AdminSummaryResponse> summary
 ) {
     @Builder
     public record AdminSummaryResponse(LocalDate date, BigDecimal amount, int quantity) {
