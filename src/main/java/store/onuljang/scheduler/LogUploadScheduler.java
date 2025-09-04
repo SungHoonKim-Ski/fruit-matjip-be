@@ -31,31 +31,31 @@ public class LogUploadScheduler {
     Environment env;
 
     /**
-     * 매일 00:12 (KST)에 어제 날짜 로그 파일(app-all/app-warn)을
+     * 매일 00:01 (KST)에 어제 날짜 로그 파일(app-all/app-warn)을
      * s3://{bucket}/logs/{dev|prod}/... 경로로 업로드 후 로컬 삭제
      */
-    @Scheduled(cron = "0 5 0 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 1 0 * * *", zone = "Asia/Seoul")
     public void uploadYesterdayLogs() {
         log.info("[LogUpload] rollover trigger (INFO)");
         log.warn("[LogUpload] rollover trigger (WARN)");
         try { Thread.sleep(200); } catch (InterruptedException ignored) {}
 
-        LocalDate y = LocalDate.now(TimeUtil.KST).minusDays(1);
+        LocalDate y = TimeUtil.yesterdayDate();
         String date = DATE.format(y);
         String stage = resolveStage();
 
         // app-all 로그
         uploadIfExists(
             String.format("%s/app-all.%s.log.gz", LOG_HOME, date),
-            String.format("logs/%s/all/%d/%02d/%02d/app-all-%s.log.gz",
-                stage, y.getYear(), y.getMonthValue(), y.getDayOfMonth(), date)
+            String.format("logs/%s/%d/%02d/app-all-%s.log.gz",
+                stage, y.getYear(), y.getMonthValue(), date)
         );
 
         // app-warn 로그
         uploadIfExists(
             String.format("%s/app-warn.%s.log.gz", LOG_HOME, date),
-            String.format("logs/%s/warn/%d/%02d/%02d/app-warn-%s.log.gz",
-                stage, y.getYear(), y.getMonthValue(), y.getDayOfMonth(), date)
+            String.format("logs/%s/%d/%02d/app-warn-%s.log.gz",
+                stage, y.getYear(), y.getMonthValue(),  date)
         );
     }
 
