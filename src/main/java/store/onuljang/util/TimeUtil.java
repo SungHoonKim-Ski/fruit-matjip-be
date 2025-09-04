@@ -16,6 +16,10 @@ public class TimeUtil {
         return LocalDate.now(KST);
     }
 
+    public static LocalDate yesterdayDate() {
+        return LocalDate.now(KST).minusDays(1);
+    }
+
     public static LocalDateTime nowDateTime() {
         return LocalDateTime.now(KST);
     }

@@ -3,6 +3,7 @@ package store.onuljang.appservice;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminUpdateReservationsRequest;
@@ -23,10 +24,12 @@ import java.util.Set;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+@Slf4j
 public class AdminReservationAppService {
     ReservationService reservationService;
     UserService userService;
     ProductsService productService;
+    AggAppliedService aggAppliedService;
 
     @Transactional
     public void updateReservationStatus(long id, ReservationStatus status) {
@@ -46,6 +49,7 @@ public class AdminReservationAppService {
         reservation.setStatus(ReservationStatus.CANCELED);
         product.cancel(reservation.getQuantity());
         user.noShow();
+        aggAppliedService.markSingle(reservation.getId(), AggPhase.NO_SHOW_MINUS);
     }
 
     @Transactional
