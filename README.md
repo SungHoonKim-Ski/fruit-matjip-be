@@ -57,11 +57,11 @@
 
 | 기능 | 설명 | 관련 파일 |
 |------|------|-----------|
+| S3에 로그 파일 업로드 | warn 이상 / 모든 level 로그 파일을 매일 s3에 업로드 | [`logback-spring.xml`](./src/main/resources/logback-spring.xml)<br>[`LogUploadScheduler.java`](./src/main/java/store/onuljang/scheduler/LogUploadScheduler.java)|
+| 유저/관리자 행위 로깅 | `UserLog`, `AdminLog` 테이블을 통해 주요 행동 기록 | [`UserLog.java`](./src/main/java/store/onuljang/repository/entity/log/UserLog.java)<br>[`UserReservationLog.java`](./src/main/java/store/onuljang/repository/entity/log/UserReservationLog.java)<br>[`AdminLog.java`](./src/main/java/store/onuljang/repository/entity/log/AdminProductLog.java)<br>[`AdminProductLog.java`](./src/main/java/store/onuljang/repository/entity/log/AdminLog.java) |
 | Refresh Token 관리 | DB에 해시 형태로 저장되고 `replaced_by` 컬럼으로 linked-list 형식 추적 가능 | [`RefreshToken.java`](./src/main/java/store/onuljang/repository/entity/RefreshToken.java) |
 | 관리자 권한 검증 강화 | Spring Security 필터, `hasRole`, validate API 추가로 미검증 방지 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/auth/AdminSecurityConfig.java) |
 | 관리자 인증 커스터마이징 | 세션에 관리자 ID 저장 위해 `AdminUserDetail`, `AdminAuthenticationToken` 구현 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/auth/AdminSecurityConfig.java)<br>[`AdminUserDetail.java`](./src/main/java/store/onuljang/service/dto/AdminUserDetails.java)<br>[`AdminAuthenticationToken.java`](./src/main/java/store/onuljang/auth/AdminAuthenticationToken.java) |
-| 유저/관리자 행위 로깅 | `UserLog`, `AdminLog` 테이블을 통해 주요 행동 기록 | [`UserLog.java`](./src/main/java/store/onuljang/repository/entity/log/UserLog.java)<br>[`UserReservationLog.java`](./src/main/java/store/onuljang/repository/entity/log/UserReservationLog.java)<br>[`AdminLog.java`](./src/main/java/store/onuljang/repository/entity/log/AdminProductLog.java)<br>[`AdminProductLog.java`](./src/main/java/store/onuljang/repository/entity/log/AdminLog.java) |
-| 환경 설정 분기 | CI 스크립트에서 dev/prod 프로필 분기 | [`deploy.yml`](.github/workflows/aws.yml) |
 
 ---
 
@@ -146,13 +146,13 @@ on:
 
 ## 🧪 향후 개선 예정 (TODO)
 
-- [x] **예약 마감 시간 자동 비활성화**: 일정 시간이 이후 당일 판매 상품 예약 마감 처리
+- [x] **예약 마감 시간 자동 비활성화**: 일정 시간 이후 당일 판매 상품 예약 마감 처리
 - [x] **관리자 판매량 조회 집계 기능 적용**: 판매량 조회 시 예약 테이블 full scan으로 인한 성능 저하 우려
 - [x] **로그 데이터 스케줄러 활용 S3 업로드 구현**: 일회성 로그 데이터 관리 필요성
 - [ ] **DB 백업 cron 활용 S3 업로드 구현**: DB 백업 필요성
 - [ ] **날짜별 품목 노출 순서 기능**: 제품 수 증가로 노출 품목의 순서 지정 필요성
 - [ ] **상품 카테고리화 + 사용자 노출 페이지 적용**: 제품량 증가로 인해 사용자에게 보일 품목의 순서 지정 필요성
-- [ ] **상품 조회/관리자 집계 페이징 처리**: 수백 건 이상 조회 시 성능 저하 방지
+- [ ] **관리자 상품 조회 페이지 개선**: 수십건 조회시 특정 품목을 찾기 어려움
 - [ ] **테스트 코드 작성**: 단위 테스트/통합 테스트 검증 필요
 - [ ] **최고 관리자 권한 기능 도입**: 다른 관리자의 권한 생성/수정/삭제 가능하도록 확장 - 보류
 - [ ] **결제 연동 도입**: PG사 연동 - 보류
