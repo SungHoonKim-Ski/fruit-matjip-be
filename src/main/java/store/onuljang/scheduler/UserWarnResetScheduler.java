@@ -18,7 +18,7 @@ public class UserWarnResetScheduler {
      * 매달 1일 00:05 KST에 warn_count를 0으로 초기화
      */
     @Transactional
-    @Scheduled(cron = "0 5 0 1 * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul")
     public void resetMonthlyWarnCount() {
         int updated = usersRepository.resetAllUsersWarnCounts();
         log.info("[WarnCountResetScheduler] reset done. updated rows = {}", updated);
