@@ -69,7 +69,7 @@ public class AdminReservationAppService {
     @Transactional(readOnly = true)
     public AdminReservationsTodayResponse getTodaySales() {
         List<ReservationSalesRow> salesRows = reservationService.findPickupDateSales(
-            Set.of(ReservationStatus.PICKED, ReservationStatus.SELF_PICK, ReservationStatus.SELF_PICK_READY),
+            Set.of(ReservationStatus.PENDING, ReservationStatus.PICKED, ReservationStatus.SELF_PICK, ReservationStatus.SELF_PICK_READY),
             TimeUtil.nowDate()
         );
 
