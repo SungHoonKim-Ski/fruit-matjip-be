@@ -38,8 +38,7 @@ public record ProductListResponse(
 
     public static ProductListResponse from(List<Product> productList) {
         return ProductListResponse.builder()
-            .response(productList.stream()
-            .map(ProductResponse::from).toList())
+            .response(productList.stream().map(ProductResponse::from).toList())
             .build();
     }
 }

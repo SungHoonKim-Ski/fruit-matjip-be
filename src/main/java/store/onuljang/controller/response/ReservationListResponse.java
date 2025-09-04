@@ -37,8 +37,7 @@ public record ReservationListResponse(
 
     public static ReservationListResponse from(List<Reservation> entities) {
         return ReservationListResponse.builder()
-            .response(entities.stream()
-                .map(ReservationResponse::from).toList())
+            .response(entities.stream().map(ReservationResponse::from).toList())
             .build();
     }
 }

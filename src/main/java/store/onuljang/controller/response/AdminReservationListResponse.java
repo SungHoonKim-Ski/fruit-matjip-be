@@ -40,8 +40,7 @@ public record AdminReservationListResponse(
 
     public static AdminReservationListResponse from(List<Reservation> entities) {
         return AdminReservationListResponse.builder()
-            .response(entities.stream()
-                .map(AdminReservationResponse::from).toList())
+            .response(entities.stream().map(AdminReservationResponse::from).toList())
             .build();
     }
 }

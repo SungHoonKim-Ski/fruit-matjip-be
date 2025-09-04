@@ -39,10 +39,7 @@ public record AdminProductListItems(
 
     public static AdminProductListItems from(List<Product> products) {
         return AdminProductListItems.builder()
-                .response(
-                    products.stream()
-                        .map(AdminProductListItem::from)
-                        .collect(Collectors.toList()))
+                .response(products.stream().map(AdminProductListItem::from).toList())
                 .build();
     }
 }
