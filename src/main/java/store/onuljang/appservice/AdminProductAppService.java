@@ -1,5 +1,6 @@
 package store.onuljang.appservice;
 
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -7,10 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
+import store.onuljang.controller.request.AdminProductUpdateOrder;
 import store.onuljang.log.admin_product.AdminProductLogEvent;
+import store.onuljang.repository.entity.ProductOrder;
+import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.AdminProductAction;
 import store.onuljang.service.AdminService;
 import store.onuljang.service.AdminUploadService;
+import store.onuljang.service.ProductOrderService;
 import store.onuljang.service.ProductsService;
 import store.onuljang.util.SessionUtil;
 import store.onuljang.controller.request.AdminCreateProductRequest;
@@ -21,8 +27,8 @@ import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -30,6 +36,7 @@ import java.util.List;
 @Slf4j
 public class AdminProductAppService {
     ProductsService productsService;
+    ProductOrderService productOrderService;
     AdminUploadService adminUploadService;
     AdminService adminService;
     ApplicationEventPublisher eventPublisher;

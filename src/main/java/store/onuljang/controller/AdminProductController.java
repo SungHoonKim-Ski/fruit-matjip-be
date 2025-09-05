@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.controller.request.AdminCreateProductRequest;
 import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
+import store.onuljang.controller.request.AdminProductUpdateOrder;
 import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
@@ -67,6 +68,12 @@ public class AdminProductController {
     public ResponseEntity<Integer> bulkUpdateSellDate(@Valid @RequestBody AdminProductBulkUpdateSellDateRequest request) {
         return ResponseEntity.ok(adminProductAppService.bulkUpdateSellDate(request));
     }
+
+    @PatchMapping("/order")
+    public ResponseEntity<Integer> updateOrder(@Valid @RequestBody AdminProductUpdateOrder request) {
+        return ResponseEntity.ok(adminProductAppService.updateOrder(request));
+    }
+
     @DeleteMapping("/{productId}")
     public ResponseEntity<Void> delete(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
         adminProductAppService.delete(productId);

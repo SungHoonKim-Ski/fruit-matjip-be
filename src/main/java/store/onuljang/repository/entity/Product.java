@@ -62,6 +62,9 @@ public class Product extends BaseEntity {
     @JoinColumn(name = "registered_admin", nullable = false)
     private Admin registeredAdmin;
 
+    @OneToOne(mappedBy = "product", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private ProductOrder productOrder;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -153,6 +156,7 @@ public class Product extends BaseEntity {
 
     public void delete() {
         this.deletedAt = LocalDateTime.now();
+        this.productDetailImages.forEach(ProductDetailImage::delete);
     }
 
     public void assertPurchasable(int quantity) {
@@ -176,6 +180,21 @@ public class Product extends BaseEntity {
     public void cancel(int quantity) {
         addStock(quantity);
         removeTotalSold(quantity);
+    }
+
+    public void setProductOrder(ProductOrder productOrder) {
+        this.productOrder = productOrder;
+        if (productOrder != null && productOrder.getProduct() != this) {
+            productOrder.setProduct(this);
+        }
+    }
+
+    public int getOrderIndex() {
+        if (this.productOrder == null) {
+            return 0;
+        } else {
+            return this.productOrder.getOrderIndex();
+        }
     }
 
     private void removeTotalSold(int quantity) {

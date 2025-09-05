@@ -21,6 +21,7 @@ public record AdminProductListItems(
         long totalSold,
         String productUrl,
         LocalDate sellDate,
+        int orderIndex,
         boolean isVisible
     ) {
         public static AdminProductListItem from(Product product) {
@@ -32,6 +33,7 @@ public record AdminProductListItems(
                 .isVisible(product.getIsVisible())
                 .sellDate(product.getSellDate())
                 .stock(product.getStock())
+                .orderIndex(product.getOrderIndex())
                 .totalSold(product.getTotalSold())
                 .build();
         }
