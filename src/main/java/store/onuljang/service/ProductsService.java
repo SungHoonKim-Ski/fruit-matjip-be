@@ -38,6 +38,11 @@ public class ProductsService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
     }
 
+    @Transactional
+    public int bulkUpdateSellDateIdIn(List<Long> ids, LocalDate sellDate) {
+        return productsRepository.bulkUpdateSellDateIdIn(ids, sellDate);
+    }
+
     @Transactional(readOnly = true)
     public List<Product> findAllOrderBySellDateDesc() {
         return productsRepository.findAllByOrderBySellDateDesc();

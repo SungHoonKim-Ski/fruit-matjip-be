@@ -93,6 +93,61 @@ public class AdminProductAppService {
         saveProductLog(productId, 0, AdminProductAction.UPDATE);
     }
 
+    @Transactional
+    public int bulkUpdateSellDate(AdminProductBulkUpdateSellDateRequest request) {
+        List<Product> products = productsService.findAllByIdIn(request.productIds());
+        if (products.isEmpty() || products.size() != request.productIds().size()) {
+            throw new IllegalArgumentException("선택한 제품이 존재하지 않습니다.");
+        }
+
+        int rows = productsService.bulkUpdateSellDateIdIn(
+            products.stream().map(BaseEntity::getId).toList(), request.sellDate()
+        );
+
+        if (rows != products.size()) {
+            throw new RuntimeException("제품 판매일 bulk update row 불일치");
+        }
+        return rows;
+    }
+
+    @Transactional
+    public int updateOrder(AdminProductUpdateOrder request) {
+        List<Product> products = productsService.findAllByIdIn(request.productIds());
+        if (products.isEmpty() || products.size() != request.productIds().size()) {
+            throw new IllegalArgumentException("선택한 제품이 존재하지 않습니다.");
+        }
+
+        Set<LocalDate> sellDates = products.stream()
+                .map(Product::getSellDate)
+                .collect(Collectors.toSet());
+
+        if (sellDates.size() != 1) {
+            throw new IllegalArgumentException("선택한 제품들의 판매일이 일치하지 않습니다.");
+        }
+
+        LocalDate sellDate = sellDates.iterator().next();
+        Map<Long, Product> productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
+        productOrderService.deleteAllBySellDate(sellDate);
+        List<ProductOrder> orders = new ArrayList<>(products.size());
+        int idx = 1;
+        for (Long id : request.productIds()) {
+            Product product = productMap.get(id);
+
+            ProductOrder productOrder = ProductOrder.builder()
+                .product(product)
+                .sellDate(sellDate)
+                .orderIndex(idx++)
+                .build();
+
+            product.setProductOrder(productOrder);
+
+            orders.add(productOrder);
+        }
+
+        return productOrderService.saveAll(orders);
+    }
+
     @Transactional(readOnly = true)
     public AdminProductListItems getAll() {
         List<Product> entities = productsService.findAllOrderBySellDateDesc();
