@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public record AdminUpdateProductDetailsRequest(
-    @Size(max = 100, message = "상품명은 100자 이하여야 합니다")
+    @Size(max = 30, message = "상품명은 30자 이하여야 합니다")
     String name,
 
     @Min(value = 100, message = "가격은 100원 이상이어야 합니다")
