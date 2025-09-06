@@ -42,13 +42,11 @@
 
 | 이슈 | 해결 방법 | 관련 파일 |
 |------|-----------|-----------|
+| 멱등성 보장 정산 구현 <br>(전날 취소 상품 정산 반영) | 1. 정산, 작업 테이블 활용. 스케줄러 동작 시 “작업 테이블 데이터 → 정산” 방식 적용<br>2. 정산 테이블은 “예약 PK + *매출 발생 유형” 복합 Unique key를 적용해 멱등성 보장<br>3. 작업 테이블은 “판매일 + 상품 PK” 복합 Unique key를 적용해 멱등성 보장 | [`ReservationAggregationScheduler.java`](./src/main/java/store/onuljang/scheduler/ReservationAggregationScheduler.java) <br>[`AdminAggregationAppService.java`](./src/main/java/store/onuljang/appservice/AdminAggregationAppService.java)|
+| 노쇼 고객 재고 복원 정합성 해결 <br>(예약 마감 이후 노쇼 고객 상품 재고 복원) | 1. 복구 예정 상품 수량을 GROUP BY로 가져와서 재고 복원 <br>2. 복원 예상 row와 실제 반영 row를 비교해, 불일치시 예외를 발생시키는 방식으로 정합성을 보장 <br>3. 재고 복원시 Lock 점유 시간 최소화를 위해 반복문을 돌며 하나의 상품에만 Lock 점유 <br>4.  DB Deadlock / LockTimeout / 2번 작업 재고 불일치 등  지정 예외 발생 시 최대 3회 재시도 적용 | [`ReservationResetScheduler.java`](./src/main/java/store/onuljang/scheduler/ReservationResetScheduler.java)<br>[`ReservationAppService.java`](./src/main/java/store/onuljang/appservice/ReservationAppService.java) |
 | 재고 정합성 문제 | 초기에는 예약 관련 코드별로 락 획득 순서가 일관되지 않아 데드락/락 타임아웃으로 요청 실패가 간헐적으로 발생<br>이후 Product → User 순으로 락 획득 순서를 전역적으로 고정하여 데드락 발생 가능성을 제거하고, 재고 차감/복원이 항상 원자적·일관적으로 처리되도록 개선 | [`ReservationAppService.java`](./src/main/java/store/onuljang/appservice/ReservationAppService.java) |
-| 재고 복원 문제 | 18시 마감 이후 "대기" 상태 예약은 노쇼로 간주 <br>→ 19시에 스케줄러에서 해당 예약을 벌크 업데이트로 "취소" 처리 <br>1. 제품별 수량을 GROUP BY 후 Product 단위로 비관적 락을 잡아 재고 복원 <br>2. 업데이트 건수와 대상 건수를 비교해, 동시 변경 시 `IllegalStateException`으로 검출해 정합성을 보장 <br>3. 제품 재고 복원의 경우 Lock 점유 시간을 최소화하기 위해 반복문을 돌며 하나의 제품에만 Lock 점유 <br>4. DB Deadlock / LockTimeout 등 지정한 예외 발생 시 Spring Retry(`@Retryable`)로 3회까지 재시도, backoff 지수 증가 방식 적용 | [`ReservationResetScheduler.java`](./src/main/java/store/onuljang/scheduler/ReservationResetScheduler.java)<br>[`ReservationAppService.java`](./src/main/java/store/onuljang/appservice/ReservationAppService.java) |
-| 카카오 로그인 시 자동 회원가입 + 고유 닉네임 생성 | 1. 카카오 인증 → 고유 ID 반환<br>2. DB에서 유저 확인<br>3. 미존재 시 닉네임 생성기 호출 (`@Lock` 사용)<br>4. 고유 닉네임 생성 및 회원가입<br>5. 로그인 처리 | [`AuthAppService.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java)<br>[`NameGenerator.java`](./src/main/java/store/onuljang/service/NameGenerator.java) |
-| 파일 업로드 메모리 초과 | AWS S3 Presigned URL 방식 적용 | [`AdminUploadService.java`](./src/main/java/store/onuljang/service/AdminUploadService.java) |
+| 파일 업로드 메모리 초과 | AWS S3 Presigned URL 방식 적용, 다건 업로드 시 프론트엔드 병렬 처리로 개선 | [`AdminUploadService.java`](./src/main/java/store/onuljang/service/AdminUploadService.java) |
 | 과도한 카카오 로그인 API 요청 | Refresh Token 저장 + 로그인 시 `/auth/refresh` 호출로 개선 | [`AuthAppService.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java) |
-| 재고 관련 동시성 문제 | JPA의 `@Lock(LockModeType.PESSIMISTIC_WRITE)` 적용 | [`ProductsRepository.java`](./src/main/java/store/onuljang/repository/ProductsRepository.java) |
-| N+1 문제 | JPA Fetch Join(`@EntityGraph`) 적용 | [`ReservationAllRepository.java`](./src/main/java/store/onuljang/repository/ReservationAllRepository.java) |
 
 ---
 
