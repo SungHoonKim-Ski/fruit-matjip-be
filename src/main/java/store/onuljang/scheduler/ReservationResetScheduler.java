@@ -27,7 +27,7 @@ public class ReservationResetScheduler {
     ReservationAppService reservationAppService;
 
     /**
-     * 매일 18:05(KST) 실행.
+     * 매일 19:05(KST) 실행.
      *   - retryFor: 재시도 대상으로 간주할 예외 목록.
      *               비관/낙관 락 충돌, DB 락 획득 실패, 동시 변경 검출(IllegalState) 등
      *   - backoff: 첫 시도 실패 후 1초 대기(기본), 이후 2배씩 증가(multiplier=2), 약간의 랜덤 지터 추가(random=true)
