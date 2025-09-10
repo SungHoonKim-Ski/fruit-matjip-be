@@ -15,7 +15,6 @@ import java.util.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "products")
 @SQLDelete(sql = "UPDATE products SET deleted_at = NOW() WHERE id = ?")
