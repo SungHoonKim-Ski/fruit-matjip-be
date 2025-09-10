@@ -20,7 +20,7 @@ public class ProductDailyAgg extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private ProductAll product;
 
     @Getter
     @Column(name = "quantity", nullable = false)
