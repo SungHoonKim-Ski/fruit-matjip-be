@@ -49,7 +49,6 @@ public class ProductAll extends BaseEntity {
 
     @Getter
     @Column(name = "total_sold", nullable = false)
-    @Builder.Default
     private Long totalSold;
 
     @Getter
