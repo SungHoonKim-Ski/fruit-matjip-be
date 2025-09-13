@@ -14,6 +14,7 @@ import jakarta.persistence.OrderBy;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.*;
 
 @NoArgsConstructor
@@ -47,6 +48,10 @@ public class Product extends BaseEntity {
     @Setter
     @Column(name = "sell_date", nullable = false)
     private LocalDate sellDate;
+
+    @Getter
+    @Column(name = "sell_time")
+    private LocalTime sellTime;
 
     @Getter
     @Column(name = "is_visible", nullable = false)
@@ -203,5 +208,9 @@ public class Product extends BaseEntity {
 
     private void addTotalSold(int quantity) {
         this.totalSold += quantity;
+    }
+
+    public void setSellTime(LocalTime sellTime) {
+        this.sellTime = sellTime;
     }
 }

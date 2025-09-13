@@ -6,6 +6,7 @@ import store.onuljang.repository.entity.Product;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Builder
@@ -18,6 +19,7 @@ public record AdminProductDetailResponse (
     String productUrl,
     List<String> detailUrls,
     LocalDate sellDate,
+    LocalTime sellTime,
     String description
 ){
     public static AdminProductDetailResponse from(Product product) {
@@ -30,6 +32,7 @@ public record AdminProductDetailResponse (
             .productUrl(product.getProductUrl())
             .detailUrls(product.getDetailImages())
             .sellDate(product.getSellDate())
+            .sellTime(product.getSellTime())
             .description(product.getDescription())
             .build();
     }

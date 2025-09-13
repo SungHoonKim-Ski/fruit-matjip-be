@@ -24,6 +24,7 @@ import store.onuljang.util.TimeUtil;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
@@ -42,7 +43,7 @@ public class ReservationAppService {
     @Transactional
     public long reserve(String uId, ReservationRequest request) {
         Product product = productsService.findByIdWithLock(request.productId());
-        validateReserveTime(product.getSellDate());
+        validateReserveTime(product.getSellDate(), product.getSellTime());
 
         Users user = userService.findByUidWithLock(uId);
         Reservation reservation = Reservation.builder()
@@ -139,10 +140,15 @@ public class ReservationAppService {
                 .build());
     }
 
-    private void validateReserveTime(LocalDate sellDate) {
+    private void validateReserveTime(LocalDate sellDate, LocalTime sellTime) {
         ZonedDateTime deadLine = sellDate.atTime(RESERVE_DEADLINE).atZone(KST);
         if (ZonedDateTime.now(KST).isAfter(deadLine)) {
             throw new UserValidateException("예약 가능한 시간이 지났습니다.");
+        }
+
+        LocalDateTime postDateTime = sellDate.atTime(sellTime);
+        if (TimeUtil.nowDateTime().isBefore(postDateTime)) {
+            throw new UserValidateException("상품 게시 시간 전입니다.");
         }
     }
 }

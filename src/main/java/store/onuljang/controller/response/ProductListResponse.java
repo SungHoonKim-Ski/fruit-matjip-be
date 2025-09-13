@@ -5,6 +5,7 @@ import store.onuljang.repository.entity.Product;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Builder
@@ -19,6 +20,7 @@ public record ProductListResponse(
         int stock,
         BigDecimal price,
         LocalDate sellDate,
+        LocalTime sellTime,
         boolean isVisible,
         int orderIndex,
         long totalSold
@@ -31,6 +33,7 @@ public record ProductListResponse(
                 .stock(product.getStock())
                 .price(product.getPrice())
                 .sellDate(product.getSellDate())
+                .sellTime(product.getSellTime())
                 .isVisible(product.getIsVisible())
                 .orderIndex(product.getOrderIndex())
                 .totalSold(product.getTotalSold())

@@ -5,6 +5,7 @@ import store.onuljang.repository.entity.Product;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ public record AdminProductListItems(
         long totalSold,
         String productUrl,
         LocalDate sellDate,
+        LocalTime sellTime,
         int orderIndex,
         boolean isVisible
     ) {
@@ -32,6 +34,7 @@ public record AdminProductListItems(
                 .price(product.getPrice())
                 .isVisible(product.getIsVisible())
                 .sellDate(product.getSellDate())
+                .sellTime(product.getSellTime())
                 .stock(product.getStock())
                 .orderIndex(product.getOrderIndex())
                 .totalSold(product.getTotalSold())

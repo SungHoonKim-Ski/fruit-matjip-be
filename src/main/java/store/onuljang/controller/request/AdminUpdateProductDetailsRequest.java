@@ -4,6 +4,8 @@ import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.UniqueElements;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 public record AdminUpdateProductDetailsRequest(
@@ -34,5 +36,11 @@ public record AdminUpdateProductDetailsRequest(
     @Size(max = 300, message = "상세 이미지 경로는 300자 이하여야 합니다")
     @Pattern(regexp = "^[A-Za-z0-9._/\\-:]+$", message = "상세 이미지 경로에는 영문/숫자/._-/:/만 허용됩니다")
         String
-    > detailUrls
+    > detailUrls,
+
+    LocalTime
+    sellTime,
+
+    Boolean
+    update_sell_time
 ) {}
