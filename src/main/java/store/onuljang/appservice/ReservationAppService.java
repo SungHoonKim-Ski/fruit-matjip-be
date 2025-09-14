@@ -146,6 +146,7 @@ public class ReservationAppService {
             throw new UserValidateException("예약 가능한 시간이 지났습니다.");
         }
 
+        if (sellTime == null) return;
         LocalDateTime postDateTime = sellDate.atTime(sellTime);
         if (TimeUtil.nowDateTime().isBefore(postDateTime)) {
             throw new UserValidateException("상품 게시 시간 전입니다.");
