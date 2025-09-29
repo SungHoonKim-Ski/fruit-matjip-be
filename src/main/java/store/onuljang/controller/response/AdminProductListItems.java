@@ -25,6 +25,7 @@ public record AdminProductListItems(
         LocalTime sellTime,
         int orderIndex,
         boolean visible,
+        boolean selfPick
     ) {
         public static AdminProductListItem from(Product product) {
             return AdminProductListItem.builder()
@@ -33,6 +34,7 @@ public record AdminProductListItems(
                 .productUrl(product.getProductUrl())
                 .price(product.getPrice())
                 .visible(product.getVisible())
+                .selfPick(product.getSelfPick())
                 .sellDate(product.getSellDate())
                 .sellTime(product.getSellTime())
                 .stock(product.getStock())

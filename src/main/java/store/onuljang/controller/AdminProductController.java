@@ -50,9 +50,9 @@ public class AdminProductController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/sold-out/{productId}")
-    public ResponseEntity<Void> setSoldOut(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
-        adminProductAppService.setSoldOut(productId);
+    @PatchMapping("/self-pick/{productId}")
+    public ResponseEntity<Void> toggleSelfPick(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
+        adminProductAppService.toggleSelfPick(productId);
 
         return ResponseEntity.ok().build();
     }

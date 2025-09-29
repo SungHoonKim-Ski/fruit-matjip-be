@@ -80,12 +80,13 @@ public class ReservationAppService {
 
     @Transactional
     public void selfPick(String uId, long reservationId) {
-        Users user = userService.findByUidWithLock(uId);
         Reservation reservation = reservationService.findByIdWithLock(reservationId);
+        Product product = productsService.findById(reservation.getProduct().getId());
+        Users user = userService.findByUidWithLock(uId);
 
         validateUserReservation(user, reservation);
         user.assertCanSelfPick();
-        productsService.findById(reservation.getProduct().getId());
+        product.assertCanSelfPick();
 
         reservation.requestSelfPick(TimeUtil.nowDate(), RESERVE_DEADLINE, KST);
 

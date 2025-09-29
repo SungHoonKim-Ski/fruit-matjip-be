@@ -110,6 +110,10 @@ public class Reservation extends BaseEntity {
         return this.product.getName();
     }
 
+    public boolean getSelfPick() {
+        return this.product.getSelfPick();
+    }
+
     public String getReservationProductUrl() {
         return this.product.getProductUrl();
     }

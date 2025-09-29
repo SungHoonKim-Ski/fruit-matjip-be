@@ -92,14 +92,14 @@ public class AdminProductAppService {
     public void toggleVisible(long productId) {
         productsService.findByIdWithLock(productId).toggleVisible();
 
-        saveProductLog(productId, -1, AdminProductAction.UPDATE);
+        saveProductLog(productId, -2, AdminProductAction.UPDATE);
     }
 
     @Transactional
-    public void setSoldOut(long productId) {
-        productsService.findByIdWithLock(productId).soldOut();
+    public void toggleSelfPick(long productId) {
+        productsService.findByIdWithLock(productId).toggleSelfPick();
 
-        saveProductLog(productId, 0, AdminProductAction.UPDATE);
+        saveProductLog(productId, -3, AdminProductAction.UPDATE);
     }
 
     @Transactional

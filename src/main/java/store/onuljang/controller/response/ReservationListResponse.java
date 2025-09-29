@@ -20,6 +20,7 @@ public record ReservationListResponse(
         String productName,
         LocalDate orderDate,
         int quantity,
+        boolean selfPick,
         ReservationStatus status) {
 
         public static ReservationResponse from(Reservation entity) {
@@ -30,6 +31,7 @@ public record ReservationListResponse(
                 .productName(entity.getReservationProductName())
                 .orderDate(entity.getPickupDate())
                 .quantity(entity.getQuantity())
+                .selfPick(entity.getSelfPick())
                 .status(entity.getStatus())
             .build();
         }

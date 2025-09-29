@@ -57,6 +57,9 @@ public class Product extends BaseEntity {
     @Column(name = "visible", nullable = false)
     private Boolean visible = true;
 
+    @Getter
+    @Column(name = "self_pick", nullable = false)
+    private Boolean selfPick = true;
 
     @Getter
     @Column(name = "total_sold", nullable = false)
@@ -152,8 +155,8 @@ public class Product extends BaseEntity {
         return removeKeys;
     }
 
-    public void soldOut() {
-        this.stock = 0;
+    public void toggleSelfPick() {
+        this.selfPick = !this.selfPick;
     }
 
     public void toggleVisible() {
@@ -203,15 +206,21 @@ public class Product extends BaseEntity {
         }
     }
 
+    public void setSellTime(LocalTime sellTime) {
+        this.sellTime = sellTime;
+    }
+
+    public void assertCanSelfPick() {
+        if (!this.selfPick) {
+            throw new ProductUnavailableException("셀프 수령이 불가능한 상품입니다.");
+        }
+    }
+
     private void removeTotalSold(int quantity) {
         this.totalSold = Math.max(this.totalSold - quantity, 0);
     }
 
     private void addTotalSold(int quantity) {
         this.totalSold += quantity;
-    }
-
-    public void setSellTime(LocalTime sellTime) {
-        this.sellTime = sellTime;
     }
 }

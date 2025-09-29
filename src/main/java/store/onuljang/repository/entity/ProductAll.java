@@ -47,6 +47,9 @@ public class ProductAll extends BaseEntity {
     @Column(name = "visible", nullable = false)
     private Boolean visible;
 
+    @Getter
+    @Column(name = "self_pick", nullable = false)
+    private Boolean selfPick = true;
 
     @Getter
     @Column(name = "total_sold", nullable = false)
