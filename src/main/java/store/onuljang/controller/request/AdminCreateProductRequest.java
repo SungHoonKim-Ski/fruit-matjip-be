@@ -39,6 +39,7 @@ public record AdminCreateProductRequest (
             .productUrl(request.imageUrl)
             .sellDate(LocalDate.parse(request.sellDate))
             .visible(request.visible)
+            .selfPick(true)
             .registeredAdmin(admin)
             .build();
     }
