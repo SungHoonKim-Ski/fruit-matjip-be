@@ -24,7 +24,7 @@ public record AdminProductListItems(
         LocalDate sellDate,
         LocalTime sellTime,
         int orderIndex,
-        boolean isVisible
+        boolean visible,
     ) {
         public static AdminProductListItem from(Product product) {
             return AdminProductListItem.builder()
@@ -32,7 +32,7 @@ public record AdminProductListItems(
                 .name(product.getName())
                 .productUrl(product.getProductUrl())
                 .price(product.getPrice())
-                .isVisible(product.getIsVisible())
+                .visible(product.getVisible())
                 .sellDate(product.getSellDate())
                 .sellTime(product.getSellTime())
                 .stock(product.getStock())

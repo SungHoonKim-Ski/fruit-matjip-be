@@ -44,8 +44,9 @@ public class ProductAll extends BaseEntity {
     private LocalDate sellDate;
 
     @Getter
-    @Column(name = "is_visible", nullable = false)
-    private Boolean isVisible;
+    @Column(name = "visible", nullable = false)
+    private Boolean visible;
+
 
     @Getter
     @Column(name = "total_sold", nullable = false)

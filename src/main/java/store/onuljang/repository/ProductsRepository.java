@@ -10,7 +10,7 @@ import java.util.*;
 
 public interface ProductsRepository extends JpaRepository<Product, Long> {
     @EntityGraph(attributePaths = {"productOrder"})
-    List<Product> findAllBySellDateBetweenAndIsVisible(LocalDate from, LocalDate to, boolean isVisible);
+    List<Product> findAllBySellDateBetweenAndVisible(LocalDate from, LocalDate to, boolean visible);
 
     @EntityGraph(attributePaths = {"productOrder"})
     List<Product> findAllByOrderBySellDateDesc();

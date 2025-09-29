@@ -21,7 +21,7 @@ public record ProductListResponse(
         BigDecimal price,
         LocalDate sellDate,
         LocalTime sellTime,
-        boolean isVisible,
+        boolean visible,
         int orderIndex,
         long totalSold
     ) {
@@ -34,7 +34,7 @@ public record ProductListResponse(
                 .price(product.getPrice())
                 .sellDate(product.getSellDate())
                 .sellTime(product.getSellTime())
-                .isVisible(product.getIsVisible())
+                .visible(product.getVisible())
                 .orderIndex(product.getOrderIndex())
                 .totalSold(product.getTotalSold())
                 .build();

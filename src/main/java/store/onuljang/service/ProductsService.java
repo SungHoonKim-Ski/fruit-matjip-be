@@ -1,17 +1,12 @@
 package store.onuljang.service;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
-import store.onuljang.repository.ProductOrderRepository;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.entity.Product;
 
@@ -61,7 +56,7 @@ public class ProductsService {
 
     @Transactional(readOnly = true)
     public List<Product> findAllVisibleBetween(LocalDate from, LocalDate to, boolean visible) {
-        return productsRepository.findAllBySellDateBetweenAndIsVisible(from, to, visible);
+        return productsRepository.findAllBySellDateBetweenAndVisible(from, to, visible);
     }
 
     @Transactional(readOnly = true)

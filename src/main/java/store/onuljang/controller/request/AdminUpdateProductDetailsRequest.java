@@ -42,5 +42,5 @@ public record AdminUpdateProductDetailsRequest(
     sellTime,
 
     Boolean
-    update_sell_time
+    updateSellTime
 ) {}

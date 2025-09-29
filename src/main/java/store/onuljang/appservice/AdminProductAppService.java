@@ -61,7 +61,7 @@ public class AdminProductAppService {
         if (request.stock() != null) product.setStock(request.stock());
         if (request.sellDate() != null) {product.setSellDate(LocalDate.parse(request.sellDate()));}
         if (request.description() != null) product.setDescription(request.description());
-        if (request.update_sell_time() != null && request.update_sell_time()) product.setSellTime(request.sellTime());
+        if (request.updateSellTime() != null && request.updateSellTime()) product.setSellTime(request.sellTime());
 
         List<String> removeKey = new ArrayList<>();
 

@@ -54,8 +54,9 @@ public class Product extends BaseEntity {
     private LocalTime sellTime;
 
     @Getter
-    @Column(name = "is_visible", nullable = false)
-    private Boolean isVisible = true;
+    @Column(name = "visible", nullable = false)
+    private Boolean visible = true;
+
 
     @Getter
     @Column(name = "total_sold", nullable = false)
@@ -156,7 +157,7 @@ public class Product extends BaseEntity {
     }
 
     public void toggleVisible() {
-        this.isVisible = !this.isVisible;
+        this.visible = !this.visible;
     }
 
     public void delete() {
@@ -165,7 +166,7 @@ public class Product extends BaseEntity {
     }
 
     public void assertPurchasable(int quantity) {
-        if (Boolean.FALSE.equals(isVisible)) {
+        if (Boolean.FALSE.equals(visible)) {
             throw new ProductUnavailableException("판매가 중단된 상품입니다.");
         }
         if (quantity <= 0) {
