@@ -71,7 +71,7 @@ public class ReservationAppService {
 
         validateUserReservation(user, reservation);
 
-        reservation.cancelByUser(TimeUtil.nowDate(), RESERVE_DEADLINE, KST);
+        reservation.cancelByUser(TimeUtil.nowDate(), CANCEL_DEADLINE, KST);
         product.cancel(reservation.getQuantity());
         user.cancelReservation(reservation.getQuantity());
 
@@ -88,7 +88,7 @@ public class ReservationAppService {
         user.assertCanSelfPick();
         product.assertCanSelfPick();
 
-        reservation.requestSelfPick(TimeUtil.nowDate(), RESERVE_DEADLINE, KST);
+        reservation.requestSelfPick(TimeUtil.nowDate(), SELF_PICK_DEADLINE, KST);
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
     }
