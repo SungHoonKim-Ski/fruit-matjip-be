@@ -10,9 +10,9 @@ import java.time.ZoneId;
 @UtilityClass
 public class TimeUtil {
     public static final ZoneId KST = ZoneId.of("Asia/Seoul");
-    public final LocalTime SELF_PICK_DEADLINE = LocalTime.of(19, 0);
-    public final LocalTime RESERVE_DEADLINE = LocalTime.of(19, 0);
-    public final LocalTime CANCEL_DEADLINE = LocalTime.of(18, 0);
+    public final LocalTime SELF_PICK_DEADLINE = LocalTime.of(19, 30);
+    public final LocalTime RESERVE_DEADLINE = LocalTime.of(19, 30);
+    public final LocalTime CANCEL_DEADLINE = LocalTime.of(19, 30);
 
     public static LocalDate nowDate() {
         return LocalDate.now(KST);
