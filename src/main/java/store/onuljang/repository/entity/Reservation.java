@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.*;
@@ -39,6 +40,11 @@ public class Reservation extends BaseEntity {
     private Product product;
 
     @Getter
+    @Setter
+    @Column(name = "sellPrice", nullable = false)
+    private BigDecimal sellPrice;
+
+    @Getter
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
@@ -58,28 +64,46 @@ public class Reservation extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Reservation(Users user, Product product, Integer quantity, BigDecimal amount, LocalDate pickupDate) {
+    public Reservation(Users user, Product product, Integer quantity, BigDecimal amount, BigDecimal sellPrice, LocalDate pickupDate) {
         this.user = user;
         this.product = product;
         this.quantity = quantity;
         this.amount = amount;
         this.pickupDate = pickupDate;
+        this.sellPrice = sellPrice;
     }
 
-    public void cancelByUser(LocalDate today, LocalTime deadline, ZoneId zone) {
-        if (this.pickupDate.isBefore(today)) {
+    public void cancelByUser() {
+        if (TimeUtil.isPastDate(pickupDate)) {
             throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
+        }
+        if (TimeUtil.isCancelDeadlineOver(pickupDate)) {
+            throw new UserValidateException("취소 가능 시각이 지났습니다.");
         }
         if (this.status != ReservationStatus.PENDING && this.status != ReservationStatus.SELF_PICK) {
             throw new UserValidateException("취소할 수 없는 예약입니다.");
         }
-        if (this.status == ReservationStatus.SELF_PICK) {
-            ZonedDateTime deadLine = this.pickupDate.atTime(deadline).atZone(zone);
-            if (ZonedDateTime.now(zone).isAfter(deadLine)) {
-                throw new UserValidateException("셀프 수령 마감 후 취소는 불가능합니다.");
-            }
-        }
+
         this.changeStatus(ReservationStatus.CANCELED);
+    }
+
+    public void minusQuantityByUser(int minusQuantity) {
+        if (TimeUtil.isPastDate(pickupDate)) {
+            throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
+        }
+        if (TimeUtil.isCancelDeadlineOver(pickupDate)) {
+            throw new UserValidateException("취소 가능 시각이 지났습니다.");
+        }
+        if (this.status != ReservationStatus.PENDING) {
+            throw new UserValidateException("변경할 수 없는 예약입니다.");
+        }
+
+        if (this.quantity - minusQuantity < 1) {
+            throw new UserValidateException("변경 뒤 수량은 1개 이상이어야 합니다.");
+        }
+
+        this.minusQuantity(minusQuantity);
+        this.amount = this.sellPrice.multiply(new BigDecimal(this.quantity));
     }
 
     public void requestSelfPick(LocalDate today, LocalTime deadline, ZoneId zone) {
@@ -120,5 +144,9 @@ public class Reservation extends BaseEntity {
 
     public void setStatus(ReservationStatus status) {
         this.status = status;
+    }
+
+    private void minusQuantity(int quantity) {
+        this.quantity = Math.max(1, this.quantity - quantity);
     }
 }

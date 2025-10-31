@@ -2,10 +2,7 @@ package store.onuljang.util;
 
 import lombok.experimental.UtilityClass;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 
 @UtilityClass
 public class TimeUtil {
@@ -24,5 +21,21 @@ public class TimeUtil {
 
     public static LocalDateTime nowDateTime() {
         return LocalDateTime.now(KST);
+    }
+
+    public boolean isPastDate(LocalDate date) {
+        return date.isBefore(nowDate());
+    }
+
+    public boolean isCancelDeadlineOver(LocalDate pickupDate) {
+        ZonedDateTime deadLine = pickupDate.atTime(CANCEL_DEADLINE).atZone(KST);
+
+        return ZonedDateTime.now(KST).isAfter(deadLine);
+    }
+
+    public boolean isReserveDeadlineOver(LocalDate pickupDate) {
+        ZonedDateTime deadLine = pickupDate.atTime(RESERVE_DEADLINE).atZone(KST);
+
+        return ZonedDateTime.now(KST).isAfter(deadLine);
     }
 }

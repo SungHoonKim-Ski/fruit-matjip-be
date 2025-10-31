@@ -2,6 +2,7 @@ package store.onuljang.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,19 @@ public class ReservationController {
         String uid = auth.getName();
 
         reservationAppService.cancel(uid, reservationId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/{id}/quantity")
+    public ResponseEntity<Void> removeMinusQuantity(
+            Authentication auth,
+            @Valid @PositiveOrZero @PathVariable("id") Long reservationId,
+            @Valid @Positive @RequestParam Integer minus
+    ) {
+        String uid = auth.getName();
+
+        reservationAppService.minusQuantity(uid, reservationId, minus);
 
         return ResponseEntity.ok().build();
     }

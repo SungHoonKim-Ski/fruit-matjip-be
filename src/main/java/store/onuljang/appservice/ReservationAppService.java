@@ -52,6 +52,7 @@ public class ReservationAppService {
             .quantity(request.quantity())
             .amount(product.getPrice().multiply(BigDecimal.valueOf(request.quantity())))
             .pickupDate(product.getSellDate())
+            .sellPrice(product.getPrice())
             .build();
 
         product.reserve(request.quantity());
@@ -64,6 +65,21 @@ public class ReservationAppService {
     }
 
     @Transactional
+    public void minusQuantity(String uId, long reservationId, int minusQuantity) {
+        Reservation reservation = reservationService.findByIdWithLock(reservationId);
+        Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
+        Users user = userService.findByUidWithLock(uId);
+
+        validateUserReservation(user, reservation);
+
+        reservation.minusQuantityByUser(minusQuantity);
+        product.addStock(minusQuantity);
+        user.cancelReservation(minusQuantity);
+
+        saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
+    }
+
+    @Transactional
     public void cancel(String uId, long reservationId) {
         Reservation reservation = reservationService.findByIdWithLock(reservationId);
         Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
@@ -71,7 +87,7 @@ public class ReservationAppService {
 
         validateUserReservation(user, reservation);
 
-        reservation.cancelByUser(TimeUtil.nowDate(), CANCEL_DEADLINE, KST);
+        reservation.cancelByUser();
         product.cancel(reservation.getQuantity());
         user.cancelReservation(reservation.getQuantity());
 
