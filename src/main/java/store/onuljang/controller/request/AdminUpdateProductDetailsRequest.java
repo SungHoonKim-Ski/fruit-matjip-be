@@ -29,7 +29,7 @@ public record AdminUpdateProductDetailsRequest(
     @Size(max = 2000, message = "설명은 300자 이하여야 합니다")
     String description,
 
-    @Size(max = 5, message = "상세 이미지는 최대 5개까지 가능합니다")
+    @Size(max = 10, message = "상세 이미지는 최대 10개까지 가능합니다")
     @UniqueElements(message = "상세 이미지에는 중복이 있을 수 없습니다")
     List<
     @NotBlank(message = "상세 이미지 경로는 비어 있을 수 없습니다")
