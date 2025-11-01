@@ -2,6 +2,7 @@ package store.onuljang.controller;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.PastOrPresent;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,8 +28,8 @@ public class AdminAggregationController {
 
     @GetMapping("/summary")
     public ResponseEntity<AdminReservationSummaryResponse> getSummary(
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull @Past LocalDate from,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull @Past LocalDate to
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull @PastOrPresent LocalDate from,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull @PastOrPresent LocalDate to
     )
     {
         return ResponseEntity.ok(adminAggregationAppService.getAggregationSummary(from, to));
