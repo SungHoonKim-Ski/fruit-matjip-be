@@ -148,6 +148,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("ProductUnavailableException", ex.getMessage()));
     }
 
+
+    @ExceptionHandler(UserNoContentException.class)
+    public ResponseEntity<ErrorResponse> handleUserNoContentException(UserNoContentException ex) {
+        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("UserNoContentException", ex.getMessage()));
+    }
+
     // Runtime Exception, Exception
 
     @ExceptionHandler(RuntimeException.class)
