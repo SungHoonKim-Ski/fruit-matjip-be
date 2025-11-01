@@ -46,9 +46,14 @@ public class AdminReservationAppService {
 
         validateUserReservation(user, reservation);
 
-        reservation.setStatus(ReservationStatus.CANCELED);
-        product.cancel(reservation.getQuantity());
-        user.noShow();
+        if (reservation.isNoShow()) {
+            user.warn();
+        } else {
+            reservation.noShow();
+            product.cancel(reservation.getQuantity());
+            user.noShow(reservation.getQuantity(), reservation.getAmount());
+        }
+
         aggAppliedService.markSingle(reservation.getId(), AggPhase.NO_SHOW_MINUS);
     }
 
