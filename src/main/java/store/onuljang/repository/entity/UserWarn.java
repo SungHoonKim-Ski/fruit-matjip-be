@@ -2,9 +2,6 @@ package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.base.BaseLogEntity;
 import store.onuljang.repository.entity.enums.UserWarnReason;
 
@@ -12,8 +9,6 @@ import store.onuljang.repository.entity.enums.UserWarnReason;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "user_warn")
-@SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user_warn SET deleted_at = NOW() WHERE id = ?")
 public class UserWarn extends BaseLogEntity {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

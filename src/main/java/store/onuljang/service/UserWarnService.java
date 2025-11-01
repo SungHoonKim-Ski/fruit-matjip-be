@@ -15,6 +15,7 @@ import store.onuljang.repository.entity.enums.UserWarnReason;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j
+@Transactional(readOnly = true)
 public class UserWarnService {
     UserWarnRepository userWarnRepository;
 
