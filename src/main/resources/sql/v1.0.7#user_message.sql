@@ -28,5 +28,7 @@ CREATE INDEX idx_umq_user_status ON user_message_queue (user_uid, status);
 
 INSERT INTO message_template(title, body, message_type)
 values ('노쇼 경고 안내',
-        '항상 이용해주셔서 감사합니다.\n예약 후 노쇼가 다중으로 발생할 경우, 추후 과일맛집 예약 사이트 이용에 제한이 있을 수 있습니다.',
+        '항상 이용해주셔서 감사합니다.
+예약 후 <b>노쇼가 여러 건 발생</b>할 경우,
+추후 과일맛집 예약 <b>사이트 이용에 제한</b>이 있을 수 있습니다.',
         'USER_NO_SHOW');

@@ -54,7 +54,7 @@ public class UserAppService {
         return !user.exceedMaxWarnCount();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public UserMessageResponse getMessage(String uid) {
         UserMessageQueue message = userMessageQueueService.findFirstPendingWithMessageTemplate(uid)
                 .orElseThrow(() -> new UserNoContentException("유저 메시지가 없습니다."));

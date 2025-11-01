@@ -14,7 +14,7 @@ public interface UserMessageQueueRepository extends JpaRepository<UserMessageQue
     @Query(value = """
     select m.*
     from user_message_queue m
-    left join message_template t on m.template_id = t.id
+    left join message_template t on m.message_template_id = t.id
     where m.user_uid = :uid
       and m.status = 'PENDING'
       and (m.valid_from is null or m.valid_from <= :now)

@@ -2,11 +2,7 @@ package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
-import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.base.BaseLogEntity;
-import store.onuljang.repository.entity.enums.MessageType;
 import store.onuljang.repository.entity.enums.UserMessageStatus;
 
 import java.time.LocalDateTime;
@@ -18,8 +14,6 @@ import java.time.LocalDateTime;
     indexes = {
         @Index(name = "idx_umq_user_status", columnList = "user_uid, status")
     })
-@SQLRestriction("deleted_at IS NULL")
-@SQLDelete(sql = "UPDATE user_message_queue SET deleted_at = NOW() WHERE id = ?")
 public class UserMessageQueue extends BaseLogEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
