@@ -75,7 +75,7 @@ public class ReservationAppService {
         reservation.minusQuantityByUser(minusQuantity);
         product.addStock(minusQuantity);
 
-        BigDecimal diff = reservation.getAmount().multiply(BigDecimal.valueOf(minusQuantity));
+        BigDecimal diff = reservation.getSellPrice().multiply(BigDecimal.valueOf(minusQuantity));
         user.cancelReserve(minusQuantity, diff);
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
