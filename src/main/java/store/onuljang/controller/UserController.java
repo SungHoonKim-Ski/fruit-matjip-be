@@ -1,5 +1,6 @@
 package store.onuljang.controller;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.UserAppService;
 import store.onuljang.auth.JwtUtil;
+import store.onuljang.controller.response.UserMessageResponse;
 
 @RequestMapping("/api/auth")
 @RestController
@@ -50,5 +52,19 @@ public class UserController {
         String uid = auth.getName();
 
         return ResponseEntity.ok(userAppService.canSelfPick(uid));
+    }
+
+    @GetMapping("/message")
+    public ResponseEntity<UserMessageResponse> getMessage(Authentication auth) {
+        String uid = auth.getName();
+
+        return ResponseEntity.ok(userAppService.getMessage(uid));
+    }
+
+    @PatchMapping("/message/{messageId}")
+    public ResponseEntity<Void> messageReceived(@NotNull @Positive @PathVariable long messageId) {
+        userAppService.messageReceived(messageId);
+
+        return ResponseEntity.ok().build();
     }
 }

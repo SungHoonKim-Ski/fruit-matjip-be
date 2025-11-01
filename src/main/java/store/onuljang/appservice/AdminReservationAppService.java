@@ -4,16 +4,18 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationsTodayResponse;
 import store.onuljang.exception.UserValidateException;
+import store.onuljang.log.user_message.UserMessageEvent;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.AggPhase;
+import store.onuljang.repository.entity.enums.MessageType;
 import store.onuljang.repository.entity.enums.ReservationStatus;
-import store.onuljang.repository.entity.enums.UserWarnReason;
 import store.onuljang.service.*;
 import store.onuljang.util.TimeUtil;
 
@@ -32,6 +34,7 @@ public class AdminReservationAppService {
     ProductsService productService;
     AggAppliedService aggAppliedService;
     UserWarnService userWarnService;
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void updateReservationStatus(long id, ReservationStatus status) {
@@ -57,6 +60,8 @@ public class AdminReservationAppService {
         }
 
         userWarnService.noShow(user);
+
+        publishUserNoShowMessage(user.getUid());
         aggAppliedService.markSingle(reservation.getId(), AggPhase.NO_SHOW_MINUS);
     }
 
@@ -123,5 +128,12 @@ public class AdminReservationAppService {
         if (!user.getUid().equals(reservation.getUser().getUid())) {
             throw new UserValidateException("다른 유저가 예약한 상품입니다.");
         }
+    }
+
+    private void publishUserNoShowMessage(String uid) {
+        eventPublisher.publishEvent(UserMessageEvent.builder()
+            .userUid(uid)
+            .type(MessageType.USER_NO_SHOW)
+            .build());
     }
 }
