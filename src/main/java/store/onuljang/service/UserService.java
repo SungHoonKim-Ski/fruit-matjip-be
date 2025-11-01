@@ -12,6 +12,7 @@ import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.Users;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)

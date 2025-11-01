@@ -23,4 +23,8 @@ public class UserWarnService {
         userWarnRepository.save(new UserWarn(user, UserWarnReason.NO_SHOW));
     }
 
+    @Transactional
+    public void warnByAdmin(Users user) {
+        userWarnRepository.save(new UserWarn(user, UserWarnReason.ADMIN));
+    }
 }
