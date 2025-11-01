@@ -13,6 +13,7 @@ import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.AggPhase;
 import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.repository.entity.enums.UserWarnReason;
 import store.onuljang.service.*;
 import store.onuljang.util.TimeUtil;
 
@@ -30,6 +31,7 @@ public class AdminReservationAppService {
     UserService userService;
     ProductsService productService;
     AggAppliedService aggAppliedService;
+    UserWarnService userWarnService;
 
     @Transactional
     public void updateReservationStatus(long id, ReservationStatus status) {
@@ -54,6 +56,7 @@ public class AdminReservationAppService {
             user.noShow(reservation.getQuantity(), reservation.getAmount());
         }
 
+        userWarnService.noShow(user);
         aggAppliedService.markSingle(reservation.getId(), AggPhase.NO_SHOW_MINUS);
     }
 
