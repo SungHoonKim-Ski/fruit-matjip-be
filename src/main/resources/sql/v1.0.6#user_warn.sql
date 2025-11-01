@@ -5,6 +5,6 @@ CREATE TABLE user_warn (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_warn__user
     FOREIGN KEY (user_uid) REFERENCES users(uid)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE INDEX idx_user_warn__user_uid ON user_warn(user_uid);

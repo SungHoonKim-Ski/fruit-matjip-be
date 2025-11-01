@@ -23,7 +23,7 @@ CREATE TABLE message_template (
         FOREIGN KEY (user_uid) REFERENCES users(uid),
     CONSTRAINT fk_umq_template
         FOREIGN KEY (message_template_id) REFERENCES message_template(id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 CREATE INDEX idx_umq_user_status ON user_message_queue (user_uid, status);
 
 INSERT INTO message_template(title, body, message_type)
