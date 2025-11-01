@@ -7,6 +7,7 @@ import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.base.BaseEntity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,6 +37,9 @@ public class Users extends BaseEntity {
     @Column(nullable = false)
     private Long totalOrders = 0L;
 
+    @Column(nullable = false)
+    private BigDecimal totalRevenue = BigDecimal.ZERO;
+
     @Getter
     @Column(nullable = false)
     private Boolean changeName = false;
@@ -63,18 +67,36 @@ public class Users extends BaseEntity {
         changeName = true;
     }
 
-    public void addTotalOrders(long totalOrders) {
-        this.totalOrders = Math.max(0, this.totalOrders + totalOrders);
+    public void addTotalOrders(long add) {
+        this.totalOrders = Math.max(0, this.totalOrders + add);
     }
 
-    public void cancelReservation(long totalOrders) {
-        this.totalOrders = Math.max(0, this.totalOrders - totalOrders);
+    public void removeTotalOrders(long remove) {
+        this.totalOrders = Math.max(0, this.totalOrders - remove);
     }
 
-    public void reserve(int quantity, LocalDate today) {
+    public void addTotalRevenue(BigDecimal add) {
+        if (add == null) return;
+        this.totalRevenue = this.totalRevenue.add(add).max(BigDecimal.ZERO);
+    }
+
+    public void removeTotalRevenue(BigDecimal remove) {
+        if (remove == null) return;
+
+        this.totalRevenue = this.totalRevenue.subtract(remove).max(BigDecimal.ZERO);
+    }
+
+    public void reserve(int quantity, BigDecimal amount, LocalDate today) {
         assertNicknameChanged();
         lastOrderDate = today;
+
         addTotalOrders(quantity);
+        addTotalRevenue(amount);
+    }
+
+    public void cancelReserve(long quantity, BigDecimal amount) {
+        removeTotalOrders(quantity);
+        removeTotalRevenue(amount);
     }
 
     public boolean exceedMaxWarnCount() {
@@ -87,7 +109,12 @@ public class Users extends BaseEntity {
         }
     }
 
-    public void noShow() {
+    public void noShow(int quantity, BigDecimal amount) {
+        this.cancelReserve(quantity, amount);
+        this.warn();
+    }
+
+    public void warn() {
         totalWarnCount++;
         warnCount++;
     }

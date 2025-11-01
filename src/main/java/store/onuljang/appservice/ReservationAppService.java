@@ -57,7 +57,7 @@ public class ReservationAppService {
 
         product.reserve(request.quantity());
         reservationService.save(reservation);
-        user.reserve(request.quantity(), TimeUtil.nowDate());
+        user.reserve(request.quantity(), reservation.getAmount(), TimeUtil.nowDate());
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.CREATE);
 
@@ -74,7 +74,9 @@ public class ReservationAppService {
 
         reservation.minusQuantityByUser(minusQuantity);
         product.addStock(minusQuantity);
-        user.cancelReservation(minusQuantity);
+
+        BigDecimal diff = reservation.getAmount().multiply(BigDecimal.valueOf(minusQuantity));
+        user.cancelReserve(minusQuantity, diff);
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
     }
@@ -89,7 +91,7 @@ public class ReservationAppService {
 
         reservation.cancelByUser();
         product.cancel(reservation.getQuantity());
-        user.cancelReservation(reservation.getQuantity());
+        user.cancelReserve(reservation.getQuantity(), reservation.getAmount());
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.DELETE);
     }
@@ -109,6 +111,7 @@ public class ReservationAppService {
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
     }
 
+    // batch
     @Transactional
     public int cancelNoShow(LocalDate today, ReservationStatus before, ReservationStatus after, LocalDateTime now) {
         Set<Long> targetIds = reservationService.findIdsByPickupDateAndStatus(today, before);
