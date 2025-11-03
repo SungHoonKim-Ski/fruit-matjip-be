@@ -31,12 +31,14 @@ public class Users extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Getter
     @Column
     private LocalDate lastOrderDate;
 
     @Column(nullable = false)
     private Long totalOrders = 0L;
 
+    @Getter
     @Column(nullable = false)
     private BigDecimal totalRevenue = BigDecimal.ZERO;
 
@@ -112,6 +114,10 @@ public class Users extends BaseEntity {
     public void noShow(int quantity, BigDecimal amount) {
         this.cancelReserve(quantity, amount);
         this.warn();
+    }
+
+    public void resetWarn() {
+        warnCount = 0;
     }
 
     public void warn() {

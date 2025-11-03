@@ -7,23 +7,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.controller.request.AdminUpdateReservationsRequest;
-import store.onuljang.controller.response.AdminReservationListResponse;
-import store.onuljang.controller.response.AdminReservationsTodayResponse;
-import store.onuljang.exception.UserValidateException;
+import store.onuljang.controller.request.AdminCustomerScrollRequest;
+import store.onuljang.controller.response.AdminCustomerScrollResponse;
 import store.onuljang.log.user_message.UserMessageEvent;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.ReservationSalesRow;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.MessageType;
-import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.*;
-import store.onuljang.util.TimeUtil;
+import store.onuljang.util.CursorUtil;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -43,6 +36,42 @@ public class AdminUserAppService {
         userWarnService.warnByAdmin(user);
 
         publishUserNoShowMessage(uid);
+    }
+
+    @Transactional
+    public void resetWarn(UUID uid) {
+        Users user = userService.findByUidWithLock(uid.toString());
+
+        user.resetWarn();
+    }
+
+    @Transactional(readOnly = true)
+    public AdminCustomerScrollResponse getUsers(AdminCustomerScrollRequest request) {
+        CursorUtil.Cursor cursor = CursorUtil.decode(request.cursor());
+
+        List<Users> users = userService.getUsers(
+            request.name(),
+            request.sortKey(),
+            request.sortOrder(),
+            cursor.sortValue(),
+            cursor.id(),
+            request.limit()
+        );
+
+        boolean hasNext = users.size() > request.limit();
+        if (hasNext) {
+            Users last = users.get(request.limit() - 1);
+            BigDecimal sortValue = switch (request.sortKey()) {
+                case TOTAL_REVENUE     -> last.getTotalRevenue();
+                case TOTAL_WARN_COUNT  -> BigDecimal.valueOf(last.getTotalWarnCount());
+                case WARN_COUNT        -> BigDecimal.valueOf(last.getWarnCount());
+            };
+            String nextCursor = CursorUtil.encode(last.getId(), sortValue);
+            users = users.subList(0, request.limit());
+            return AdminCustomerScrollResponse.of(users, true, nextCursor);
+        } else {
+            return AdminCustomerScrollResponse.of(users, false, null);
+        }
     }
 
     private void publishUserNoShowMessage(UUID uid) {

@@ -6,13 +6,17 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.controller.request.AdminCustomerSortKey;
+import store.onuljang.controller.request.SortOrder;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.exception.UserNotFoundException;
+import store.onuljang.repository.UserQueryRepository;
 import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.Users;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -21,6 +25,7 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class UserService {
     UserRepository userRepository;
+    UserQueryRepository userQueryRepository;
 
     @Transactional
     public Users save(Users user) {
@@ -53,5 +58,14 @@ public class UserService {
     @Transactional(readOnly = true)
     public boolean existUserByName(String name) {
         return userRepository.findByName(name).isPresent();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Users> getUsers(String name, AdminCustomerSortKey sortKey, SortOrder sortOrder, BigDecimal sortValue, Long id, int limit) {
+        return userQueryRepository.getUsers(name, sortKey, sortOrder, sortValue, id, limit);
+    }
+
+    public long countUsers(String name) {
+        return userRepository.countUsers(name);
     }
 }
