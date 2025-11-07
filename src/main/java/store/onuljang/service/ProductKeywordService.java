@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.repository.ProductKeywordRepository;
 import store.onuljang.repository.entity.ProductKeyword;
@@ -30,14 +29,14 @@ public class ProductKeywordService {
         productKeywordRepository.saveAll(productKeywords);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Transactional
     public void delete(String keyword) {
         productKeywordRepository.deleteByName(keyword);
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void deleteAllWithNewTransaction() {
-        productKeywordRepository.deleteAll();
+    @Transactional
+    public void deleteAllWithFlush() {
+        productKeywordRepository.deleteAllKeywords();
     }
 
     @Transactional
@@ -47,6 +46,6 @@ public class ProductKeywordService {
 
     @Transactional(readOnly = true)
     public List<ProductKeyword> findAll() {
-        return productKeywordRepository.findAll();
+        return productKeywordRepository.findAllByOrderByCreatedAtAsc();
     }
 }

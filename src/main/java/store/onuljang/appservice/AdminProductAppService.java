@@ -171,7 +171,8 @@ public class AdminProductAppService {
 
     @Transactional
     public void updateKeywords(List<String> keywords) {
-        productKeywordService.deleteAllWithNewTransaction();
+        productKeywordService.deleteAllWithFlush();
+
         productKeywordService.saveAll(
             keywords.stream().map(
             keyword -> ProductKeyword.builder()
