@@ -35,57 +35,89 @@ public class UserQueryRepository {
         Long cursorId,
         int limit
     ) {
-        BooleanBuilder where = new BooleanBuilder();
+        BooleanBuilder where = buildBaseWhere(name);
 
+        applyCursorCondition(where, sortKey, sortOrder, cursorValue, cursorId);
+
+        List<OrderSpecifier<?>> orders = buildOrderSpecifiers(sortKey, sortOrder);
+
+        return queryFactory
+            .selectFrom(users)
+            .where(where)
+            .orderBy(orders.toArray(OrderSpecifier[]::new))
+            .limit(limit + 1L) // hasNext 판단용
+            .fetch();
+    }
+
+    private BooleanBuilder buildBaseWhere(String name) {
+        BooleanBuilder where = new BooleanBuilder();
         if (name != null && !name.isBlank()) {
             where.and(users.name.contains(name));
         }
+        return where;
+    }
 
+    private void applyCursorCondition(
+        BooleanBuilder where,
+        AdminCustomerSortKey sortKey,
+        SortOrder sortOrder,
+        BigDecimal cursorValue,
+        Long cursorId
+    ) {
         // 커서 조건 (첫 페이지면 cursorValue/cursorId 가 null)
-        if (cursorValue != null && cursorId != null) {
-            switch (sortKey) {
-                case TOTAL_REVENUE -> {
-                    if (sortOrder == SortOrder.DESC) {
-                        where.and(
-                            users.totalRevenue.lt(cursorValue)
-                                .or(users.totalRevenue.eq(cursorValue).and(users.id.lt(cursorId)))
-                        );
-                    } else {
-                        where.and(
-                            users.totalRevenue.gt(cursorValue)
-                                .or(users.totalRevenue.eq(cursorValue).and(users.id.gt(cursorId)))
-                        );
-                    }
-                }
-                case TOTAL_WARN_COUNT -> {
-                    NumberPath<Integer> col = users.totalWarnCount;
-                    int cv = cursorValue.intValue();
-                    if (sortOrder == SortOrder.DESC) {
-                        where.and(
-                            col.lt(cv).or(col.eq(cv).and(users.id.lt(cursorId)))
-                        );
-                    } else {
-                        where.and(
-                            col.gt(cv).or(col.eq(cv).and(users.id.gt(cursorId)))
-                        );
-                    }
-                }
-                case WARN_COUNT -> {
-                    NumberPath<Integer> col = users.warnCount;
-                    int cv = cursorValue.intValue();
-                    if (sortOrder == SortOrder.DESC) {
-                        where.and(
-                            col.lt(cv).or(col.eq(cv).and(users.id.lt(cursorId)))
-                        );
-                    } else {
-                        where.and(
-                            col.gt(cv).or(col.eq(cv).and(users.id.gt(cursorId)))
-                        );
-                    }
-                }
-            }
+        if (cursorValue == null || cursorId == null) {
+            return;
         }
 
+        switch (sortKey) {
+            case TOTAL_REVENUE -> applyTotalRevenueCursor(where, sortOrder, cursorValue, cursorId);
+            case TOTAL_WARN_COUNT -> applyIntegerCursor(where, users.totalWarnCount, sortOrder, cursorValue, cursorId);
+            case WARN_COUNT -> applyIntegerCursor(where, users.warnCount, sortOrder, cursorValue, cursorId);
+        }
+    }
+
+    private void applyTotalRevenueCursor(
+        BooleanBuilder where,
+        SortOrder sortOrder,
+        BigDecimal cursorValue,
+        Long cursorId
+    ) {
+        if (sortOrder == SortOrder.DESC) {
+            where.and(
+                users.totalRevenue.lt(cursorValue)
+                    .or(users.totalRevenue.eq(cursorValue).and(users.id.lt(cursorId)))
+            );
+        } else {
+            where.and(
+                users.totalRevenue.gt(cursorValue)
+                    .or(users.totalRevenue.eq(cursorValue).and(users.id.gt(cursorId)))
+            );
+        }
+    }
+
+    private void applyIntegerCursor(
+        BooleanBuilder where,
+        NumberPath<Integer> column,
+        SortOrder sortOrder,
+        BigDecimal cursorValue,
+        Long cursorId
+    ) {
+        int cv = cursorValue.intValue();
+        if (sortOrder == SortOrder.DESC) {
+            where.and(
+                column.lt(cv).or(column.eq(cv).and(users.id.lt(cursorId)))
+            );
+        } else {
+            where.and(
+                column.gt(cv).or(column.eq(cv).and(users.id.gt(cursorId)))
+            );
+        }
+    }
+
+    private List<OrderSpecifier<?>> buildOrderSpecifiers(
+        AdminCustomerSortKey sortKey,
+        SortOrder sortOrder
+    ) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
         switch (sortKey) {
             case TOTAL_REVENUE ->
@@ -95,13 +127,8 @@ public class UserQueryRepository {
             case WARN_COUNT ->
                 orders.add(sortOrder == SortOrder.DESC ? users.warnCount.desc() : users.warnCount.asc());
         }
+        // 항상 id를 tie-breaker 로 사용
         orders.add(sortOrder == SortOrder.DESC ? users.id.desc() : users.id.asc());
-
-        return queryFactory
-            .selectFrom(users)
-            .where(where)
-            .orderBy(orders.toArray(OrderSpecifier[]::new))
-            .limit(limit + 1L) // hasNext 판단용
-            .fetch();
+        return orders;
     }
 }
