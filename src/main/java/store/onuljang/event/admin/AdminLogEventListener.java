@@ -1,4 +1,4 @@
-package store.onuljang.log.admin_product;
+package store.onuljang.event.admin;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -7,22 +7,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import store.onuljang.repository.AdminProductLogRepository;
+import store.onuljang.repository.AdminLogRepository;
+import store.onuljang.repository.entity.log.AdminLog;
 
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
-public class AdminProductLogEventListener {
-    AdminProductLogRepository adminProductLogRepository;
+public class AdminLogEventListener {
+    AdminLogRepository adminLogRepository;
 
     @Async("logExecutor")
     @EventListener
-    public void handle(AdminProductLogEvent event) {
+    public void handle(AdminLogEvent event) {
         try {
-            adminProductLogRepository.save(AdminProductLogEvent.from(event));
+            adminLogRepository.save(AdminLog.from(event));
         } catch (Exception e) {
-            log.warn("Admin product log save failed", e);
+            log.warn("Admin log save failed", e);
         }
     }
 }

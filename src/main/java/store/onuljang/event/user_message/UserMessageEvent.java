@@ -1,4 +1,4 @@
-package store.onuljang.log.user_message;
+package store.onuljang.event.user_message;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.enums.MessageType;

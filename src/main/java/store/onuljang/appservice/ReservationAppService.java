@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
 import store.onuljang.exception.UserValidateException;
-import store.onuljang.log.user_product.UserReservationLogEvent;
+import store.onuljang.event.user_product.UserReservationLogEvent;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.ProductRestockTarget;
 import store.onuljang.repository.entity.Reservation;

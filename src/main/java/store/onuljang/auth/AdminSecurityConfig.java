@@ -20,7 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
-import store.onuljang.log.admin.AdminLogFilter;
+import store.onuljang.event.admin.AdminLogFilter;
 import store.onuljang.service.dto.AdminUserDetails;
 
 @Configuration

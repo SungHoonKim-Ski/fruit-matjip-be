@@ -1,4 +1,4 @@
-package store.onuljang.log.user_product;
+package store.onuljang.event.user_product;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.enums.UserProductAction;

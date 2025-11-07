@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminCustomerScrollRequest;
 import store.onuljang.controller.response.AdminCustomerScrollResponse;
-import store.onuljang.log.user_message.UserMessageEvent;
+import store.onuljang.event.user_message.UserMessageEvent;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.MessageType;
 import store.onuljang.service.*;

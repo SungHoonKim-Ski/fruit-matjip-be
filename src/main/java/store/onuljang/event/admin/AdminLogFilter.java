@@ -1,4 +1,4 @@
-package store.onuljang.log.user;
+package store.onuljang.event.admin;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -9,36 +9,28 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.lang.Nullable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
-import store.onuljang.auth.JwtUtil;
+import store.onuljang.auth.AdminAuthenticationToken;
 
 import java.io.IOException;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class UserLogFilter extends OncePerRequestFilter {
+public class AdminLogFilter extends OncePerRequestFilter {
     ApplicationEventPublisher eventPublisher;
     AntPathMatcher matcher = new AntPathMatcher();
-    JwtUtil jwtUtil;
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String method = request.getMethod();
 
-        if (!matcher.match("/api/auth/**", uri)) return true;
+        if (!matcher.match("/api/admin/**", uri)) return true;
 
         if ("GET".equalsIgnoreCase(method) || "OPTIONS".equalsIgnoreCase(method)) return true;
-
-        if (matcher.match("/api/login", uri)
-            || matcher.match("/api/logout", uri)
-            || matcher.match("/api/refresh", uri)
-            || matcher.match("/api/health", uri)) {
-            return true;
-        }
 
         return false;
     }
@@ -56,7 +48,7 @@ public class UserLogFilter extends OncePerRequestFilter {
         StatusCaptureResponseWrapper resp = new StatusCaptureResponseWrapper(res);
 
         try {
-            chain.doFilter(req, resp);
+            chain.doFilter(req, res);
         } catch (Throwable t) {
             if (resp.getStatus() < 400) {
                 resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -66,27 +58,22 @@ public class UserLogFilter extends OncePerRequestFilter {
             long durationMs = (System.nanoTime() - start) / 1_000_000L;
             int status = resp.getStatus();
 
-            eventPublisher.publishEvent(
-                UserLogEvent.builder()
-                    .userUid(currentUserIdOrNull(req))
-                    .requestId(requestId)
-                    .status(status)
-                    .path(req.getRequestURI())
-                    .durationMs(durationMs)
-                    .method(req.getMethod())
-                    .build()
-            );
+            eventPublisher.publishEvent(AdminLogEvent.builder()
+                .adminId(currentAdminIdOrNull())
+                .requestId(requestId)
+                .status(status)
+                .path(req.getRequestURI())
+                .durationMs(durationMs)
+                .requestId(requestId)
+                .method(req.getMethod())
+                .build());
         }
     }
-    @Nullable
-    private String currentUserIdOrNull(HttpServletRequest req) {
-        String header = req.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            try {
-                return jwtUtil.getBearerUid(header);
-            } catch (Exception ignore) {
 
-            }
+    private Long currentAdminIdOrNull() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth instanceof AdminAuthenticationToken a) {
+            return a.getAdminId();
         }
         return null;
     }

@@ -6,8 +6,7 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
-import store.onuljang.log.admin.AdminLogEvent;
-import store.onuljang.log.user.UserLogEvent;
+import store.onuljang.event.user.UserLogEvent;
 import store.onuljang.repository.entity.base.BaseLogEntity;
 
 @NoArgsConstructor

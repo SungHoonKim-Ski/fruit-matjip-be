@@ -1,10 +1,10 @@
-package store.onuljang.log.user;
+package store.onuljang.event.admin;
 
 import lombok.Builder;
 
 @Builder
-public record UserLogEvent(
-    String userUid,
+public record AdminLogEvent(
+    Long adminId,
     String path,
     String method,
     Integer status,

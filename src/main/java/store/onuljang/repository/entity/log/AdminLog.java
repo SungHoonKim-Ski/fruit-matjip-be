@@ -2,7 +2,7 @@ package store.onuljang.repository.entity.log;
 
 import jakarta.persistence.*;
 import lombok.*;
-import store.onuljang.log.admin.AdminLogEvent;
+import store.onuljang.event.admin.AdminLogEvent;
 import store.onuljang.repository.entity.base.BaseLogEntity;
 
 @NoArgsConstructor

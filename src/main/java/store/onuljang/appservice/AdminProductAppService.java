@@ -1,6 +1,5 @@
 package store.onuljang.appservice;
 
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -10,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
 import store.onuljang.controller.request.AdminProductUpdateOrder;
-import store.onuljang.log.admin_product.AdminProductLogEvent;
+import store.onuljang.event.admin_product.AdminProductLogEvent;
 import store.onuljang.repository.entity.ProductOrder;
 import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.AdminProductAction;

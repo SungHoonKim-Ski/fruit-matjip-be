@@ -11,7 +11,7 @@ import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationsTodayResponse;
 import store.onuljang.exception.UserValidateException;
-import store.onuljang.log.user_message.UserMessageEvent;
+import store.onuljang.event.user_message.UserMessageEvent;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.AggPhase;
 import store.onuljang.repository.entity.enums.MessageType;
