@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminCustomerScrollRequest;
 import store.onuljang.controller.response.AdminCustomerScrollResponse;
+import store.onuljang.controller.response.AdminCustomerWarnResponse;
 import store.onuljang.event.user_message.UserMessageEvent;
+import store.onuljang.repository.entity.UserWarn;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.MessageType;
 import store.onuljang.service.*;
@@ -28,34 +30,17 @@ public class AdminUserAppService {
     UserWarnService userWarnService;
     ApplicationEventPublisher eventPublisher;
 
-    @Transactional
-    public void warn(UUID uid) {
-        Users user = userService.findByUidWithLock(uid.toString());
-
-        user.warn();
-        userWarnService.warnByAdmin(user);
-
-        publishUserNoShowMessage(uid);
-    }
-
-    @Transactional
-    public void resetWarn(UUID uid) {
-        Users user = userService.findByUidWithLock(uid.toString());
-
-        user.resetWarn();
-    }
-
     @Transactional(readOnly = true)
     public AdminCustomerScrollResponse getUsers(AdminCustomerScrollRequest request) {
         CursorUtil.Cursor cursor = CursorUtil.decode(request.cursor());
 
         List<Users> users = userService.getUsers(
-            request.name(),
-            request.sortKey(),
-            request.sortOrder(),
-            cursor.sortValue(),
-            cursor.id(),
-            request.limit()
+                request.name(),
+                request.sortKey(),
+                request.sortOrder(),
+                cursor.sortValue(),
+                cursor.id(),
+                request.limit()
         );
 
         boolean hasNext = users.size() > request.limit();
@@ -72,6 +57,32 @@ public class AdminUserAppService {
         } else {
             return AdminCustomerScrollResponse.of(users, false, null);
         }
+    }
+
+    @Transactional(readOnly = true)
+    public AdminCustomerWarnResponse getUserWarn(UUID uid) {
+        Users user = userService.findByUId(uid.toString());
+
+        List<UserWarn> warn = userWarnService.findAllByUser(user);
+
+        return AdminCustomerWarnResponse.of(warn);
+    }
+
+    @Transactional
+    public void warn(UUID uid) {
+        Users user = userService.findByUidWithLock(uid.toString());
+
+        user.warn();
+        userWarnService.warnByAdmin(user);
+
+        publishUserNoShowMessage(uid);
+    }
+
+    @Transactional
+    public void resetWarn(UUID uid) {
+        Users user = userService.findByUidWithLock(uid.toString());
+
+        user.resetWarn();
     }
 
     private void publishUserNoShowMessage(UUID uid) {

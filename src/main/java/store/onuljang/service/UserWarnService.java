@@ -11,6 +11,8 @@ import store.onuljang.repository.entity.UserWarn;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.UserWarnReason;
 
+import java.util.List;
+
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -18,6 +20,11 @@ import store.onuljang.repository.entity.enums.UserWarnReason;
 @Transactional(readOnly = true)
 public class UserWarnService {
     UserWarnRepository userWarnRepository;
+
+    @Transactional(readOnly = true)
+    public List<UserWarn> findAllByUser(Users user) {
+        return userWarnRepository.findAllByUserOrderByCreatedAtDesc(user);
+    }
 
     @Transactional
     public void noShow(Users user) {

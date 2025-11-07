@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AdminUserAppService;
 import store.onuljang.controller.request.AdminCustomerScrollRequest;
 import store.onuljang.controller.response.AdminCustomerScrollResponse;
+import store.onuljang.controller.response.AdminCustomerWarnResponse;
 
 import java.util.UUID;
 
@@ -42,4 +43,8 @@ public class AdminCustomerController {
         return ResponseEntity.ok(adminUserAppService.getUsers(request));
     }
 
+    @GetMapping("/customers/warn/{uid}")
+    public ResponseEntity<AdminCustomerWarnResponse> getCustomers(@PathVariable("uid") UUID uid) {
+        return ResponseEntity.ok(adminUserAppService.getUserWarn(uid));
+    }
 }

@@ -2,6 +2,7 @@ package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.repository.entity.base.BaseLogEntity;
 import store.onuljang.repository.entity.enums.UserWarnReason;
 
