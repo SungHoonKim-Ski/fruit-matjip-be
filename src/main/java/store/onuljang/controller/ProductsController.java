@@ -1,6 +1,5 @@
 package store.onuljang.controller;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -13,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.ProductsAppService;
 import store.onuljang.controller.response.ProductDetailResponse;
+import store.onuljang.controller.response.ProductKeywordResponse;
 import store.onuljang.controller.response.ProductListResponse;
 
 import java.time.LocalDate;
@@ -36,6 +36,11 @@ public class ProductsController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductDetailResponse> detail(@PathVariable @PositiveOrZero Long id) {
         return ResponseEntity.ok(productsAppService.getDetail(id));
+    }
+
+    @GetMapping("/keywords")
+    public ResponseEntity<ProductKeywordResponse> keywords() {
+        return ResponseEntity.ok(productsAppService.getProductKeywords());
     }
 }
 

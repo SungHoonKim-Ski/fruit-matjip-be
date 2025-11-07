@@ -1,6 +1,7 @@
 package store.onuljang.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
@@ -9,13 +10,11 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import store.onuljang.controller.request.AdminCreateProductRequest;
-import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
-import store.onuljang.controller.request.AdminProductUpdateOrder;
-import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
+import store.onuljang.controller.request.*;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
 import store.onuljang.appservice.AdminProductAppService;
+import store.onuljang.controller.response.ProductKeywordResponse;
 
 @RestController
 @RequestMapping("/api/admin/products")
@@ -80,6 +79,30 @@ public class AdminProductController {
 
         return ResponseEntity.ok().build();
     }
+
+    @GetMapping("/keywords")
+    public ResponseEntity<ProductKeywordResponse> getProductKeyWord() {
+        return ResponseEntity.ok(adminProductAppService.getProductKeywords());
+    }
+
+    @PostMapping("/keyword")
+    public ResponseEntity<Void> saveProductKeyword(@NotEmpty @RequestParam String keyword) {
+        adminProductAppService.saveKeyword(keyword);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/keyword")
+    public ResponseEntity<Void> deleteProductKeyword(@NotEmpty @RequestParam String keyword) {
+        adminProductAppService.deleteKeyword(keyword);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/keywords")
+    public ResponseEntity<Void> updateProductKeyWord(@RequestBody @Valid AdminProductKeywordsRequest request) {
+        adminProductAppService.updateKeywords(request.keywords());
+
+        return ResponseEntity.ok().build();
+    }
 }
-
-

@@ -6,8 +6,11 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.response.ProductDetailResponse;
+import store.onuljang.controller.response.ProductKeywordResponse;
 import store.onuljang.controller.response.ProductListResponse;
 import store.onuljang.repository.entity.Product;
+import store.onuljang.repository.entity.ProductKeyword;
+import store.onuljang.service.ProductKeywordService;
 import store.onuljang.service.ProductsService;
 
 import java.time.LocalDate;
@@ -18,6 +21,14 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductsAppService {
     ProductsService productsService;
+    ProductKeywordService productKeywordService;
+
+    @Transactional(readOnly = true)
+    public ProductKeywordResponse getProductKeywords() {
+        List<ProductKeyword> keywords = productKeywordService.findAll();
+
+        return ProductKeywordResponse.of(keywords);
+    }
 
     @Transactional(readOnly = true)
     public ProductListResponse getProducts(LocalDate from, LocalDate to) {

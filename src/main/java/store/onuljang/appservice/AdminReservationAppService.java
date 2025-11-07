@@ -73,7 +73,12 @@ public class AdminReservationAppService {
 
     @Transactional
     public int bulkUpdateReservationsStatus(AdminUpdateReservationsRequest request) {
+        if (request.status() == ReservationStatus.NO_SHOW) {
+            throw new IllegalArgumentException("노쇼 경고로만 노쇼 상태로 변경할 수 있습니다.");
+        }
+
         List<Reservation> reservationList = reservationService.findAllUserIdInWithUserWithLock(request.reservationIds());
+
         if (reservationList.isEmpty()) {
             return 0;
         }

@@ -9,14 +9,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
 import store.onuljang.controller.request.AdminProductUpdateOrder;
+import store.onuljang.controller.response.ProductKeywordResponse;
 import store.onuljang.event.admin_product.AdminProductLogEvent;
+import store.onuljang.repository.entity.ProductKeyword;
 import store.onuljang.repository.entity.ProductOrder;
 import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.AdminProductAction;
-import store.onuljang.service.AdminService;
-import store.onuljang.service.AdminUploadService;
-import store.onuljang.service.ProductOrderService;
-import store.onuljang.service.ProductsService;
+import store.onuljang.service.*;
 import store.onuljang.util.SessionUtil;
 import store.onuljang.controller.request.AdminCreateProductRequest;
 import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
@@ -35,6 +34,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AdminProductAppService {
     ProductsService productsService;
+    ProductKeywordService productKeywordService;
     ProductOrderService productOrderService;
     AdminUploadService adminUploadService;
     AdminService adminService;
@@ -156,6 +156,35 @@ public class AdminProductAppService {
         return productOrderService.saveAll(orders);
     }
 
+    @Transactional
+    public void saveKeyword(String keyword) {
+        if (productKeywordService.existKeyword(keyword)) {
+            throw new IllegalArgumentException("이미 존재하는 키워드");
+        }
+
+        productKeywordService.save(
+            ProductKeyword.builder()
+                .name(keyword)
+                .build()
+        );
+    }
+
+    @Transactional
+    public void updateKeywords(List<String> keywords) {
+        productKeywordService.deleteAllWithNewTransaction();
+        productKeywordService.saveAll(
+            keywords.stream().map(
+            keyword -> ProductKeyword.builder()
+                .name(keyword)
+                .build()).toList()
+        );
+    }
+
+    @Transactional
+    public void deleteKeyword(String keywords) {
+        productKeywordService.delete(keywords);
+    }
+
     @Transactional(readOnly = true)
     public AdminProductListItems getAll() {
         List<Product> entities = productsService.findAllOrderBySellDateDesc();
@@ -168,6 +197,13 @@ public class AdminProductAppService {
         Product product = productsService.findByIdWithDetailImages(productId);
 
         return AdminProductDetailResponse.from(product);
+    }
+
+    @Transactional(readOnly = true)
+    public ProductKeywordResponse getProductKeywords() {
+        List<ProductKeyword> keywords = productKeywordService.findAll();
+
+        return ProductKeywordResponse.of(keywords);
     }
 
     private void saveProductLog(long productId, Integer quantity, AdminProductAction action) {
