@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.AdminUpdateReservationsRequest;
 import store.onuljang.controller.response.AdminReservationListResponse;
 import store.onuljang.controller.response.AdminReservationsTodayResponse;
+import store.onuljang.exception.AlreadyNoShowAdminException;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.event.user_message.UserMessageEvent;
 import store.onuljang.repository.entity.*;
@@ -39,25 +40,30 @@ public class AdminReservationAppService {
     @Transactional
     public void updateReservationStatus(long id, ReservationStatus status) {
         Reservation reservation = reservationService.findByIdWithLock(id);
-
+        if (status == ReservationStatus.NO_SHOW) {
+            throw new IllegalArgumentException("노쇼 경고로만 노쇼 상태로 변경할 수 있습니다.");
+        }
+        if (reservation.isNoShow()) {
+            throw new IllegalArgumentException("노쇼 예약은 변경할 수 없습니다.");
+        }
         reservation.setStatus(status);
     }
 
     @Transactional
     public void handleNoShow(long id) {
         Reservation reservation = reservationService.findByIdWithLock(id);
+        if (reservation.isNoShow()) {
+            throw new AlreadyNoShowAdminException("이미 노쇼 처리된 예약입니다;");
+        }
+
         Product product = productService.findByIdWithLock(reservation.getProduct().getId());
         Users user = userService.findByUidWithLock(reservation.getUser().getUid());
 
         validateUserReservation(user, reservation);
 
-        if (reservation.isNoShow()) {
-            user.warn();
-        } else {
-            reservation.noShow();
-            product.cancel(reservation.getQuantity());
-            user.noShow(reservation.getQuantity(), reservation.getAmount());
-        }
+        reservation.noShow();
+        product.cancel(reservation.getQuantity());
+        user.noShow(reservation.getQuantity(), reservation.getAmount());
 
         userWarnService.noShow(user);
 
@@ -103,6 +109,10 @@ public class AdminReservationAppService {
 
         if (beforeStatus == ReservationStatus.CANCELED) {
             throw new IllegalStateException("예약 취소는 한번에 변경이 불가능합니다.");
+        }
+
+        if (beforeStatus == ReservationStatus.NO_SHOW) {
+            throw new IllegalStateException("노쇼 경고는 한 번에 한 건만 가능합니다.");
         }
 
         Reservation first = reservationSet.iterator().next();

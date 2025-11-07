@@ -60,10 +60,6 @@ public class Reservation extends BaseEntity {
     @Column(name = "status_changed_at", nullable = false)
     private LocalDateTime statusChangedAt = LocalDateTime.now();
 
-    @Column(name = "is_no_show")
-    @Getter
-    private boolean isNoShow = false;
-
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
@@ -146,9 +142,11 @@ public class Reservation extends BaseEntity {
         return this.product.getProductUrl();
     }
 
+    public boolean isNoShow() {
+        return this.status == ReservationStatus.NO_SHOW;
+    }
     public void noShow() {
-        this.isNoShow = true;
-        setStatus(ReservationStatus.CANCELED);
+        setStatus(ReservationStatus.NO_SHOW);
     }
 
     public void setStatus(ReservationStatus status) {
@@ -158,4 +156,5 @@ public class Reservation extends BaseEntity {
     private void minusQuantity(int quantity) {
         this.quantity = Math.max(1, this.quantity - quantity);
     }
+
 }

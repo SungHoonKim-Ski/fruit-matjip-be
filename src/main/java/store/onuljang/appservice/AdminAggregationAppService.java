@@ -52,6 +52,7 @@ public class AdminAggregationAppService {
         return AdminReservationSummaryResponse.from(rows);
     }
 
+    @Transactional(readOnly = true)
     public AdminReservationDetailsResponse getDetail(LocalDate date) {
         List<ProductDailyAgg> details = productDailyAggService.findDetailBySellDateWithProduct(date);
 
