@@ -72,7 +72,7 @@ public class AdminReservationAppService {
     }
 
     @Transactional
-    public int bulkUpdateReservationsStatus(AdminUpdateReservationsRequest request) {
+    public long bulkUpdateReservationsStatus(AdminUpdateReservationsRequest request) {
         if (request.status() == ReservationStatus.NO_SHOW) {
             throw new IllegalArgumentException("노쇼 경고로만 노쇼 상태로 변경할 수 있습니다.");
         }
@@ -119,6 +119,21 @@ public class AdminReservationAppService {
             product.addStock(restockTarget.quantity());
         }
 
+        // 4. 유저 warn(노쇼 row만큼) + 메시지(1회)
+        List<UserSalesRollbackTarget> userSalesRollbackTargets = reservationService
+            .findUserSalesRollbackTargets(targetIds, after);
+
+        for (UserSalesRollbackTarget target : userSalesRollbackTargets) {
+            Users user = userService.findByUidWithLock(target.userUid());
+            user.cancelReserve(target.totalQuantity(), target.totalAmount());
+
+            user.warn(target.rows());
+            userWarnService.noShows(user, target.rows());
+            publishUserNoShowMessage(user.getUid());
+        }
+
+        // 5. + 노쇼 집계 처리만 별도 루프에서 수행
+        aggAppliedService.markMany(targetIds, AggPhase.NO_SHOW_MINUS);
 
         return updateReservationRows;
     }

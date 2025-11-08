@@ -93,5 +93,9 @@ public class ReservationService {
     public List<ReservationWarnTarget> findAllByPickupDateAndStatus(LocalDate today, ReservationStatus status) {
         return reservationQueryRepository.findWarnTargetsByPickupDateAndStatus(today, status);
     }
+
+    @Transactional(readOnly = true)
+    public List<UserSalesRollbackTarget> findUserSalesRollbackTargets(Set<Long> reservationIdSet, ReservationStatus status) {
+        return reservationQueryRepository.findUserSalesRollbackTargets(reservationIdSet, status);
     }
 }

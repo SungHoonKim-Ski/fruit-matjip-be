@@ -125,6 +125,11 @@ public class Users extends BaseEntity {
         warnCount++;
     }
 
+    public void warn(int time) {
+        totalWarnCount += time;
+        warnCount += time;
+    }
+
     private void assertNicknameChanged() {
         if (!changeName) {
             throw new UserValidateException("닉네임 변경 후 주문이 가능합니다.");

@@ -57,7 +57,7 @@ public class AdminReservationController {
     }
 
     @PatchMapping("/status")
-    public ResponseEntity<Integer> bulkUpdateReservationsStatus(
+    public ResponseEntity<Long> bulkUpdateReservationsStatus(
         @Valid @NotNull @RequestBody AdminUpdateReservationsRequest request)
     {
         return ResponseEntity.ok(adminReservationAppService.bulkUpdateReservationsStatus(request));

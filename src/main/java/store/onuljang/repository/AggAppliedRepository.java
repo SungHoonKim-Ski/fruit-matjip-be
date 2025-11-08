@@ -9,6 +9,8 @@ import store.onuljang.repository.entity.AggApplied;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 public interface AggAppliedRepository extends JpaRepository<AggApplied, Long> {
 
@@ -19,6 +21,16 @@ public interface AggAppliedRepository extends JpaRepository<AggApplied, Long> {
         values (:rid, :phase)
     """, nativeQuery = true)
     int insertAppliedIgnoreDuplicate(@Param("rid") long reservationId, @Param("phase") String phase);
+
+    // 배치 예정 컬럼 INSERT - 주로 노쇼 주문에 사용
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query(value = """
+        insert ignore into agg_applied (reservation_id, phase)
+        select r.id, :phase
+        from reservations r
+        where r.id in (:reservationIds)
+    """, nativeQuery = true)
+    int bulkInsertAppliedIgnoreDuplicate(@Param("reservationIds") Set<Long> reservationIds, @Param("phase") String phase);
 
     // 1. 배치 데이터 INSERT
     @Modifying

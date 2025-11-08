@@ -43,6 +43,26 @@ public class ReservationQueryRepository {
             .fetch();
     }
 
+    public List<ProductRestockTarget> findAllByIdInAndStatusGroupByProductIdOrderByProductId(
+        Set<Long> ids
+        , ReservationStatus status
+    ) {
+        return queryFactory
+            .select(Projections.constructor(
+                ProductRestockTarget.class,
+                reservation.product.id,
+                reservation.quantity.sum()
+            ))
+            .from(reservation)
+            .where(
+                reservation.id.in(ids),
+                reservation.status.eq(status)
+            )
+            .groupBy(reservation.product.id)
+            .orderBy(reservation.product.id.asc())
+            .fetch();
+    }
+
     public List<UserSalesRollbackTarget> findUserSalesRollbackTargets(
         Set<Long> ids
         , ReservationStatus status

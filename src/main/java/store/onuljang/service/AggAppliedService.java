@@ -11,6 +11,8 @@ import store.onuljang.repository.entity.enums.AggPhase;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -29,6 +31,10 @@ public class AggAppliedService {
     public int markSingle(long reservationId, AggPhase phase) {
         return aggAppliedRepository.insertAppliedIgnoreDuplicate(reservationId, phase.name());
     }
+
+    @Transactional
+    public int markMany(Set<Long> reservationIds, AggPhase phase) {
+        return aggAppliedRepository.bulkInsertAppliedIgnoreDuplicate(reservationIds, phase.name());
     }
 
     @Transactional

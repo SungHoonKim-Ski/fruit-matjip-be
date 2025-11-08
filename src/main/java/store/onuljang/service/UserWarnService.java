@@ -11,6 +11,7 @@ import store.onuljang.repository.entity.UserWarn;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.UserWarnReason;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,6 +30,15 @@ public class UserWarnService {
     @Transactional
     public void noShow(Users user) {
         userWarnRepository.save(new UserWarn(user, UserWarnReason.NO_SHOW));
+    }
+
+    @Transactional
+    public void noShows(Users user, long times) {
+        ArrayList<UserWarn> warnArrayList = new ArrayList<>();
+        for (int i = 0; i < times; i++) {
+            warnArrayList.add(new UserWarn(user, UserWarnReason.NO_SHOW));
+        }
+        userWarnRepository.saveAll(warnArrayList);
     }
 
     @Transactional
