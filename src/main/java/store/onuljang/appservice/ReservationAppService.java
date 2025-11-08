@@ -10,10 +10,7 @@ import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.event.user_product.UserReservationLogEvent;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.ProductRestockTarget;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.repository.entity.enums.UserProductAction;
 import store.onuljang.service.ProductsService;
@@ -109,31 +106,6 @@ public class ReservationAppService {
         reservation.requestSelfPick(TimeUtil.nowDate(), SELF_PICK_DEADLINE, KST);
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
-    }
-
-    // batch
-    @Transactional
-    public int cancelNoShow(LocalDate today, ReservationStatus before, ReservationStatus after, LocalDateTime now) {
-        Set<Long> targetIds = reservationService.findIdsByPickupDateAndStatus(today, before);
-        if (targetIds.isEmpty()) {
-            return 0;
-        }
-
-        int updateReservationRows = reservationService.updateAllReservationsWhereIdIn(targetIds, today, before, after, now);
-        if (updateReservationRows != targetIds.size()) {
-            throw new IllegalStateException("동시에 변경된 예약이 있어 취소/재고복원이 일치하지 않습니다.");
-        }
-
-        List<ProductRestockTarget> noShowReservations =
-                reservationService.findAllByIdInAndStatusGroupByProductIdOrderByProductId(targetIds, after);
-
-        for (ProductRestockTarget restockTarget : noShowReservations) {
-            Product product = productsService.findByIdWithLock(restockTarget.getProductId());
-
-            product.addStock(restockTarget.getQuantity());
-        }
-
-        return updateReservationRows;
     }
 
     @Transactional(readOnly = true)

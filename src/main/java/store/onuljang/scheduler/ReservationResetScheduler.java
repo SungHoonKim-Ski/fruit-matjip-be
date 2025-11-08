@@ -12,6 +12,7 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import store.onuljang.appservice.AdminReservationAppService;
 import store.onuljang.appservice.ReservationAppService;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.util.TimeUtil;
@@ -24,7 +25,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReservationResetScheduler {
-    ReservationAppService reservationAppService;
+    AdminReservationAppService adminReservationAppService;
 
     /**
      * 매일 20:03(KST) 실행.
@@ -53,7 +54,7 @@ public class ReservationResetScheduler {
         LocalDate today = TimeUtil.nowDate();
         LocalDateTime now = TimeUtil.nowDateTime();
 
-        int updated = reservationAppService.cancelNoShow(today, ReservationStatus.PENDING, ReservationStatus.CANCELED, now);
+        long updated = adminReservationAppService.cancelNoShow(today, ReservationStatus.PENDING, ReservationStatus.NO_SHOW, now);
 
         log.info("[ReservationResetScheduler] success: updated={} date={}", updated, today);
     }

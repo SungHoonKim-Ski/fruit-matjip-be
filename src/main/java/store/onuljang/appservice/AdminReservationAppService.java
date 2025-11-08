@@ -90,6 +90,40 @@ public class AdminReservationAppService {
         );
     }
 
+    // batch
+    @Transactional
+    public long cancelNoShow(LocalDate today, ReservationStatus before, ReservationStatus after, LocalDateTime now) {
+        // 마감시간(마감시간 <= 배치 시작시간 이어야 함) 기준 노쇼 예약 조회
+        List<ReservationWarnTarget> targets = reservationService.findAllByPickupDateAndStatus(today, before);
+        if (targets.isEmpty()) {
+            return 0;
+        }
+
+        Set<Long> targetIds = targets.stream()
+            .map(ReservationWarnTarget::reservationId)
+            .collect(Collectors.toSet());
+
+        // 2. 예약 상태 일괄 변경
+        long updateReservationRows = reservationService.updateAllReservationsWhereIdIn(targetIds, today, before, after, now);
+        if (updateReservationRows != targetIds.size()) {
+            throw new IllegalStateException("동시에 변경된 예약이 있어 취소/재고복원이 일치하지 않습니다.");
+        }
+
+        // 3. 변경된 예약 상태 기반 재고 복원 (또는 노쇼-마이너스 등)
+        List<ProductRestockTarget> restockTargets =
+            reservationService.findAllByIdInAndStatusGroupByProductIdOrderByProductId(targetIds, after);
+
+        for (ProductRestockTarget restockTarget : restockTargets) {
+            Product product = productService.findByIdWithLock(restockTarget.productId());
+
+            product.addStock(restockTarget.quantity());
+        }
+
+
+        return updateReservationRows;
+    }
+
+
     @Transactional(readOnly = true)
     public AdminReservationsTodayResponse getTodaySales() {
         List<ReservationSalesRow> salesRows = reservationService.findPickupDateSales(
