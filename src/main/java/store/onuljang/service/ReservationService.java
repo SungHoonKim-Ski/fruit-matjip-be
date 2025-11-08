@@ -8,13 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.ReservationAllRepository;
+import store.onuljang.repository.ReservationQueryRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -25,11 +25,12 @@ import java.util.Set;
 @Transactional(readOnly = true)
 public class ReservationService {
     ReservationRepository reservationRepository;
+    ReservationQueryRepository reservationQueryRepository;
     ReservationAllRepository reservationAllRepository;
 
     @Transactional
     public Reservation findByIdWithLock(long id) {
-        return reservationRepository.findByIdWithLock(id)
+        return reservationQueryRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
     }
 
@@ -41,23 +42,30 @@ public class ReservationService {
     }
 
     @Transactional
-    public int bulkUpdateReservationsStatus(Set<Long> reservationIdSet, ReservationStatus updateStatus, LocalDateTime updateTime) {
-        return reservationRepository.updateStatusIdIn(reservationIdSet, updateStatus, updateTime);
+    public long bulkUpdateReservationsStatus(
+        Set<Long> reservationIdSet, ReservationStatus updateStatus, LocalDateTime updateTime
+    ) {
+        return reservationQueryRepository.updateStatusIdIn(reservationIdSet, updateStatus, updateTime);
     }
 
     @Transactional
-    public int updateAllReservationsWhereIdIn(Set<Long> reservationIdSet, LocalDate today, ReservationStatus before, ReservationStatus after, LocalDateTime now) {
-        return reservationRepository.updateAllReservationStatus(reservationIdSet, today, before, after, now);
+    public long updateAllReservationsWhereIdIn(
+        Set<Long> reservationIdSet, LocalDate today, ReservationStatus before, ReservationStatus after
+        , LocalDateTime now
+    ) {
+        return reservationQueryRepository.updateAllReservationStatus(reservationIdSet, today, before, after, now);
     }
 
     @Transactional(readOnly = true)
-    public List<ProductRestockTarget> findAllByIdInAndStatusGroupByProductIdOrderByProductId(Set<Long> reservationIdSet, ReservationStatus status) {
-        return reservationRepository.findAllByIdInAndStatusGroupByProductIdOrderByProductId(reservationIdSet, status);
+    public List<ProductRestockTarget> findAllByIdInAndStatusGroupByProductIdOrderByProductId(
+        Set<Long> reservationIdSet, ReservationStatus status
+    ) {
+        return reservationQueryRepository.findAllByIdInAndStatusGroupByProductIdOrderByProductId(reservationIdSet, status);
     }
 
     @Transactional(readOnly = true)
     public List<Reservation> findAllUserIdInWithUserWithLock(Set<Long> reservationIdSet) {
-        return reservationRepository.findAllByIdInWithUserWithLock(reservationIdSet);
+        return reservationQueryRepository.findAllByIdInWithUserWithLock(reservationIdSet);
     }
 
     @Transactional(readOnly = true)
@@ -82,7 +90,8 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public Set<Long> findIdsByPickupDateAndStatus(LocalDate today, ReservationStatus status) {
-        return reservationRepository.findIdsByPickupDateAndStatus(today, status);
+    public List<ReservationWarnTarget> findAllByPickupDateAndStatus(LocalDate today, ReservationStatus status) {
+        return reservationQueryRepository.findWarnTargetsByPickupDateAndStatus(today, status);
+    }
     }
 }

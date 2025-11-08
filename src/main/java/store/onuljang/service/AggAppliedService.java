@@ -27,7 +27,8 @@ public class AggAppliedService {
 
     @Transactional
     public int markSingle(long reservationId, AggPhase phase) {
-        return aggAppliedRepository.markSingle(reservationId, phase.name());
+        return aggAppliedRepository.insertAppliedIgnoreDuplicate(reservationId, phase.name());
+    }
     }
 
     @Transactional

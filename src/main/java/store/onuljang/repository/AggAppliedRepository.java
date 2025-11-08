@@ -18,7 +18,7 @@ public interface AggAppliedRepository extends JpaRepository<AggApplied, Long> {
         insert IGNORE into agg_applied (reservation_id, phase)
         values (:rid, :phase)
     """, nativeQuery = true)
-    int markSingle(@Param("rid") long reservationId, @Param("phase") String phase);
+    int insertAppliedIgnoreDuplicate(@Param("rid") long reservationId, @Param("phase") String phase);
 
     // 1. 배치 데이터 INSERT
     @Modifying
