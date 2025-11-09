@@ -13,7 +13,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import store.onuljang.appservice.AdminReservationAppService;
-import store.onuljang.appservice.ReservationAppService;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.util.TimeUtil;
 
@@ -50,11 +49,11 @@ public class ReservationResetScheduler {
         backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
     )
     @Scheduled(cron = "0 3 20 * * *", zone = "Asia/Seoul")
-    public void cancelNoShowDailyJob() {
+    public void processNoShowBatch() {
         LocalDate today = TimeUtil.nowDate();
         LocalDateTime now = TimeUtil.nowDateTime();
 
-        long updated = adminReservationAppService.cancelNoShow(today, ReservationStatus.PENDING, ReservationStatus.NO_SHOW, now);
+        long updated = adminReservationAppService.processNoShowBatch(today, now);
 
         log.info("[ReservationResetScheduler] success: updated={} date={}", updated, today);
     }

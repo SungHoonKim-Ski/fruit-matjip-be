@@ -93,7 +93,10 @@ public class AdminReservationAppService {
 
     // batch
     @Transactional
-    public long cancelNoShow(LocalDate today, ReservationStatus before, ReservationStatus after, LocalDateTime now) {
+    public long processNoShowBatch(LocalDate today,LocalDateTime now) {
+        final ReservationStatus before = ReservationStatus.PENDING;
+        final ReservationStatus after = ReservationStatus.NO_SHOW;
+
         // 마감시간(마감시간 <= 배치 시작시간 이어야 함) 기준 노쇼 예약 조회
         List<ReservationWarnTarget> targets = reservationService.findAllByPickupDateAndStatus(today, before);
         if (targets.isEmpty()) {
