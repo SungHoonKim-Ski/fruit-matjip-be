@@ -136,9 +136,6 @@ public class AdminReservationAppService {
             publishUserNoShowMessage(user.getUid());
         }
 
-        // 5. + 노쇼 집계 처리만 별도 루프에서 수행
-        aggAppliedService.markMany(targetIds, AggPhase.NO_SHOW_MINUS);
-
         return updateReservationRows;
     }
 
