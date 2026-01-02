@@ -32,9 +32,6 @@ jobs:
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
           echo "S3_APP_BUCKET_NAME=${{ secrets[format('S3_{0}_APP_BUCKET_NAME', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
-      - name: Set Health Check URL
-        run: |
-          echo "HEALTH_URL=${{ vars[format('{0}_HEALTH_URL', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -102,30 +99,30 @@ jobs:
           EOF
 
       - name: Health Check
+        shell: bash
         run: |
-          if [[ "${{ steps.env.outputs.ENV }}" == "DEV" ]]; then
-            echo "HEALTH_URL=${{ vars.DEV_HEALTH_URL }}" >> $GITHUB_ENV
-          else
-            echo "HEALTH_URL=${{ vars.PROD_HEALTH_URL }}" >> $GITHUB_ENV
-          fi
+          ENV="${{ steps.env.outputs.ENV }}"
           
-          ATTEMPTS=12   # 최대 1분
+          # Bash에서 동적으로 변수명 조합
+          VAR_NAME="${ENV}_HEALTH_URL"
+          
+          # GitHub Actions vars는 환경변수로 자동 주입됨
+          HEALTH_URL="${!VAR_NAME}"
+          
+          : "${HEALTH_URL:?${VAR_NAME} is not set in GitHub Actions Variables}"
+          
+          ATTEMPTS=12
           SLEEP=5
-          ok=false
-
+          
           echo "Waiting for 200 from: $HEALTH_URL"
           for i in $(seq 1 $ATTEMPTS); do
             code=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || true)
             if [ "$code" = "200" ]; then
-              ok=true
-              break
+              echo "✅ App is UP (200)"
+              exit 0
             fi
             sleep $SLEEP
           done
-
-          if [ "$ok" != "true" ]; then
-            echo "❌ Health check failed (timeout or non-200)"
-            exit 1
-          fi
-
-          echo "✅ App is UP (200)"
+          
+          echo "❌ Health check failed"
+          exit 1
