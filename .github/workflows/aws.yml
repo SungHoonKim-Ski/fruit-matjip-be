@@ -31,6 +31,7 @@ jobs:
         run: |
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
+          echo "HEALTH_URL=${{ secrets[format('{0}_HEALTH_URL', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "S3_APP_BUCKET_NAME=${{ secrets[format('S3_{0}_APP_BUCKET_NAME', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
 
       - name: Set up JDK 17
@@ -101,15 +102,7 @@ jobs:
       - name: Health Check
         shell: bash
         run: |
-          ENV="${{ steps.env.outputs.ENV }}"
-          
-          # Bash에서 동적으로 변수명 조합
-          VAR_NAME="${ENV}_HEALTH_URL"
-          
-          # GitHub Actions vars는 환경변수로 자동 주입됨
-          HEALTH_URL="${!VAR_NAME}"
-          
-          : "${HEALTH_URL:?${VAR_NAME} is not set in GitHub Actions Variables}"
+          : "${HEALTH_URL:?HEALTH_URL is not set. Define DEV_HEALTH_URL / PROD_HEALTH_URL in GitHub Secrets}"
           
           ATTEMPTS=12
           SLEEP=5
