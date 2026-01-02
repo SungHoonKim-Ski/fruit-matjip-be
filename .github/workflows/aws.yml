@@ -103,8 +103,12 @@ jobs:
 
       - name: Health Check
         run: |
-          : "${HEALTH_URL:?HEALTH_URL is not set. Define DEV_HEALTH_URL / PROD_HEALTH_URL in GitHub Actions Variables}"
-
+          if [[ "${{ steps.env.outputs.ENV }}" == "DEV" ]]; then
+            echo "HEALTH_URL=${{ vars.DEV_HEALTH_URL }}" >> $GITHUB_ENV
+          else
+            echo "HEALTH_URL=${{ vars.PROD_HEALTH_URL }}" >> $GITHUB_ENV
+          fi
+          
           ATTEMPTS=12   # 최대 1분
           SLEEP=5
           ok=false
