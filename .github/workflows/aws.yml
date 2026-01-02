@@ -32,6 +32,9 @@ jobs:
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
           echo "S3_APP_BUCKET_NAME=${{ secrets[format('S3_{0}_APP_BUCKET_NAME', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
+      - name: Set Health Check URL
+        run: |
+          echo "HEALTH_URL=${{ vars[format('{0}_HEALTH_URL', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -100,16 +103,12 @@ jobs:
 
       - name: Health Check
         run: |
-          if [[ "${{ steps.env.outputs.ENV }}" == "DEV" ]]; then
-            HEALTH_URL="https://dev.api.fruit-matjip.store/api/health"
-          else
-            HEALTH_URL="https://api.fruit-matjip.store/api/health"
-          fi
-          
+          : "${HEALTH_URL:?HEALTH_URL is not set. Define DEV_HEALTH_URL / PROD_HEALTH_URL in GitHub Actions Variables}"
+
           ATTEMPTS=12   # 최대 1분
           SLEEP=5
           ok=false
-          
+
           echo "Waiting for 200 from: $HEALTH_URL"
           for i in $(seq 1 $ATTEMPTS); do
             code=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_URL" || true)
@@ -119,10 +118,10 @@ jobs:
             fi
             sleep $SLEEP
           done
-          
+
           if [ "$ok" != "true" ]; then
             echo "❌ Health check failed (timeout or non-200)"
             exit 1
           fi
-          
+
           echo "✅ App is UP (200)"
