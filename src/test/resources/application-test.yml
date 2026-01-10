@@ -20,6 +20,17 @@ spring:
     jdbc:
       initialize-schema: always
 
+  cloud:
+    aws:
+      s3:
+        enabled: false
+      region:
+        static: ap-northeast-2
+      credentials:
+        access-key: test-access-key
+        secret-key: test-secret-key
+      stack:
+        auto: false
 server:
   port: 0
 
@@ -31,20 +42,6 @@ security:
 
 KAKAO:
   KEY: test-kakao-key
-
-cloud:
-  aws:
-    s3:
-      bucket: test-bucket
-      log:
-        bucket: test-log-bucket
-    stack:
-      auto: false
-    region:
-      static: ap-northeast-2
-    credentials:
-      access-key: test-access-key
-      secret-key: test-secret-key
 
 logging:
   level:
