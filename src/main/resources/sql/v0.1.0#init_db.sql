@@ -52,12 +52,13 @@ CREATE TABLE products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE product_detail_images (
-    id                 BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    product_id  BIGINT UNSIGNED NOT NULL,
-    detail_url                TEXT NOT NULL,
+    id                BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+    product_id        BIGINT UNSIGNED NOT NULL,
+    detail_url        TEXT NOT NULL,
     created_at        DATETIME NOT NULL,
     updated_at        DATETIME NOT NULL,
     deleted_at        DATETIME,
+    sort_order        INT NOT NULL,
     PRIMARY KEY (id),
     KEY idx_pdi_detail (product_id),
     CONSTRAINT fk_pdi_detail
