@@ -40,13 +40,84 @@
 
 ## 🛠️ 주요 이슈 해결 사례
 
-| 이슈 | 해결 방법 | 관련 파일 |
-|------|-----------|-----------|
-| 멱등성 보장 정산 구현 <br>(전날 취소 상품 정산 반영) | 1. 정산, 작업 테이블 활용. 스케줄러 동작 시 “작업 테이블 데이터 → 정산” 방식 적용<br>2. 정산 테이블은 “예약 PK + *매출 발생 유형” 복합 Unique key를 적용해 멱등성 보장<br>3. 작업 테이블은 “판매일 + 상품 PK” 복합 Unique key를 적용해 멱등성 보장 | [`ReservationAggregationScheduler.java`](./src/main/java/store/onuljang/scheduler/ReservationAggregationScheduler.java) <br>[`AdminAggregationAppService.java`](./src/main/java/store/onuljang/appservice/AdminAggregationAppService.java)|
-| 노쇼 고객 재고 복원 정합성 해결 <br>(예약 마감 이후 노쇼 고객 상품 재고 복원) | 1. 복구 예정 상품 수량을 GROUP BY로 가져와서 재고 복원 <br>2. 복원 예상 row와 실제 반영 row를 비교해, 불일치시 예외를 발생시키는 방식으로 정합성을 보장 <br>3. 재고 복원시 Lock 점유 시간 최소화를 위해 반복문을 돌며 하나의 상품에만 Lock 점유 <br>4.  DB Deadlock / LockTimeout / 2번 작업 재고 불일치 등  지정 예외 발생 시 최대 3회 재시도 적용 | [`ReservationResetScheduler.java`](./src/main/java/store/onuljang/scheduler/ReservationResetScheduler.java)<br>[`ReservationAppService.java`](./src/main/java/store/onuljang/appservice/ReservationAppService.java) |
-| 재고 정합성 문제 | 초기에는 예약 관련 코드별로 락 획득 순서가 일관되지 않아 데드락/락 타임아웃으로 요청 실패가 간헐적으로 발생<br>이후 Product → User 순으로 락 획득 순서를 전역적으로 고정하여 데드락 발생 가능성을 제거하고, 재고 차감/복원이 항상 원자적·일관적으로 처리되도록 개선 | [`ReservationAppService.java`](./src/main/java/store/onuljang/appservice/ReservationAppService.java) |
-| 파일 업로드 메모리 초과 | AWS S3 Presigned URL 방식 적용, 다건 업로드 시 프론트엔드 병렬 처리로 개선 | [`AdminUploadService.java`](./src/main/java/store/onuljang/service/AdminUploadService.java) |
-| 과도한 카카오 로그인 API 요청 | Refresh Token 저장 + 로그인 시 `/auth/refresh` 호출로 개선 | [`AuthAppService.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java) |
+### 1. 멱등성 보장 정산 구현
+
+**문제**  
+전날 취소된 상품의 매출을 정산에 반영해야 하는데, 스케줄러가 중복 실행되거나 재시도될 경우 중복 집계 위험
+
+**해결 방법**
+- 정산 테이블(`product_daily_agg`)과 작업 테이블(`agg_applied`) 분리
+- 스케줄러 동작: `작업 테이블 데이터 → 정산 테이블` 순차 처리
+- **멱등성 보장**:
+  - 정산 테이블: `(예약 PK + 매출 발생 유형)` 복합 Unique Key
+  - 작업 테이블: `(판매일 + 상품 PK)` 복합 Unique Key
+
+**관련 파일**  
+[`ReservationAggregationScheduler.java`](./src/main/java/store/onuljang/scheduler/ReservationAggregationScheduler.java), [`AdminAggregationAppService.java`](./src/main/java/store/onuljang/appservice/AdminAggregationAppService.java)
+
+---
+
+### 2. 노쇼 고객 재고 복원 정합성
+
+**문제**  
+예약 마감 이후 노쇼 고객의 상품 재고를 복원할 때, 동시성 이슈로 인한 재고 불일치 발생 가능성
+
+**해결 방법**
+1. **GROUP BY 집계**: 복구 예정 상품 수량을 미리 계산
+2. **정합성 검증**: 복원 예상 row 수와 실제 반영 row 수 비교, 불일치 시 예외 발생
+3. **Lock 최적화**: 반복문으로 상품별 개별 Lock 획득하여 점유 시간 최소화
+4. **재시도 로직**: Deadlock/LockTimeout/재고 불일치 시 최대 3회 자동 재시도
+
+**관련 파일**  
+[`ReservationResetScheduler.java`](./src/main/java/store/onuljang/scheduler/ReservationResetScheduler.java), [`ReservationAppService.java`](./src/main/java/store/onuljang/appservice/ReservationAppService.java)
+
+---
+
+### 3. 재고 정합성 문제
+
+**문제**  
+예약 관련 코드에서 Lock 획득 순서가 일관되지 않아 Deadlock 및 Lock Timeout으로 요청 실패 발생
+
+**해결 방법**  
+전역적으로 **Product → User 순서**로 Lock 획득 순서를 고정하여:
+- Deadlock 발생 가능성 제거
+- 재고 차감/복원이 항상 원자적·일관적으로 처리
+
+**관련 파일**  
+[`ReservationAppService.java`](./src/main/java/store/onuljang/appservice/ReservationAppService.java)
+
+---
+
+### 4. 파일 업로드 메모리 초과
+
+**문제**  
+대용량 이미지 업로드 시 서버 메모리 부담 및 타임아웃 발생
+
+**해결 방법**  
+AWS S3 Presigned URL 방식 도입:
+- 클라이언트가 직접 S3에 업로드
+- 다건 업로드 시 프론트엔드에서 병렬 처리
+- 서버 부하 최소화
+
+**관련 파일**  
+[`AdminUploadService.java`](./src/main/java/store/onuljang/service/AdminUploadService.java)
+
+---
+
+### 5. 과도한 카카오 로그인 API 요청
+
+**문제**  
+매 로그인마다 카카오 API를 호출하여 불필요한 외부 API 의존성 및 응답 지연
+
+**해결 방법**  
+Refresh Token 기반 인증 개선:
+- Refresh Token을 DB에 저장
+- 로그인 시 `/auth/refresh` 엔드포인트로 토큰 갱신
+- 카카오 API 호출 최소화
+
+**관련 파일**  
+[`ProdAuthAppServiceImpl.java`](./src/main/java/store/onuljang/appservice/ProdAuthAppServiceImpl.java)
+
 
 ---
 
@@ -68,11 +139,12 @@
 - [x] **로그 데이터 스케줄러 활용 S3 업로드**: 일회성 로그 데이터 관리 필요성
 - [x] **cron 활용 DB 백업 S3 업로드**: DB 백업 필요성 - 매일 1시 업로드
 - [x] **날짜별 품목 노출 순서 기능**: 제품 수 증가로 노출 품목의 순서 지정 필요성
-- [ ] **상품 카테고리화 + 사용자 노출 페이지 적용**: 제품량 증가로 인해 사용자에게 보일 품목의 순서 지정 필요성
-- [ ] **관리자 상품 조회 페이지 개선**: 수십건 조회시 특정 품목을 찾기 어려움
-- [ ] **테스트 코드 작성**: 단위 테스트/통합 테스트 검증 필요
+- [x] **관리자 상품 조회 페이지 개선**: 검색 기능 도입
+- [x] **테스트 코드 작성**: 단위 테스트 / 통합 테스트 적용 완료
+- [ ] **배달 연계 / 결제 도입: PG사 연동** 예정
 - [ ] ~~최고 관리자 권한 기능 도입: 다른 관리자의 권한 생성/수정/삭제 가능하도록 확장~~ 보류
-- [ ] ~~결제 연동 도입: PG사 연동~~ 보류
+- [ ] ~~상품 카테고리화 + 사용자 노출 페이지 적용**: 제품량 증가로 인해 사용자에게 보일 품목의 순서 지정 필요성~~ 보류
+
 
 ---
 
@@ -128,6 +200,45 @@ on:
 ```
 
 - 배포 분기 로직은 GitHub Actions 스크립트 내부에서 `-d`(dev), `-p`(prod) 접미어로 판단
+
+---
+
+## 🧪 테스트 커버리지
+
+프로젝트의 안정성과 신뢰성을 보장하기 위해 포괄적인 테스트 코드를 작성했습니다.
+
+### 테스트 구성
+
+- **총 103개 테스트** (통합 테스트 102개 + 단위 테스트 1개)
+- **통합 테스트**: Spring Boot 기반 실제 HTTP 요청/응답 검증
+- **배치 테스트**: 스케줄러 및 집계 로직 검증
+
+### 주요 테스트 파일
+
+| 테스트 파일 | 설명 | 테스트 수 |
+|------------|------|----------|
+| [`AdminReservationIntegrationTest`](./src/test/java/store/onuljang/integration/AdminReservationIntegrationTest.java) | 관리자 예약 관리 API (조회/상태변경/노쇼처리/일괄변경) | 11개 |
+| [`AdminProductIntegrationTest`](./src/test/java/store/onuljang/integration/AdminProductIntegrationTest.java) | 관리자 상품 관리 API (생성/수정/삭제/조회/이미지관리) | 19개 |
+| [`AdminAggregationIntegrationTest`](./src/test/java/store/onuljang/integration/AdminAggregationIntegrationTest.java) | 관리자 판매 집계 조회 API | 3개 |
+| [`ReservationIntegrationTest`](./src/test/java/store/onuljang/integration/ReservationIntegrationTest.java) | 사용자 예약 API (생성/취소/수량변경/셀프픽업) | 24개 |
+| [`UserIntegrationTest`](./src/test/java/store/onuljang/integration/UserIntegrationTest.java) | 사용자 정보 관리 API (닉네임/메시지) | 7개 |
+| [`ProductsIntegrationTest`](./src/test/java/store/onuljang/integration/ProductsIntegrationTest.java) | 사용자 상품 조회 API | 11개 |
+| [`ReservationAggregationSchedulerTest`](./src/test/java/store/onuljang/scheduler/ReservationAggregationSchedulerTest.java) | 예약 집계 스케줄러 (정상동작/데이터없음/다양한상태/집계후취소) | 4개 |
+| [`ReservationResetSchedulerTest`](./src/test/java/store/onuljang/scheduler/ReservationResetSchedulerTest.java) | 예약 초기화 스케줄러 (재고복원/정합성검증/재시도로직) | 23개 |
+
+### CI/CD 통합
+
+- **자동 테스트 실행**: PR 및 main/develop 브랜치 push 시 자동 실행
+- **배포 전 검증**: 태그 기반 배포 시 테스트 통과 필수
+- **테스트 리포트**: GitHub Actions에서 테스트 결과 및 리포트 자동 생성
+
+```bash
+# 로컬에서 전체 테스트 실행
+./gradlew test
+
+# 특정 테스트만 실행
+./gradlew test --tests AdminReservationIntegrationTest
+```
 
 ---
 
