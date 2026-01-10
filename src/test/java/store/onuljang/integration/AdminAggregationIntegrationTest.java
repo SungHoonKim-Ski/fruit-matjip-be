@@ -90,13 +90,14 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
         @DisplayName("특정 날짜 판매 상세 조회 성공")
         void getDailySales_Success() throws Exception {
             // given
-            LocalDate yesterday = nowDate().minusDays(1);
-            Product product1 = testFixture.createProduct("상품1", 10, new BigDecimal("10000"), yesterday, admin);
-            Product product2 = testFixture.createProduct("상품2", 10, new BigDecimal("20000"), yesterday, admin);
+            // API validation requires past date - use fixed date to avoid timezone issues
+            LocalDate pastDate = LocalDate.of(2025, 12, 12);
+            Product product1 = testFixture.createProduct("상품1", 10, new BigDecimal("10000"), pastDate, admin);
+            Product product2 = testFixture.createProduct("상품2", 10, new BigDecimal("20000"), pastDate, admin);
             testFixture.createReservationWithStatus(user1, product1, 2, ReservationStatus.PICKED);
             testFixture.createReservationWithStatus(user2, product2, 1, ReservationStatus.PICKED);
 
-            String date = yesterday.format(DateTimeFormatter.ISO_DATE);
+            String date = pastDate.format(DateTimeFormatter.ISO_DATE);
 
             // when
             var response = getAction("/api/admin/agg/sales?date=" + date, AdminReservationDetailsResponse.class);
