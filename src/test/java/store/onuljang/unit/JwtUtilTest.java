@@ -7,8 +7,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import store.onuljang.auth.JwtUtil;
+import store.onuljang.config.TestS3Config;
 import store.onuljang.exception.AccessTokenParseException;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.service.dto.JwtToken;
@@ -23,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(TestS3Config.class)
 class JwtUtilTest {
 
     @Autowired
