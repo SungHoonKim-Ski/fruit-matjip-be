@@ -35,6 +35,7 @@ KAKAO:
 cloud:
   aws:
     s3:
+      enabled: false
       bucket: test-bucket
       log:
         bucket: test-log-bucket
