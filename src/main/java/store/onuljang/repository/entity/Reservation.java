@@ -64,13 +64,16 @@ public class Reservation extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    public Reservation(Users user, Product product, Integer quantity, BigDecimal amount, BigDecimal sellPrice, LocalDate pickupDate) {
+    public Reservation(Users user, Product product, Integer quantity, BigDecimal amount, BigDecimal sellPrice,
+            LocalDate pickupDate) {
         this.user = user;
         this.product = product;
         this.quantity = quantity;
         this.amount = amount;
         this.pickupDate = pickupDate;
         this.sellPrice = sellPrice;
+        this.status = ReservationStatus.PENDING;
+        this.statusChangedAt = LocalDateTime.now();
     }
 
     public void cancelByUser() {
@@ -145,6 +148,7 @@ public class Reservation extends BaseEntity {
     public boolean isNoShow() {
         return this.status == ReservationStatus.NO_SHOW;
     }
+
     public void noShow() {
         setStatus(ReservationStatus.NO_SHOW);
     }

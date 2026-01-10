@@ -62,6 +62,11 @@ public class Users extends BaseEntity {
         this.socialId = socialId;
         this.uid = uid.toString();
         this.name = name;
+        this.totalRevenue = BigDecimal.ZERO;
+        this.totalOrders = 0L;
+        this.warnCount = 0;
+        this.totalWarnCount = 0;
+        this.changeName = false;
     }
 
     public void modifyName(String name) {

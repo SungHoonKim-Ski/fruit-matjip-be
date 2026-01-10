@@ -22,7 +22,7 @@ public class Admin extends BaseEntity {
     private String name;
 
     @Getter
-    @Column(name = "email", nullable = false)
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 
     @Getter
@@ -38,9 +38,10 @@ public class Admin extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Builder
-    Admin(String name, String email, String password) {
+    Admin(String name, String email, String password, AdminRole role) {
         this.name = name;
         this.email = email;
         this.password = password;
+        this.role = role != null ? role : AdminRole.NONE;
     }
 }

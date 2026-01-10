@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "agg_applied")
 public class AggApplied extends BaseLogEntity {
-    @Column(name = "batch_uid", nullable = false, length = 36)
+    @Column(name = "batch_uid", nullable = true, length = 36)
     private String batchUid;
 
     @Column(name = "reservation_id", nullable = false)
@@ -28,6 +28,6 @@ public class AggApplied extends BaseLogEntity {
     @Column(name = "processed", nullable = false)
     private Boolean processed;
 
-    @Column(name = "processed_at", nullable = false)
+    @Column(name = "processed_at", nullable = true)
     private LocalDateTime processedAt;
 }

@@ -1,8 +1,6 @@
 package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
@@ -37,6 +35,7 @@ public class Product extends BaseEntity {
 
     @Getter
     @Column(name = "stock", nullable = false)
+    @Builder.Default
     private Integer stock = 0;
 
     @Getter
@@ -55,10 +54,12 @@ public class Product extends BaseEntity {
 
     @Getter
     @Column(name = "visible", nullable = false)
+    @Builder.Default
     private Boolean visible = true;
 
     @Getter
     @Column(name = "self_pick", nullable = false)
+    @Builder.Default
     private Boolean selfPick = true;
 
     @Getter
@@ -67,7 +68,7 @@ public class Product extends BaseEntity {
     private Long totalSold = 0L;
 
     @Getter
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "registered_admin", nullable = false)
     private Admin registeredAdmin;
 
@@ -83,6 +84,7 @@ public class Product extends BaseEntity {
     @Setter
     private String description;
 
+    @Builder.Default
     @OrderBy("sortOrder ASC")
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDetailImage> productDetailImages = new ArrayList<>();
