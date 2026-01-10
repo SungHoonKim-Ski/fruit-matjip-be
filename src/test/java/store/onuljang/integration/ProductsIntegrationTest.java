@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static store.onuljang.util.TimeUtil.nowDate;
 
 /**
  * 상품 조회 API 통합 테스트
@@ -46,7 +47,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
         @DisplayName("날짜 범위로 상품 목록 조회 성공")
         void getProducts_Success() throws Exception {
             // given
-            LocalDate today = LocalDate.now();
+            LocalDate today = nowDate();
             LocalDate tomorrow = today.plusDays(1);
 
             testFixture.createTodayProduct("오늘상품", 10, new BigDecimal("10000"), admin);

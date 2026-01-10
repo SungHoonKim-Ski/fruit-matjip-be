@@ -18,6 +18,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
+import static store.onuljang.util.TimeUtil.nowDate;
+
 /**
  * 테스트 데이터 생성 헬퍼 클래스
  */
@@ -109,14 +111,24 @@ public class TestFixture {
      * 오늘 판매 상품 생성
      */
     public Product createTodayProduct(String name, int stock, BigDecimal price, Admin admin) {
-        return createProduct(name, stock, price, LocalDate.now(), admin);
+        return createProduct(name, stock, price, nowDate(), admin);
+    }
+
+    /**
+     * 내일 판매 상품 생성 (시간 무관 테스트용)
+     * 
+     * 19:30 이후에도 예약 가능하도록 내일 날짜로 생성.
+     * 시간과 무관하게 테스트가 동작해야 하는 경우 사용.
+     */
+    public Product createTomorrowProduct(String name, int stock, BigDecimal price, Admin admin) {
+        return createProduct(name, stock, price, nowDate().plusDays(1), admin);
     }
 
     /**
      * 미래 판매 상품 생성
      */
     public Product createFutureProduct(String name, int stock, BigDecimal price, int daysLater, Admin admin) {
-        return createProduct(name, stock, price, LocalDate.now().plusDays(daysLater), admin);
+        return createProduct(name, stock, price, nowDate().plusDays(daysLater), admin);
     }
 
     /**

@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static store.onuljang.util.TimeUtil.nowDate;
 
 /**
  * 예약 API 통합 테스트
@@ -64,7 +65,8 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         @DisplayName("재고 부족 시 예약 실패")
         void createReservation_InsufficientStock() throws Exception {
             // given
-            Product product = testFixture.createTodayProduct("테스트상품", 1, new BigDecimal("10000"), admin);
+            // 재고 부족 테스트 - 내일 상품으로 시간 무관하게 동작
+            Product product = testFixture.createTomorrowProduct("테스트상품", 1, new BigDecimal("10000"), admin);
             ReservationRequest request = new ReservationRequest(product.getId(), 5, // 재고보다 많은 수량
                     new BigDecimal("50000"));
 
@@ -79,7 +81,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         @DisplayName("비공개 상품 예약 시 실패")
         void createReservation_InvisibleProduct() throws Exception {
             // given
-            Product product = testFixture.createInvisibleProduct("비공개상품", 10, new BigDecimal("10000"), LocalDate.now(),
+            Product product = testFixture.createInvisibleProduct("비공개상품", 10, new BigDecimal("10000"), nowDate(),
                     admin);
             ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("10000"));
 
@@ -259,7 +261,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         void requestSelfPick_ProductNotAllowed() throws Exception {
             // given
             Product product = testFixture.createNoSelfPickProduct("셀프픽업불가상품", 10, new BigDecimal("10000"),
-                    LocalDate.now(), admin);
+                    nowDate(), admin);
             Reservation reservation = testFixture.createReservation(user, product, 2);
 
             // when
@@ -284,7 +286,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             testFixture.createReservation(user, product1, 2);
             testFixture.createReservation(user, product2, 1);
 
-            LocalDate today = LocalDate.now();
+            LocalDate today = nowDate();
             String fromDate = today.format(DateTimeFormatter.ISO_DATE);
             String toDate = today.format(DateTimeFormatter.ISO_DATE);
 
@@ -302,14 +304,14 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         void getReservations_OnlyOwnReservations() throws Exception {
             // given
             Users otherUser = testFixture.createUser("다른유저");
-            Product product = testFixture.createTodayProduct("상품", 10, new BigDecimal("10000"), admin);
+            Product product = testFixture.createTomorrowProduct("상품", 10, new BigDecimal("10000"), admin);
 
             testFixture.createReservation(user, product, 2);
             testFixture.createReservation(otherUser, product, 1);
 
-            LocalDate today = LocalDate.now();
-            String fromDate = today.format(DateTimeFormatter.ISO_DATE);
-            String toDate = today.format(DateTimeFormatter.ISO_DATE);
+            LocalDate tomorrow = nowDate().plusDays(1);
+            String fromDate = tomorrow.format(DateTimeFormatter.ISO_DATE);
+            String toDate = tomorrow.format(DateTimeFormatter.ISO_DATE);
 
             // when
             var response = getAction("/api/auth/reservations/?from=" + fromDate + "&to=" + toDate, accessToken,
@@ -324,7 +326,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         @DisplayName("예약이 없는 경우 빈 배열 반환")
         void getReservations_Empty() throws Exception {
             // given
-            LocalDate today = LocalDate.now();
+            LocalDate today = nowDate();
             String fromDate = today.format(DateTimeFormatter.ISO_DATE);
             String toDate = today.format(DateTimeFormatter.ISO_DATE);
 

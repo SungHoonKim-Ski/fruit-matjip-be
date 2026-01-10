@@ -1,5 +1,6 @@
 package store.onuljang.integration;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -58,7 +59,6 @@ class AdminControllerIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @org.junit.jupiter.api.Disabled("Validation bug - returns 200 for empty email")
         @DisplayName("빈 이메일로 회원가입 시 실패")
         void adminSignup_EmptyEmail() throws Exception {
             // given

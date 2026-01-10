@@ -23,6 +23,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static store.onuljang.util.TimeUtil.nowDate;
 
 /**
  * 관리자 상품 관리 API 통합 테스트
@@ -60,7 +61,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             // given
             testFixture.createTodayProduct("상품1", 10, new BigDecimal("10000"), admin);
             testFixture.createTodayProduct("상품2", 5, new BigDecimal("5000"), admin);
-            testFixture.createInvisibleProduct("비공개상품", 3, new BigDecimal("3000"), LocalDate.now(), admin);
+            testFixture.createInvisibleProduct("비공개상품", 3, new BigDecimal("3000"), nowDate(), admin);
 
             // when
             var response = getAction("/api/admin/products", AdminProductListItems.class);
@@ -111,7 +112,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
         void createProduct_Success() throws Exception {
             // given
             AdminCreateProductRequest request = new AdminCreateProductRequest("새상품", new BigDecimal("25000"), 10,
-                    "https://example.com/image.jpg", LocalDate.now().plusDays(1).toString(), true);
+                    "https://example.com/image.jpg", nowDate().plusDays(1).toString(), true);
 
             // when
             var response = postAction("/api/admin/products", request, Long.class);
@@ -139,7 +140,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
 
             AdminUpdateProductDetailsRequest request = new AdminUpdateProductDetailsRequest("수정된상품",
                     new BigDecimal("20000"), 20, "https://example.com/new-image.jpg",
-                    LocalDate.now().plusDays(2).toString(), "수정된 설명", List.of(), LocalTime.of(12, 0), true);
+                    nowDate().plusDays(2).toString(), "수정된 설명", List.of(), LocalTime.of(12, 0), true);
 
             // when
             var response = patchAction("/api/admin/products/" + product.getId(), request, Void.class);
@@ -234,7 +235,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             // given
             Product product1 = testFixture.createTodayProduct("상품1", 10, new BigDecimal("10000"), admin);
             Product product2 = testFixture.createTodayProduct("상품2", 5, new BigDecimal("5000"), admin);
-            LocalDate newSellDate = LocalDate.now().plusDays(7);
+            LocalDate newSellDate = nowDate().plusDays(7);
 
             AdminProductBulkUpdateSellDateRequest request = new AdminProductBulkUpdateSellDateRequest(newSellDate,
                     java.util.Set.of(product1.getId(), product2.getId()));

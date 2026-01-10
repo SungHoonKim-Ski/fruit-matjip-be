@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static store.onuljang.util.TimeUtil.nowDate;
 
 /**
  * 관리자 집계 API 통합 테스트
@@ -46,7 +47,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
         @DisplayName("날짜 범위로 집계 요약 조회 성공")
         void getAggregationSummary_Success() throws Exception {
             // given
-            LocalDate today = LocalDate.now();
+            LocalDate today = nowDate();
             Product product = testFixture.createTodayProduct("상품", 10, new BigDecimal("10000"), admin);
             testFixture.createReservationWithStatus(user1, product, 2, ReservationStatus.PICKED);
             testFixture.createReservationWithStatus(user2, product, 3, ReservationStatus.PICKED);
@@ -67,7 +68,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
         @DisplayName("예약이 없는 기간 조회 시 빈 결과")
         void getAggregationSummary_EmptyPeriod() throws Exception {
             // given
-            LocalDate pastDate = LocalDate.now().minusDays(30);
+            LocalDate pastDate = nowDate().minusDays(30);
             String fromDate = pastDate.format(DateTimeFormatter.ISO_DATE);
             String toDate = pastDate.plusDays(1).format(DateTimeFormatter.ISO_DATE);
 
@@ -88,7 +89,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
         @DisplayName("특정 날짜 판매 상세 조회 성공")
         void getDailySales_Success() throws Exception {
             // given
-            LocalDate yesterday = LocalDate.now().minusDays(1);
+            LocalDate yesterday = nowDate().minusDays(1);
             Product product1 = testFixture.createProduct("상품1", 10, new BigDecimal("10000"), yesterday, admin);
             Product product2 = testFixture.createProduct("상품2", 10, new BigDecimal("20000"), yesterday, admin);
             testFixture.createReservationWithStatus(user1, product1, 2, ReservationStatus.PICKED);
@@ -108,7 +109,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
         @DisplayName("판매가 없는 날짜 조회")
         void getDailySales_NoSales() throws Exception {
             // given
-            LocalDate pastDate = LocalDate.now().minusDays(30);
+            LocalDate pastDate = nowDate().minusDays(30);
             String date = pastDate.format(DateTimeFormatter.ISO_DATE);
 
             // when

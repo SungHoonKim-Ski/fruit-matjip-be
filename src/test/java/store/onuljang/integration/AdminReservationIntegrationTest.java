@@ -22,6 +22,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static store.onuljang.util.TimeUtil.nowDate;
 
 /**
  * 관리자 예약 관리 API 통합 테스트
@@ -64,7 +65,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
             testFixture.createReservation(user1, product, 2);
             testFixture.createReservation(user2, product, 3);
 
-            String today = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
+            String today = nowDate().format(DateTimeFormatter.ISO_DATE);
 
             // when
             var response = getAction("/api/admin/reservations?date=" + today, AdminReservationListResponse.class);
@@ -78,7 +79,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
         @DisplayName("예약이 없는 날짜 조회 시 빈 배열 반환")
         void getReservationsByDate_Empty() throws Exception {
             // given
-            String tomorrow = LocalDate.now().plusDays(1).format(DateTimeFormatter.ISO_DATE);
+            String tomorrow = nowDate().plusDays(1).format(DateTimeFormatter.ISO_DATE);
 
             // when
             var response = getAction("/api/admin/reservations?date=" + tomorrow, AdminReservationListResponse.class);
