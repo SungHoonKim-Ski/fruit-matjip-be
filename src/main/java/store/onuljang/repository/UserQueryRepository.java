@@ -4,14 +4,10 @@ import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.NumberPath;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import store.onuljang.controller.request.AdminCustomerScrollRequest;
 import store.onuljang.controller.request.AdminCustomerSortKey;
 import store.onuljang.controller.request.SortOrder;
-import store.onuljang.repository.entity.QUsers;
 import store.onuljang.repository.entity.Users;
 
 import java.math.BigDecimal;
