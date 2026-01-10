@@ -47,13 +47,14 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
         @DisplayName("날짜 범위로 집계 요약 조회 성공")
         void getAggregationSummary_Success() throws Exception {
             // given
-            LocalDate today = nowDate();
-            Product product = testFixture.createTodayProduct("상품", 10, new BigDecimal("10000"), admin);
+            // API가 과거/현재 날짜만 허용하므로 yesterday 사용
+            LocalDate yesterday = nowDate().minusDays(1);
+            Product product = testFixture.createProduct("상품", 10, new BigDecimal("10000"), yesterday, admin);
             testFixture.createReservationWithStatus(user1, product, 2, ReservationStatus.PICKED);
             testFixture.createReservationWithStatus(user2, product, 3, ReservationStatus.PICKED);
 
-            String fromDate = today.format(DateTimeFormatter.ISO_DATE);
-            String toDate = today.format(DateTimeFormatter.ISO_DATE);
+            String fromDate = yesterday.format(DateTimeFormatter.ISO_DATE);
+            String toDate = yesterday.format(DateTimeFormatter.ISO_DATE);
 
             // when
             var response = getAction("/api/admin/agg/summary?from=" + fromDate + "&to=" + toDate,

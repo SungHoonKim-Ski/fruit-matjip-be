@@ -70,7 +70,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
         @DisplayName("비공개 상품은 조회되지 않음")
         void getProducts_InvisibleProductNotShown() throws Exception {
             // given
-            LocalDate today = LocalDate.now();
+            LocalDate today = nowDate();
             testFixture.createTodayProduct("공개상품", 10, new BigDecimal("10000"), admin);
             testFixture.createInvisibleProduct("비공개상품", 5, new BigDecimal("5000"), today, admin);
 
