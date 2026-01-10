@@ -5,8 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.config.TestS3Config;
 import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Users;
@@ -24,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
  */
 @SpringBootTest
 @ActiveProfiles("test")
+@Import(TestS3Config.class)
 @Transactional
 class ReservationAggregationSchedulerTest {
 
