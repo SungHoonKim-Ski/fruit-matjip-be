@@ -169,23 +169,6 @@ Repository (JPA 기반 DB 접근)
 | `Service`    | 실제 비즈니스 도메인 중심의 내부 로직 담당 |
 | `Repository` | JPA 기반 DB 접근 계층 (쿼리 메서드, fetch join 등 포함) |
 ---
-## 📂 DB 테이블 구조
-
-아래는 주요 테이블 및 관계의 간략한 설명입니다.
-전체 구조는 ERD 이미지를 참고해주세요.
-
-| 테이블 | 설명 |
-|--------|------|
-| `users` | 사용자 정보 저장 (카카오 ID, 닉네임) |
-| `reservations` | 사용자 예약 내역 및 수량 정보 |
-| `products` | 상품 정보 및 상태 (재고, 상품 노출 여부) |
-| `admins` | 관리자 계정 및 권한 정보 (OWNER/MANAGER/NONE) |
-| `admin_logs`, `user_logs` | API 호출 로깅 (메서드/응답 시간/상태 등) |
-
-ERD
-<img width="3448" height="2428" alt="prod-onuljang-server" src="https://github.com/user-attachments/assets/541891e3-00f5-48fd-b507-a5f216adad54" />
-
----
 
 ## 🚀 배포 전략
 
