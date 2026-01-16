@@ -1,5 +1,6 @@
 package store.onuljang.integration;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,11 +54,18 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
 
     @BeforeEach
     void setUp() {
-        // 기존 데이터 정리
-        reservationRepository.deleteAll();
-        productsRepository.deleteAll();
-
+        cleanup();
         admin = testFixture.createDefaultAdmin();
+    }
+
+    @AfterEach
+    void tearDown() {
+        cleanup();
+    }
+
+    private void cleanup() {
+        reservationRepository.deleteAllInBatch();
+        productsRepository.deleteAllInBatch();
     }
 
     @Test
