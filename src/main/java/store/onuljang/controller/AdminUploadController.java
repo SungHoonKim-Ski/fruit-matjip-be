@@ -16,7 +16,6 @@ import store.onuljang.service.AdminUploadService;
 
 import java.util.List;
 
-
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -28,6 +27,12 @@ public class AdminUploadController {
 
     @PostMapping("/products/presigned-url")
     public ResponseEntity<PresignedUrlResponse> getTempUploadUrl(@Valid @RequestBody PresignedUrlRequest req) {
+        PresignedUrlResponse res = uploadService.issueImageUrl(req.fileName(), req.contentType());
+        return ResponseEntity.ok(res);
+    }
+
+    @PostMapping("/keyword/presigned-url")
+    public ResponseEntity<PresignedUrlResponse> getKeywordUploadUrl(@Valid @RequestBody PresignedUrlRequest req) {
         PresignedUrlResponse res = uploadService.issueImageUrl(req.fileName(), req.contentType());
         return ResponseEntity.ok(res);
     }
