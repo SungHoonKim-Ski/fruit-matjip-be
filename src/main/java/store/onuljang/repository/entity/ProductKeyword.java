@@ -15,4 +15,8 @@ public class ProductKeyword extends BaseLogEntity {
     @Getter
     @Column(name = "name", nullable = false)
     private String name;
+
+    @Getter
+    @Column(name = "keyword_url")
+    private String keywordUrl;
 }

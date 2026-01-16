@@ -69,7 +69,7 @@ public class AdminProductController {
     }
 
     @PatchMapping("/order")
-    public ResponseEntity<Integer> updateOrder(@Valid @RequestBody AdminProductUpdateOrder request) {
+    public ResponseEntity<Integer> updateOrder(@Valid @RequestBody AdminProductUpdateOrderRequest request) {
         return ResponseEntity.ok(adminProductAppService.updateOrder(request));
     }
 
@@ -86,8 +86,8 @@ public class AdminProductController {
     }
 
     @PostMapping("/keyword")
-    public ResponseEntity<Void> saveProductKeyword(@NotEmpty @RequestParam String keyword) {
-        adminProductAppService.saveKeyword(keyword);
+    public ResponseEntity<Void> saveProductKeyword(@Valid @RequestBody AdminCreateKeywordRequestRequest request) {
+        adminProductAppService.saveKeyword(request);
 
         return ResponseEntity.ok().build();
     }
@@ -101,7 +101,7 @@ public class AdminProductController {
 
     @PatchMapping("/keywords")
     public ResponseEntity<Void> updateProductKeyWord(@RequestBody @Valid AdminProductKeywordsRequest request) {
-        adminProductAppService.updateKeywords(request.keywords());
+        adminProductAppService.updateKeywords(request);
 
         return ResponseEntity.ok().build();
     }

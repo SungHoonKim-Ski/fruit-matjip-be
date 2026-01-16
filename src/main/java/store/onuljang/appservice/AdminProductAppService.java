@@ -7,8 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
-import store.onuljang.controller.request.AdminProductUpdateOrder;
+import store.onuljang.controller.request.*;
 import store.onuljang.controller.response.ProductKeywordResponse;
 import store.onuljang.event.admin_product.AdminProductLogEvent;
 import store.onuljang.repository.entity.ProductKeyword;
@@ -17,8 +16,6 @@ import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.AdminProductAction;
 import store.onuljang.service.*;
 import store.onuljang.util.SessionUtil;
-import store.onuljang.controller.request.AdminCreateProductRequest;
-import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
 import store.onuljang.repository.entity.Admin;
@@ -119,7 +116,7 @@ public class AdminProductAppService {
     }
 
     @Transactional
-    public int updateOrder(AdminProductUpdateOrder request) {
+    public int updateOrder(AdminProductUpdateOrderRequest request) {
         List<Product> products = productsService.findAllByIdIn(request.productIds());
         if (products.isEmpty() || products.size() != request.productIds().size()) {
             throw new IllegalArgumentException("선택한 제품이 존재하지 않습니다.");
@@ -157,28 +154,26 @@ public class AdminProductAppService {
     }
 
     @Transactional
-    public void saveKeyword(String keyword) {
-        if (productKeywordService.existKeyword(keyword)) {
+    public void saveKeyword(AdminCreateKeywordRequestRequest request) {
+        if (productKeywordService.existKeyword(request.keyword())) {
             throw new IllegalArgumentException("이미 존재하는 키워드");
         }
 
-        productKeywordService.save(
-            ProductKeyword.builder()
-                .name(keyword)
-                .build()
-        );
+        productKeywordService.save(AdminCreateKeywordRequestRequest.toEntity(request));
     }
 
     @Transactional
-    public void updateKeywords(List<String> keywords) {
+    public void updateKeywords(AdminProductKeywordsRequest request) {
         productKeywordService.deleteAllWithFlush();
 
-        productKeywordService.saveAll(
-            keywords.stream().map(
-            keyword -> ProductKeyword.builder()
-                .name(keyword)
-                .build()).toList()
-        );
+        productKeywordService
+            .saveAll(
+                request.keywords().stream().map(
+                keyword -> ProductKeyword.builder()
+                        .name(keyword.keyword())
+                        .keywordUrl(keyword.keywordUrl())
+                        .build())
+                .toList());
     }
 
     @Transactional
