@@ -34,7 +34,6 @@ class ProductsServiceTest {
     @BeforeEach
     void setUp() {
         testProduct = mock(Product.class);
-        when(testProduct.getId()).thenReturn(1L);
     }
 
     @Test
@@ -70,10 +69,9 @@ class ProductsServiceTest {
         when(productsRepository.save(testProduct)).thenReturn(testProduct);
 
         // when
-        long result = productsService.save(testProduct);
+        productsService.save(testProduct);
 
         // then
-        assertThat(result).isEqualTo(1L);
         verify(productsRepository).save(testProduct);
     }
 

@@ -11,6 +11,7 @@ import store.onuljang.controller.request.AdminProductUpdateOrder;
 import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
+import store.onuljang.controller.request.AdminCreateKeywordRequestRequest;
 import store.onuljang.controller.response.ProductKeywordResponse;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.entity.Admin;
@@ -295,8 +296,12 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
         @Test
         @DisplayName("POST /api/admin/products/keyword - 키워드 추가")
         void saveProductKeyword_Success() throws Exception {
+            // given
+            AdminCreateKeywordRequestRequest request = new AdminCreateKeywordRequestRequest("새키워드",
+                    "https://example.com/image.jpg");
+
             // when
-            var response = postAction("/api/admin/products/keyword?keyword=새키워드", null, Void.class);
+            var response = postAction("/api/admin/products/keyword", request, Void.class);
 
             // then
             assertThat(response.isOk()).isTrue();

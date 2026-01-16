@@ -11,6 +11,7 @@ import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
+import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -47,18 +48,14 @@ class ProductsIntegrationTest extends IntegrationTestBase {
         @DisplayName("날짜 범위로 상품 목록 조회 성공")
         void getProducts_Success() throws Exception {
             // given
-            LocalDate today = nowDate();
-            LocalDate tomorrow = today.plusDays(1);
+            LocalDate tomorrow = TimeUtil.tomorrowDate();
+            LocalDate tomorrowNextDay = TimeUtil.tomorrowDate().plusDays(1);
 
-            testFixture.createTodayProduct("오늘상품", 10, new BigDecimal("10000"), admin);
             testFixture.createFutureProduct("내일상품", 5, new BigDecimal("5000"), 1, admin);
             testFixture.createFutureProduct("모레상품", 3, new BigDecimal("3000"), 2, admin);
 
-            String fromDate = today.format(DateTimeFormatter.ISO_DATE);
-            String toDate = tomorrow.format(DateTimeFormatter.ISO_DATE);
-
             // when
-            var response = getAction("/api/auth/products?from=" + fromDate + "&to=" + toDate, accessToken,
+            var response = getAction("/api/auth/products?from=" + tomorrow + "&to=" + tomorrowNextDay, accessToken,
                     ProductListResponse.class);
 
             // then

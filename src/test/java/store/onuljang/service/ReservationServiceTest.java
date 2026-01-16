@@ -43,7 +43,6 @@ class ReservationServiceTest {
     @BeforeEach
     void setUp() {
         testReservation = mock(Reservation.class);
-        when(testReservation.getId()).thenReturn(1L);
     }
 
     @Test
@@ -79,10 +78,9 @@ class ReservationServiceTest {
         when(reservationRepository.save(testReservation)).thenReturn(testReservation);
 
         // when
-        long result = reservationService.save(testReservation);
+        reservationService.save(testReservation);
 
         // then
-        assertThat(result).isEqualTo(1L);
         verify(reservationRepository).save(testReservation);
     }
 

@@ -40,8 +40,6 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         testUser = mock(Users.class);
-        when(testUser.getUid()).thenReturn("test-uid");
-        when(testUser.getName()).thenReturn("테스트유저");
     }
 
     @Test

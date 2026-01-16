@@ -85,9 +85,7 @@ public class TestFixture {
     public Admin createAdmin(String name, String email, String password) {
         Admin admin = Admin.builder().name(name).email(email).password(password)
                 .role(store.onuljang.repository.entity.enums.AdminRole.OWNER).build();
-        Admin saved = adminRepository.save(admin);
-        entityManager.flush();
-        return saved;
+        return adminRepository.saveAndFlush(admin);
     }
 
     /**
