@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import store.onuljang.controller.request.AdminCreateProductRequest;
 import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
-import store.onuljang.controller.request.AdminProductUpdateOrder;
+import store.onuljang.controller.request.AdminProductUpdateOrderRequest;
 import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
@@ -262,7 +262,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             Product product2 = testFixture.createTodayProduct("상품2", 5, new BigDecimal("5000"), admin);
             Product product3 = testFixture.createTodayProduct("상품3", 3, new BigDecimal("3000"), admin);
 
-            AdminProductUpdateOrder request = new AdminProductUpdateOrder(
+            AdminProductUpdateOrderRequest request = new AdminProductUpdateOrderRequest(
                     List.of(product3.getId(), product1.getId(), product2.getId()));
 
             // when
