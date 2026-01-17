@@ -7,9 +7,9 @@ import java.time.*;
 @UtilityClass
 public class TimeUtil {
     public static final ZoneId KST = ZoneId.of("Asia/Seoul");
-    public final LocalTime SELF_PICK_DEADLINE = LocalTime.of(19, 30);
+    public final LocalTime SELF_PICK_DEADLINE = LocalTime.of(19, 0);
     public final LocalTime RESERVE_DEADLINE = LocalTime.of(19, 30);
-    public final LocalTime CANCEL_DEADLINE = LocalTime.of(19, 30);
+    public final LocalTime CANCEL_DEADLINE = LocalTime.of(19, 0);
 
     public static LocalDate nowDate() {
         return LocalDate.now(KST);
@@ -18,6 +18,7 @@ public class TimeUtil {
     public static LocalDate yesterdayDate() {
         return LocalDate.now(KST).minusDays(1);
     }
+
     public static LocalDate tomorrowDate() {
         return LocalDate.now(KST).plusDays(1);
     }

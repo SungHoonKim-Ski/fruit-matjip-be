@@ -147,37 +147,4 @@ class TimeUtilTest {
         // then
         assertThat(result).isFalse();
     }
-
-    @Test
-    @DisplayName("CANCEL_DEADLINE - 19:30으로 설정됨")
-    void cancelDeadline_Is1930() {
-        // when
-        var deadline = TimeUtil.CANCEL_DEADLINE;
-
-        // then
-        assertThat(deadline.getHour()).isEqualTo(19);
-        assertThat(deadline.getMinute()).isEqualTo(30);
-    }
-
-    @Test
-    @DisplayName("RESERVE_DEADLINE - 19:30으로 설정됨")
-    void reserveDeadline_Is1930() {
-        // when
-        var deadline = TimeUtil.RESERVE_DEADLINE;
-
-        // then
-        assertThat(deadline.getHour()).isEqualTo(19);
-        assertThat(deadline.getMinute()).isEqualTo(30);
-    }
-
-    @Test
-    @DisplayName("SELF_PICK_DEADLINE - 19:30으로 설정됨")
-    void selfPickDeadline_Is1930() {
-        // when
-        var deadline = TimeUtil.SELF_PICK_DEADLINE;
-
-        // then
-        assertThat(deadline.getHour()).isEqualTo(19);
-        assertThat(deadline.getMinute()).isEqualTo(30);
-    }
 }

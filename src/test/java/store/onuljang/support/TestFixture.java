@@ -130,6 +130,24 @@ public class TestFixture {
     }
 
     /**
+     * 과거 판매 상품 생성
+     */
+    public Product createPastProduct(String name, int stock, BigDecimal price, int daysAgo, Admin admin) {
+        return createProduct(name, stock, price, nowDate().minusDays(daysAgo), admin);
+    }
+
+    /**
+     * 특정 날짜와 시간에 판매되는 상품 생성
+     */
+    public Product createProductAtDateTime(String name, int stock, BigDecimal price,
+            java.time.LocalDateTime sellDateTime,
+            Admin admin) {
+        Product product = createProduct(name, stock, price, sellDateTime.toLocalDate(), admin);
+        product.setSellTime(sellDateTime.toLocalTime());
+        return productsRepository.save(product);
+    }
+
+    /**
      * 비공개 상품 생성
      */
     public Product createInvisibleProduct(String name, int stock, BigDecimal price, LocalDate sellDate, Admin admin) {
