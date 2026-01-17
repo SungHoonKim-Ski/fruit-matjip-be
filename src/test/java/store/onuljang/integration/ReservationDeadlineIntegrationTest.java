@@ -1,5 +1,6 @@
 package store.onuljang.integration;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -8,13 +9,17 @@ import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
+import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.RESERVE_DEADLINE;
+import static store.onuljang.util.TimeUtil.KST;
 import static store.onuljang.util.TimeUtil.nowDateTime;
 
 class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
@@ -31,6 +36,20 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         admin = testFixture.createDefaultAdmin();
         user = testFixture.createUser("데드라인테스터");
         accessToken = testFixture.createAccessToken(user);
+
+        // 모든 테스트 시간을 오늘 12:00으로 고정 (19:30 데드라인 전)
+        fixedTodayTime(12, 0);
+    }
+
+    private void fixedTodayTime(int hour, int minute) {
+        LocalDateTime todayNoon = LocalDateTime.of(LocalDate.now(), LocalTime.of(hour, minute));
+        Instant instant = todayNoon.atZone(KST).toInstant();
+        TimeUtil.setClock(Clock.fixed(instant, KST));
+    }
+
+    @AfterEach
+    void tearDown() {
+        store.onuljang.util.TimeUtil.resetClock();
     }
 
     @Test
@@ -89,24 +108,21 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
     @Test
     @DisplayName("마감 시간(19:30) 경계성 테스트 - 오늘 상품 기준")
     void reserve_ReserveDeadline_Today_Boundaries() throws Exception {
-        LocalTime nowTime = nowDateTime().toLocalTime();
-        LocalTime deadline = RESERVE_DEADLINE;
+        // 1. 19:29분 (마감 전) -> 성공
+        fixedTodayTime(19, 29);
+        Product todayBefore = testFixture.createTodayProduct("오늘마감전", 10, new BigDecimal("1000"), admin);
+        var resBefore = postAction("/api/auth/reservations/",
+                new ReservationRequest(todayBefore.getId(), 1, new BigDecimal("1000")), accessToken, Long.class);
+        assertThat(resBefore.isOk()).isTrue();
 
-        if (nowTime.isBefore(deadline)) {
-            // 현재가 19:30 전이면 오늘 상품 예약 가능해야 함
-            Product today = testFixture.createTodayProduct("오늘상품", 10, new BigDecimal("1000"), admin);
-            var res = postAction("/api/auth/reservations/",
-                    new ReservationRequest(today.getId(), 1, new BigDecimal("1000")), accessToken, Long.class);
-            assertThat(res.isOk()).isTrue();
-        } else {
-            // 현재가 19:30 후면 오늘 상품 예약 실패해야 함
-            Product today = testFixture.createTodayProduct("오늘상품", 10, new BigDecimal("1000"), admin);
-            var res = postAction("/api/auth/reservations/",
-                    new ReservationRequest(today.getId(), 1, new BigDecimal("1000")), accessToken, Object.class);
+        // 2. 19:31분 (마감 후) -> 실패
+        fixedTodayTime(19, 31);
+        Product todayAfter = testFixture.createTodayProduct("오늘마감후", 10, new BigDecimal("1000"), admin);
+        var resAfter = postAction("/api/auth/reservations/",
+                new ReservationRequest(todayAfter.getId(), 1, new BigDecimal("1000")), accessToken, Object.class);
 
-            assertThat(res.status()).isEqualTo(400);
-            ErrorResponse error = objectMapper.convertValue(res.body(), ErrorResponse.class);
-            assertThat(error.message()).isEqualTo("예약 가능한 시간이 지났습니다.");
-        }
+        assertThat(resAfter.status()).isEqualTo(400);
+        ErrorResponse error = objectMapper.convertValue(resAfter.body(), ErrorResponse.class);
+        assertThat(error.message()).isEqualTo("예약 가능한 시간이 지났습니다.");
     }
 }

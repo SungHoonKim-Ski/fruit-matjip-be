@@ -134,7 +134,7 @@ public class ReservationAppService {
 
     private void validateReserveTime(LocalDate sellDate, LocalTime sellTime) {
         ZonedDateTime deadLine = sellDate.atTime(RESERVE_DEADLINE).atZone(KST);
-        if (ZonedDateTime.now(KST).isAfter(deadLine)) {
+        if (TimeUtil.nowZonedDateTime().isAfter(deadLine)) {
             throw new UserValidateException("예약 가능한 시간이 지났습니다.");
         }
 

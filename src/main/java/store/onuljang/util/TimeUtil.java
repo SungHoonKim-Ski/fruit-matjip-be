@@ -7,24 +7,37 @@ import java.time.*;
 @UtilityClass
 public class TimeUtil {
     public static final ZoneId KST = ZoneId.of("Asia/Seoul");
+    private static Clock clock = Clock.system(KST);
     public final LocalTime SELF_PICK_DEADLINE = LocalTime.of(19, 0);
     public final LocalTime RESERVE_DEADLINE = LocalTime.of(19, 30);
     public final LocalTime CANCEL_DEADLINE = LocalTime.of(19, 0);
 
+    public static void setClock(Clock customClock) {
+        clock = customClock;
+    }
+
+    public static void resetClock() {
+        clock = Clock.system(KST);
+    }
+
     public static LocalDate nowDate() {
-        return LocalDate.now(KST);
+        return LocalDate.now(clock);
     }
 
     public static LocalDate yesterdayDate() {
-        return LocalDate.now(KST).minusDays(1);
+        return nowDate().minusDays(1);
     }
 
     public static LocalDate tomorrowDate() {
-        return LocalDate.now(KST).plusDays(1);
+        return nowDate().plusDays(1);
     }
 
     public static LocalDateTime nowDateTime() {
-        return LocalDateTime.now(KST);
+        return LocalDateTime.now(clock);
+    }
+
+    public static ZonedDateTime nowZonedDateTime() {
+        return ZonedDateTime.now(clock);
     }
 
     public boolean isPastDate(LocalDate date) {
@@ -34,12 +47,12 @@ public class TimeUtil {
     public boolean isCancelDeadlineOver(LocalDate pickupDate) {
         ZonedDateTime deadLine = pickupDate.atTime(CANCEL_DEADLINE).atZone(KST);
 
-        return ZonedDateTime.now(KST).isAfter(deadLine);
+        return nowZonedDateTime().isAfter(deadLine);
     }
 
     public boolean isReserveDeadlineOver(LocalDate pickupDate) {
         ZonedDateTime deadLine = pickupDate.atTime(RESERVE_DEADLINE).atZone(KST);
 
-        return ZonedDateTime.now(KST).isAfter(deadLine);
+        return nowZonedDateTime().isAfter(deadLine);
     }
 }
