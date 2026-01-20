@@ -107,13 +107,12 @@ class ReservationServiceTest {
         Set<Long> ids = Set.of(1L, 2L);
         LocalDate today = LocalDate.now();
         LocalDateTime now = LocalDateTime.now();
-        when(reservationQueryRepository.updateAllReservationStatus(
-                ids, today, ReservationStatus.PENDING, ReservationStatus.NO_SHOW, now))
-                .thenReturn(2L);
+        when(reservationQueryRepository.updateAllReservationStatus(ids, today, ReservationStatus.PENDING,
+                ReservationStatus.NO_SHOW, now)).thenReturn(2L);
 
         // when
-        long result = reservationService.updateAllReservationsWhereIdIn(
-                ids, today, ReservationStatus.PENDING, ReservationStatus.NO_SHOW, now);
+        long result = reservationService.updateAllReservationsWhereIdIn(ids, today, ReservationStatus.PENDING,
+                ReservationStatus.NO_SHOW, now);
 
         // then
         assertThat(result).isEqualTo(2L);
@@ -125,9 +124,8 @@ class ReservationServiceTest {
         // given
         Set<Long> ids = Set.of(1L, 2L);
         List<ProductRestockTarget> targets = List.of(mock(ProductRestockTarget.class));
-        when(reservationQueryRepository.findAllByIdInAndStatusGroupByProductIdOrderByProductId(
-                ids, ReservationStatus.CANCELED))
-                .thenReturn(targets);
+        when(reservationQueryRepository.findAllByIdInAndStatusGroupByProductIdOrderByProductId(ids,
+                ReservationStatus.CANCELED)).thenReturn(targets);
 
         // when
         List<ProductRestockTarget> result = reservationService
@@ -204,8 +202,8 @@ class ReservationServiceTest {
                 .thenReturn(reservations);
 
         // when
-        List<Reservation> result = reservationService.findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(
-                user, from, to);
+        List<Reservation> result = reservationService.findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(user,
+                from, to);
 
         // then
         assertThat(result).hasSize(1);
@@ -237,8 +235,8 @@ class ReservationServiceTest {
                 .thenReturn(targets);
 
         // when
-        List<ReservationWarnTarget> result = reservationService.findAllByPickupDateAndStatus(
-                today, ReservationStatus.PENDING);
+        List<ReservationWarnTarget> result = reservationService.findAllByPickupDateAndStatus(today,
+                ReservationStatus.PENDING);
 
         // then
         assertThat(result).hasSize(1);
@@ -254,8 +252,8 @@ class ReservationServiceTest {
                 .thenReturn(targets);
 
         // when
-        List<UserSalesRollbackTarget> result = reservationService.findUserSalesRollbackTargets(
-                ids, ReservationStatus.CANCELED);
+        List<UserSalesRollbackTarget> result = reservationService.findUserSalesRollbackTargets(ids,
+                ReservationStatus.CANCELED);
 
         // then
         assertThat(result).hasSize(1);

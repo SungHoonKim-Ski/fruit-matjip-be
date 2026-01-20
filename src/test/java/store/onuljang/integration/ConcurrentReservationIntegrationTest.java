@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.appservice.ReservationAppService;
@@ -15,7 +14,6 @@ import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
 
@@ -30,10 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * 동시 예약 시나리오 통합 테스트
- * 
- * 여러 사용자가 동시에 같은 상품을 예약할 때
- * 재고 관리가 정확하게 이루어지는지 검증합니다.
- * 
+ *
+ * 여러 사용자가 동시에 같은 상품을 예약할 때 재고 관리가 정확하게 이루어지는지 검증합니다.
+ *
  * Note: @Transactional을 제거하여 각 스레드가 독립적인 트랜잭션을 사용하도록 합니다.
  */
 @Transactional(propagation = Propagation.NOT_SUPPORTED) // 테스트 트랜잭션 비활성화
@@ -99,9 +96,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
                 try {
                     startLatch.await(); // 모든 스레드가 동시에 시작하도록 대기
 
-                    ReservationRequest request = new ReservationRequest(
-                            product.getId(),
-                            3, // 3개씩 예약
+                    ReservationRequest request = new ReservationRequest(product.getId(), 3, // 3개씩 예약
                             new BigDecimal("30000"));
 
                     reservationAppService.reserve(users.get(index).getUid(), request);
@@ -172,10 +167,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
                 try {
                     startLatch.await();
 
-                    ReservationRequest request = new ReservationRequest(
-                            product.getId(),
-                            1,
-                            new BigDecimal("50000"));
+                    ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("50000"));
 
                     reservationAppService.reserve(users.get(index).getUid(), request);
                     successCount.incrementAndGet();

@@ -14,7 +14,6 @@ import store.onuljang.controller.response.AdminCustomerWarnResponse;
 
 import java.util.UUID;
 
-
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor

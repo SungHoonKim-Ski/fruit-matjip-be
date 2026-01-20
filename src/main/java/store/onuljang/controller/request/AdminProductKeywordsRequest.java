@@ -3,7 +3,6 @@ package store.onuljang.controller.request;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.UniqueElements;
-import store.onuljang.controller.response.ProductKeywordResponse;
 
 import java.util.List;
 

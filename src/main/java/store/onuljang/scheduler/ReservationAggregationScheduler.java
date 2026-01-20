@@ -13,14 +13,13 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import store.onuljang.appservice.AdminAggregationAppService;
-import store.onuljang.appservice.AdminReservationAppService;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReservationAggregationScheduler {
-     AdminAggregationAppService adminAggregationAppService;
+    AdminAggregationAppService adminAggregationAppService;
 
     /**
      * 매일 00:10(KST) 실행.

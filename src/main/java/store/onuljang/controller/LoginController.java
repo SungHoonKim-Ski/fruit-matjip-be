@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.AuthAppService;
 import store.onuljang.controller.request.LoginRequest;
 import store.onuljang.controller.response.LoginResponse;
-import store.onuljang.service.dto.JwtToken;
 
 @RequestMapping("/api")
 @RestController

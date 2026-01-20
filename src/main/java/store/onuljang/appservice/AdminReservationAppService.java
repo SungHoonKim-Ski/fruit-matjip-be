@@ -78,7 +78,8 @@ public class AdminReservationAppService {
             throw new IllegalArgumentException("노쇼 경고로만 노쇼 상태로 변경할 수 있습니다.");
         }
 
-        List<Reservation> reservationList = reservationService.findAllUserIdInWithUserWithLock(request.reservationIds());
+        List<Reservation> reservationList = reservationService
+                .findAllUserIdInWithUserWithLock(request.reservationIds());
 
         if (reservationList.isEmpty()) {
             return 0;
@@ -86,14 +87,13 @@ public class AdminReservationAppService {
 
         validateBulkReservationsUpdate(reservationList, request.status());
 
-        return reservationService.bulkUpdateReservationsStatus(
-            request.reservationIds(), request.status(), LocalDateTime.now(TimeUtil.KST)
-        );
+        return reservationService.bulkUpdateReservationsStatus(request.reservationIds(), request.status(),
+                LocalDateTime.now(TimeUtil.KST));
     }
 
     // batch
     @Transactional
-    public long processNoShowBatch(LocalDate today,LocalDateTime now) {
+    public long processNoShowBatch(LocalDate today, LocalDateTime now) {
         final ReservationStatus before = ReservationStatus.PENDING;
         final ReservationStatus after = ReservationStatus.NO_SHOW;
 
@@ -108,14 +108,15 @@ public class AdminReservationAppService {
             .collect(Collectors.toSet());
 
         // 2. 예약 상태 일괄 변경
-        long updateReservationRows = reservationService.updateAllReservationsWhereIdIn(targetIds, today, before, after, now);
+        long updateReservationRows = reservationService.updateAllReservationsWhereIdIn(targetIds, today, before, after,
+                now);
         if (updateReservationRows != targetIds.size()) {
             throw new IllegalStateException("동시에 변경된 예약이 있어 취소/재고복원이 일치하지 않습니다.");
         }
 
         // 3. 변경된 예약 상태 기반 재고 복원 (또는 노쇼-마이너스 등)
-        List<ProductRestockTarget> restockTargets =
-            reservationService.findAllByIdInAndStatusGroupByProductIdOrderByProductId(targetIds, after);
+        List<ProductRestockTarget> restockTargets = reservationService
+                .findAllByIdInAndStatusGroupByProductIdOrderByProductId(targetIds, after);
 
         for (ProductRestockTarget restockTarget : restockTargets) {
             Product product = productService.findByIdWithLock(restockTarget.productId());
@@ -125,7 +126,7 @@ public class AdminReservationAppService {
 
         // 4. 유저 warn(노쇼 row만큼) + 메시지(1회)
         List<UserSalesRollbackTarget> userSalesRollbackTargets = reservationService
-            .findUserSalesRollbackTargets(targetIds, after);
+                .findUserSalesRollbackTargets(targetIds, after);
 
         for (UserSalesRollbackTarget target : userSalesRollbackTargets) {
             Users user = userService.findByUidWithLock(target.userUid());
@@ -138,7 +139,6 @@ public class AdminReservationAppService {
 
         return updateReservationRows;
     }
-
 
     @Transactional(readOnly = true)
     public AdminReservationsTodayResponse getTodaySales() {

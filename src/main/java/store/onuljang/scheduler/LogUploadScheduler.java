@@ -38,7 +38,10 @@ public class LogUploadScheduler {
     public void uploadYesterdayLogs() {
         log.info("[LogUpload] rollover trigger (INFO)");
         log.warn("[LogUpload] rollover trigger (WARN)");
-        try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+        try {
+            Thread.sleep(200);
+        } catch (InterruptedException ignored) {
+        }
 
         LocalDate y = TimeUtil.yesterdayDate();
         String date = DATE.format(y);
@@ -61,8 +64,10 @@ public class LogUploadScheduler {
 
     private String resolveStage() {
         for (String p : env.getActiveProfiles()) {
-            if ("dev".equalsIgnoreCase(p)) return "dev";
-            if ("prod".equalsIgnoreCase(p) || "production".equalsIgnoreCase(p)) return "prod";
+            if ("dev".equalsIgnoreCase(p))
+                return "dev";
+            if ("prod".equalsIgnoreCase(p) || "production".equalsIgnoreCase(p))
+                return "prod";
         }
         return "dev";
     }

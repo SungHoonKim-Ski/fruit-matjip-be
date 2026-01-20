@@ -10,7 +10,6 @@ import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.ProductKeywordRepository;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.ProductKeyword;
 
 import java.time.LocalDate;
 import java.util.*;

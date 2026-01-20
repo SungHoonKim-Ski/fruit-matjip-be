@@ -3,7 +3,6 @@ package store.onuljang.controller.response;
 import lombok.Builder;
 import store.onuljang.repository.entity.UserMessageQueue;
 
-
 @Builder
 public record UserMessageResponse(
     long id,

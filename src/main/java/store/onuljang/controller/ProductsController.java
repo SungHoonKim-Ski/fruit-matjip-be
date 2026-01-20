@@ -27,9 +27,8 @@ public class ProductsController {
 
     @GetMapping
     public ResponseEntity<ProductListResponse> getProducts(
-       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate from,
-       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate to
-    ) {
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate to) {
         return ResponseEntity.ok(productsAppService.getProducts(from, to));
     }
 
@@ -43,5 +42,3 @@ public class ProductsController {
         return ResponseEntity.ok(productsAppService.getProductKeywords());
     }
 }
-
-

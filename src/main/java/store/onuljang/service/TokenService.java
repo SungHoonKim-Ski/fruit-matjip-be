@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.auth.JwtUtil;
@@ -47,7 +46,8 @@ public class TokenService {
                 .build()
         );
 
-        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, CookieUtil.generateStr(jwtToken.refresh(), jwtConfigDto.getRefreshTtl()));
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE,
+                CookieUtil.generateStr(jwtToken.refresh(), jwtConfigDto.getRefreshTtl()));
         return jwtToken.access();
     }
 
@@ -68,7 +68,8 @@ public class TokenService {
 
         expriredToken.rotateTo(tokenHash);
 
-        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE, CookieUtil.generateStr(jwtToken.refresh(), jwtConfigDto.getRefreshTtl()));
+        httpServletResponse.addHeader(HttpHeaders.SET_COOKIE,
+                CookieUtil.generateStr(jwtToken.refresh(), jwtConfigDto.getRefreshTtl()));
         return jwtToken.access();
     }
 
@@ -76,8 +77,8 @@ public class TokenService {
     public RefreshToken validate(String userUid, String refreshToken) {
         String tokenHash = HashUtil.sha256Hex(refreshToken);
 
-        RefreshToken token = refreshTokenRepository.findByUserUidAndTokenHashAndRevokedIsFalseAndExpiresAtAfter(
-                        userUid, tokenHash, Instant.now())
+        RefreshToken token = refreshTokenRepository
+                .findByUserUidAndTokenHashAndRevokedIsFalseAndExpiresAtAfter(userUid, tokenHash, Instant.now())
                 .orElseThrow(() -> new InvalidRefreshTokenException("refresh token not found or expired"));
 
         if (!HashUtil.constantTimeEqualsHex(tokenHash, token.getTokenHash())) {

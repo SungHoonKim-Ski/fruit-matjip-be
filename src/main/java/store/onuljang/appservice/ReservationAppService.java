@@ -11,7 +11,6 @@ import store.onuljang.controller.response.ReservationListResponse;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.event.user_product.UserReservationLogEvent;
 import store.onuljang.repository.entity.*;
-import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.repository.entity.enums.UserProductAction;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
@@ -24,7 +23,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Set;
 
 import static store.onuljang.util.TimeUtil.*;
 
@@ -112,7 +110,8 @@ public class ReservationAppService {
     public ReservationListResponse getReservations(String uId, LocalDate from, LocalDate to) {
         Users user = userService.findByUId(uId);
 
-        List<Reservation> entities = reservationService.findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(user, from, to);
+        List<Reservation> entities = reservationService
+                .findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(user, from, to);
 
         return ReservationListResponse.from(entities);
     }

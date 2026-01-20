@@ -23,8 +23,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult().getFieldErrors().stream()
-            .map(err -> err.getField() + ": " + err.getDefaultMessage())
-            .findFirst().orElse("VALIDATION_ERROR");
+                .map(err -> err.getField() + ": " + err.getDefaultMessage()).findFirst().orElse("VALIDATION_ERROR");
 
         log.info("MethodArgumentNotValidException: {}", message);
         return ResponseEntity.badRequest().body(new ErrorResponse("VALIDATION_ERROR", message));
@@ -67,7 +66,7 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("UNAUTHORIZED", "Authorization header is required"));
     }
 
-    @ExceptionHandler({ NoHandlerFoundException.class, NoResourceFoundException.class })
+    @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<Void> handleNotFound() {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
@@ -98,7 +97,6 @@ public class GlobalExceptionHandler {
         log.info("ExistUserNameException: {}", ex.getMessage());
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("CONFLICT", ex.getMessage()));
     }
-
 
     @ExceptionHandler(ExistAdminException.class)
     public ResponseEntity<ErrorResponse> handleExistAdmin(ExistAdminException ex) {
@@ -145,9 +143,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProductUnavailableException.class)
     public ResponseEntity<ErrorResponse> handleProductUnavailable(ProductUnavailableException ex) {
         log.info("ProductUnavailableException: {}", ex.getMessage());
-        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("ProductUnavailableException", ex.getMessage()));
+        return ResponseEntity.status(ex.getStatus())
+                .body(new ErrorResponse("ProductUnavailableException", ex.getMessage()));
     }
-
 
     @ExceptionHandler(UserNoContentException.class)
     public ResponseEntity<ErrorResponse> handleUserNoContentException(UserNoContentException ex) {
@@ -159,14 +157,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntime(RuntimeException ex) {
         log.error("RuntimeException: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("SERVER_ERROR", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("SERVER_ERROR", ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
         log.error("Exception: {}", ex.getMessage());
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse("SERVER_ERROR", ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("SERVER_ERROR", ex.getMessage()));
     }
 }
-
-

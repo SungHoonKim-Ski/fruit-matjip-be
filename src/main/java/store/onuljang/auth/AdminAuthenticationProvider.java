@@ -38,7 +38,8 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
         return new AdminAuthenticationToken(user, null, user.getAuthorities(), user.getAdminId());
     }
 
-    @Override public boolean supports(Class<?> aClass) {
+    @Override
+    public boolean supports(Class<?> aClass) {
         return UsernamePasswordAuthenticationToken.class.isAssignableFrom(aClass);
     }
 }

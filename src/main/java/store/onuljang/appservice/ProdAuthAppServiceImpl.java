@@ -18,7 +18,6 @@ import store.onuljang.service.NameGenerator;
 import store.onuljang.service.TokenService;
 import store.onuljang.service.UserService;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

@@ -26,9 +26,7 @@ public class AdminUserDetails implements UserDetails, Serializable {
         this.email = admin.getEmail();
         this.password = admin.getPassword();
         this.username = admin.getName();
-        this.authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + admin.getRole().name())
-        );
+        this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + admin.getRole().name()));
     }
 
     @Override

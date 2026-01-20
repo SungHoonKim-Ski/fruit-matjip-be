@@ -18,4 +18,3 @@ public class BaseLogEntity {
     @CreatedDate
     protected LocalDateTime createdAt;
 }
-

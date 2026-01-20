@@ -61,7 +61,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<Users> getUsers(String name, AdminCustomerSortKey sortKey, SortOrder sortOrder, BigDecimal sortValue, Long id, int limit) {
+    public List<Users> getUsers(String name, AdminCustomerSortKey sortKey, SortOrder sortOrder, BigDecimal sortValue,
+            Long id, int limit) {
         return userQueryRepository.getUsers(name, sortKey, sortOrder, sortValue, id, limit);
     }
 

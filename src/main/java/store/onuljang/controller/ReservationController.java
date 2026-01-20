@@ -13,7 +13,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.ReservationAppService;
-import store.onuljang.auth.JwtUtil;
 import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
 
@@ -28,20 +27,15 @@ public class ReservationController {
     ReservationAppService reservationAppService;
 
     @PostMapping("/")
-    public ResponseEntity<Long> create(
-        Authentication auth,
-        @RequestBody @Valid ReservationRequest request
-    ) {
+    public ResponseEntity<Long> create(Authentication auth, @RequestBody @Valid ReservationRequest request) {
         String uid = auth.getName();
 
         return ResponseEntity.ok(reservationAppService.reserve(uid, request));
     }
 
     @PatchMapping("/cancel/{id}")
-    public ResponseEntity<Void> cancel(
-        Authentication auth,
-        @Valid @PositiveOrZero @PathVariable("id") Long reservationId
-    ) {
+    public ResponseEntity<Void> cancel(Authentication auth,
+            @Valid @PositiveOrZero @PathVariable("id") Long reservationId) {
         String uid = auth.getName();
 
         reservationAppService.cancel(uid, reservationId);
@@ -50,11 +44,9 @@ public class ReservationController {
     }
 
     @PatchMapping("/{id}/quantity")
-    public ResponseEntity<Void> removeMinusQuantity(
-            Authentication auth,
+    public ResponseEntity<Void> removeMinusQuantity(Authentication auth,
             @Valid @PositiveOrZero @PathVariable("id") Long reservationId,
-            @Valid @Positive @RequestParam Integer minus
-    ) {
+            @Valid @Positive @RequestParam Integer minus) {
         String uid = auth.getName();
 
         reservationAppService.minusQuantity(uid, reservationId, minus);
@@ -63,10 +55,8 @@ public class ReservationController {
     }
 
     @PatchMapping("/self-pick/{id}")
-    public ResponseEntity<Void> selfPick(
-        Authentication auth,
-        @Valid @PositiveOrZero @PathVariable("id") Long reservationId
-    ) {
+    public ResponseEntity<Void> selfPick(Authentication auth,
+            @Valid @PositiveOrZero @PathVariable("id") Long reservationId) {
         String uid = auth.getName();
 
         reservationAppService.selfPick(uid, reservationId);
@@ -75,15 +65,11 @@ public class ReservationController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<ReservationListResponse> getList(
-        Authentication auth,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,
-        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate to
-    ) {
+    public ResponseEntity<ReservationListResponse> getList(Authentication auth,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate to) {
         String uid = auth.getName();
 
         return ResponseEntity.ok(reservationAppService.getReservations(uid, from, to));
     }
 }
-
-

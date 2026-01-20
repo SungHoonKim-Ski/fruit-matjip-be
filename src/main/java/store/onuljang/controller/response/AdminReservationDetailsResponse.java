@@ -2,7 +2,6 @@ package store.onuljang.controller.response;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.ProductDailyAgg;
-import store.onuljang.repository.entity.ReservationAll;
 
 import java.math.BigDecimal;
 import java.util.List;

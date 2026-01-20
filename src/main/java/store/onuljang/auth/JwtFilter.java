@@ -37,12 +37,11 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(req, res);
         } catch (JwtException e) {
-            res.setStatus(HttpStatus.UNAUTHORIZED.value());  // 401
+            res.setStatus(HttpStatus.UNAUTHORIZED.value()); // 401
             res.getWriter().write("Token expired");
         } catch (Exception ignore) {
-            res.setStatus(HttpStatus.UNAUTHORIZED.value());  // 401
+            res.setStatus(HttpStatus.UNAUTHORIZED.value()); // 401
             res.getWriter().write("Invalid token");
         }
     }
 }
-

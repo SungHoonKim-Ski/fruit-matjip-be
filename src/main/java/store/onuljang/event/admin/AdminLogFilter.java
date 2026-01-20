@@ -28,9 +28,11 @@ public class AdminLogFilter extends OncePerRequestFilter {
         String uri = request.getRequestURI();
         String method = request.getMethod();
 
-        if (!matcher.match("/api/admin/**", uri)) return true;
+        if (!matcher.match("/api/admin/**", uri))
+            return true;
 
-        if ("GET".equalsIgnoreCase(method) || "OPTIONS".equalsIgnoreCase(method)) return true;
+        if ("GET".equalsIgnoreCase(method) || "OPTIONS".equalsIgnoreCase(method))
+            return true;
 
         return false;
     }
@@ -81,15 +83,33 @@ public class AdminLogFilter extends OncePerRequestFilter {
     static class StatusCaptureResponseWrapper extends HttpServletResponseWrapper {
         private int httpStatus = SC_OK;
 
-        StatusCaptureResponseWrapper(HttpServletResponse response) { super(response); }
+        StatusCaptureResponseWrapper(HttpServletResponse response) {
+            super(response);
+        }
 
-        @Override public void setStatus(int sc) { super.setStatus(sc); this.httpStatus = sc; }
-        @Override public void sendError(int sc) throws IOException { super.sendError(sc); this.httpStatus = sc; }
-        @Override public void sendError(int sc, String msg) throws IOException { super.sendError(sc, msg); this.httpStatus = sc; }
-        @Override public void sendRedirect(String location) throws IOException {
+        @Override
+        public void setStatus(int sc) {
+            super.setStatus(sc);
+            this.httpStatus = sc;
+        }
+        @Override
+        public void sendError(int sc) throws IOException {
+            super.sendError(sc);
+            this.httpStatus = sc;
+        }
+        @Override
+        public void sendError(int sc, String msg) throws IOException {
+            super.sendError(sc, msg);
+            this.httpStatus = sc;
+        }
+        @Override
+        public void sendRedirect(String location) throws IOException {
             super.sendRedirect(location);
             this.httpStatus = SC_FOUND;
         }
-        @Override public int getStatus() { return this.httpStatus; }
+        @Override
+        public int getStatus() {
+            return this.httpStatus;
+        }
     }
 }

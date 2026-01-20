@@ -4,7 +4,6 @@ import lombok.Builder;
 import store.onuljang.repository.entity.ProductKeyword;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Builder
 public record ProductKeywordResponse(List<KeywordItem> response) {

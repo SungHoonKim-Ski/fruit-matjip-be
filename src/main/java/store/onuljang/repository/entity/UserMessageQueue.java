@@ -60,8 +60,10 @@ public class UserMessageQueue extends BaseLogEntity {
     }
 
     public boolean isValidNow(LocalDateTime now) {
-        if (validFrom != null && now.isBefore(validFrom)) return false;
-        if (validUntil != null && now.isAfter(validUntil)) return false;
+        if (validFrom != null && now.isBefore(validFrom))
+            return false;
+        if (validUntil != null && now.isAfter(validUntil))
+            return false;
         return true;
     }
 

@@ -260,8 +260,8 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         @DisplayName("셀프 픽업 불가 상품 요청 시 실패")
         void requestSelfPick_ProductNotAllowed() throws Exception {
             // given
-            Product product = testFixture.createNoSelfPickProduct("셀프픽업불가상품", 10, new BigDecimal("10000"),
-                    nowDate(), admin);
+            Product product = testFixture.createNoSelfPickProduct("셀프픽업불가상품", 10, new BigDecimal("10000"), nowDate(),
+                    admin);
             Reservation reservation = testFixture.createReservation(user, product, 2);
 
             // when

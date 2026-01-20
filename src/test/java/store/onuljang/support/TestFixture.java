@@ -15,6 +15,7 @@ import store.onuljang.service.dto.JwtToken;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
@@ -139,8 +140,7 @@ public class TestFixture {
     /**
      * 특정 날짜와 시간에 판매되는 상품 생성
      */
-    public Product createProductAtDateTime(String name, int stock, BigDecimal price,
-            java.time.LocalDateTime sellDateTime,
+    public Product createProductAtDateTime(String name, int stock, BigDecimal price, LocalDateTime sellDateTime,
             Admin admin) {
         Product product = createProduct(name, stock, price, sellDateTime.toLocalDate(), admin);
         product.setSellTime(sellDateTime.toLocalTime());

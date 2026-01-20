@@ -21,6 +21,6 @@ public class MessageTemplateService {
 
     public MessageTemplate findByMessageType(MessageType type) {
         return messageTemplateRepository.findByMessageType(type)
-            .orElseThrow(() -> new NotFoundException("메시지 타입을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("메시지 타입을 찾을 수 없습니다."));
     }
 }

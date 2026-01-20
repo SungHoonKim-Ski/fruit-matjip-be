@@ -13,7 +13,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import store.onuljang.appservice.AdminReservationAppService;
-import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.util.TimeUtil;
 
 import java.time.LocalDate;

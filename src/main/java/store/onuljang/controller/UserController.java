@@ -1,6 +1,5 @@
 package store.onuljang.controller;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.UserAppService;
-import store.onuljang.auth.JwtUtil;
 import store.onuljang.controller.response.UserMessageResponse;
 
 @RequestMapping("/api/auth")

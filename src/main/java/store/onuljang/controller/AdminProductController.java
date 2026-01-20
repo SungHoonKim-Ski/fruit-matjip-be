@@ -30,7 +30,8 @@ public class AdminProductController {
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<AdminProductDetailResponse> getDetail(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
+    public ResponseEntity<AdminProductDetailResponse> getDetail(
+            @Valid @NotNull @Positive @PathVariable("productId") Long productId) {
         return ResponseEntity.ok(adminProductAppService.getDetail(productId));
     }
 
@@ -64,7 +65,8 @@ public class AdminProductController {
     }
 
     @PatchMapping("/bulk-sell-date")
-    public ResponseEntity<Integer> bulkUpdateSellDate(@Valid @RequestBody AdminProductBulkUpdateSellDateRequest request) {
+    public ResponseEntity<Integer> bulkUpdateSellDate(
+            @Valid @RequestBody AdminProductBulkUpdateSellDateRequest request) {
         return ResponseEntity.ok(adminProductAppService.bulkUpdateSellDate(request));
     }
 

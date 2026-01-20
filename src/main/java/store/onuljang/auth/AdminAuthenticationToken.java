@@ -8,8 +8,8 @@ import java.util.Collection;
 public class AdminAuthenticationToken extends UsernamePasswordAuthenticationToken {
     private final Long adminId;
 
-    public AdminAuthenticationToken(Object principal, Object credentials
-            , Collection<? extends GrantedAuthority> authorities, Long adminId) {
+    public AdminAuthenticationToken(Object principal, Object credentials,
+            Collection<? extends GrantedAuthority> authorities, Long adminId) {
 
         super(principal, credentials, authorities);
         this.adminId = adminId;

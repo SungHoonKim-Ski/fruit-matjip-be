@@ -83,12 +83,14 @@ public class Users extends BaseEntity {
     }
 
     public void addTotalRevenue(BigDecimal add) {
-        if (add == null) return;
+        if (add == null)
+            return;
         this.totalRevenue = this.totalRevenue.add(add).max(BigDecimal.ZERO);
     }
 
     public void removeTotalRevenue(BigDecimal remove) {
-        if (remove == null) return;
+        if (remove == null)
+            return;
 
         this.totalRevenue = this.totalRevenue.subtract(remove).max(BigDecimal.ZERO);
     }

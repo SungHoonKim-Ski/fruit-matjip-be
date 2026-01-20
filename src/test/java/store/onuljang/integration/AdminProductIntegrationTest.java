@@ -140,8 +140,8 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             Product product = testFixture.createTodayProduct("기존상품", 10, new BigDecimal("10000"), admin);
 
             AdminUpdateProductDetailsRequest request = new AdminUpdateProductDetailsRequest("수정된상품",
-                    new BigDecimal("20000"), 20, "https://example.com/new-image.jpg",
-                    nowDate().plusDays(2).toString(), "수정된 설명", List.of(), LocalTime.of(12, 0), true);
+                    new BigDecimal("20000"), 20, "https://example.com/new-image.jpg", nowDate().plusDays(2).toString(),
+                    "수정된 설명", List.of(), LocalTime.of(12, 0), true);
 
             // when
             var response = patchAction("/api/admin/products/" + product.getId(), request, Void.class);

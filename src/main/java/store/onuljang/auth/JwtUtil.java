@@ -32,7 +32,7 @@ public class JwtUtil {
             "name",  name
         );
 
-        String accessToken  = generateAccessToken(uid, claims);
+        String accessToken = generateAccessToken(uid, claims);
         String refreshToken = generateRefreshToken(uid);
 
         return new JwtToken(accessToken, refreshToken);
@@ -60,7 +60,8 @@ public class JwtUtil {
     }
 
     private String generateRefreshToken(String subject) {
-        return buildToken(subject, Map.of("typ", "refresh"), Instant.now().plus(jwtConfigDto.getRefreshTtl(), ChronoUnit.DAYS));
+        return buildToken(subject, Map.of("typ", "refresh"),
+                Instant.now().plus(jwtConfigDto.getRefreshTtl(), ChronoUnit.DAYS));
     }
 
     private String buildToken(String subject, Map<String, Object> claims, Instant expiresAt) {
@@ -82,7 +83,7 @@ public class JwtUtil {
             .parseClaimsJws(accessToken);
     }
 
-    public String extractBearer(String auth){
+    public String extractBearer(String auth) {
         if (auth == null) {
             throw new AccessTokenParseException("Bearer token is null");
         }

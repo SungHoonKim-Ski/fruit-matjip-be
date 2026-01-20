@@ -30,4 +30,3 @@ public class BaseEntity {
         this.updatedAt = updatedAt;
     }
 }
-

@@ -52,12 +52,19 @@ public class AdminProductAppService {
     public void updateDetail(long productId, AdminUpdateProductDetailsRequest request) {
         Product product = productsService.findByIdWithDetailImagesWithLock(productId);
 
-        if (request.name() != null) product.setName(request.name());
-        if (request.price() != null) product.setPrice(request.price());
-        if (request.stock() != null) product.setStock(request.stock());
-        if (request.sellDate() != null) {product.setSellDate(LocalDate.parse(request.sellDate()));}
-        if (request.description() != null) product.setDescription(request.description());
-        if (request.updateSellTime() != null && request.updateSellTime()) product.setSellTime(request.sellTime());
+        if (request.name() != null)
+            product.setName(request.name());
+        if (request.price() != null)
+            product.setPrice(request.price());
+        if (request.stock() != null)
+            product.setStock(request.stock());
+        if (request.sellDate() != null) {
+            product.setSellDate(LocalDate.parse(request.sellDate()));
+        }
+        if (request.description() != null)
+            product.setDescription(request.description());
+        if (request.updateSellTime() != null && request.updateSellTime())
+            product.setSellTime(request.sellTime());
 
         List<String> removeKey = new ArrayList<>();
 

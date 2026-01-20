@@ -3,7 +3,6 @@ package store.onuljang.service;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ public class AdminUserDetailService implements UserDetailsService {
     @Transactional(readOnly = true)
     public AdminUserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Admin admin = adminRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Admin not found"));
 
         return new AdminUserDetails(admin);
     }

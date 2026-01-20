@@ -49,7 +49,8 @@ public class AdminUploadController {
             @Valid @Positive @NotNull @PathVariable Long productId,
             @Valid @RequestBody PresignedUrlBatchRequest req) {
 
-        List<PresignedUrlResponse> res = uploadService.issueDetailImageUrls(productId, req.fileNames(), req.contentType());
+        List<PresignedUrlResponse> res = uploadService.issueDetailImageUrls(productId, req.fileNames(),
+                req.contentType());
         return ResponseEntity.ok(res);
     }
 }

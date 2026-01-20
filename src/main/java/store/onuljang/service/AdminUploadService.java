@@ -57,7 +57,8 @@ public class AdminUploadService {
 
     /** 소프트 삭제: images/ → images/delete/ 로 복사 후 원본 삭제 */
     public void softDeleteAllImages(List<String> removeKeys) {
-        if (removeKeys == null || removeKeys.isEmpty()) return;
+        if (removeKeys == null || removeKeys.isEmpty())
+            return;
         String bucket = s3Config.getBucket();
 
         for (String key : removeKeys) {

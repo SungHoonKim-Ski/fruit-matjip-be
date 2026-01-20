@@ -112,11 +112,13 @@ public class Product extends BaseEntity {
     }
 
     public List<String> replaceDetailImagesInOrder(List<String> replaceDetailImages) {
-        if (replaceDetailImages == null) return List.of();
+        if (replaceDetailImages == null)
+            return List.of();
 
         LinkedHashSet<String> updateSet = new LinkedHashSet<>();
         for (String url : replaceDetailImages) {
-            if (url == null) continue;
+            if (url == null)
+                continue;
             String detailImage = url.trim();
             if (!detailImage.isEmpty()) {
                 updateSet.add(detailImage);

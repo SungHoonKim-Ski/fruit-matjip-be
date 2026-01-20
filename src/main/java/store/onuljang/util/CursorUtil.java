@@ -8,10 +8,12 @@ import java.util.Base64;
 
 @UtilityClass
 public class CursorUtil {
-    public record Cursor(Long id, BigDecimal sortValue) {}
+    public record Cursor(Long id, BigDecimal sortValue) {
+    }
 
     public Cursor decode(String cursor) {
-        if (cursor == null || cursor.isBlank()) return new Cursor(null, null);
+        if (cursor == null || cursor.isBlank())
+            return new Cursor(null, null);
 
         String decoded = new String(Base64.getUrlDecoder().decode(cursor), StandardCharsets.UTF_8);
         String[] parts = decoded.split("\\|");
@@ -21,7 +23,8 @@ public class CursorUtil {
     }
 
     public String encode(Long id, BigDecimal sortValue) {
-        if (id == null || sortValue == null) return null;
+        if (id == null || sortValue == null)
+            return null;
         String raw = id + "|" + sortValue.toPlainString();
         return Base64.getUrlEncoder().encodeToString(raw.getBytes(StandardCharsets.UTF_8));
     }
