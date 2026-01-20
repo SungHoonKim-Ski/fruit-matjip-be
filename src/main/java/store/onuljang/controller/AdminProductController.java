@@ -14,7 +14,7 @@ import store.onuljang.controller.request.*;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
 import store.onuljang.appservice.AdminProductAppService;
-import store.onuljang.controller.response.ProductKeywordResponse;
+import store.onuljang.controller.response.ProductCategoryResponse;
 
 @RestController
 @RequestMapping("/api/admin/products")
@@ -82,29 +82,65 @@ public class AdminProductController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/keywords")
-    public ResponseEntity<ProductKeywordResponse> getProductKeyWord() {
-        return ResponseEntity.ok(adminProductAppService.getProductKeywords());
+    // ===== Category Management =====
+
+    @GetMapping("/categories")
+    public ResponseEntity<ProductCategoryResponse> getProductCategories() {
+        return ResponseEntity.ok(adminProductAppService.getProductCategories());
     }
 
-    @PostMapping("/keyword")
-    public ResponseEntity<Void> saveProductKeyword(@Valid @RequestBody AdminCreateKeywordRequestRequest request) {
-        adminProductAppService.saveKeyword(request);
+    @PostMapping("/category")
+    public ResponseEntity<Void> saveProductCategory(@Valid @RequestBody AdminCreateCategoryRequest request) {
+        adminProductAppService.saveCategory(request);
 
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/keyword")
-    public ResponseEntity<Void> deleteProductKeyword(@NotEmpty @RequestParam String keyword) {
-        adminProductAppService.deleteKeyword(keyword);
+    @PatchMapping("/category/{categoryId}")
+    public ResponseEntity<Void> updateProductCategory(
+            @Valid @NotNull @Positive @PathVariable("categoryId") Long categoryId,
+            @Valid @RequestBody AdminUpdateCategoryRequest request) {
+        adminProductAppService.updateCategory(categoryId, request);
 
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/keywords")
-    public ResponseEntity<Void> updateProductKeyWord(@RequestBody @Valid AdminProductKeywordsRequest request) {
-        adminProductAppService.updateKeywords(request);
+    @DeleteMapping("/category")
+    public ResponseEntity<Void> deleteProductCategory(@NotEmpty @RequestParam String keyword) {
+        adminProductAppService.deleteCategory(keyword);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/categories/{categoryId}/products")
+    public ResponseEntity<Void> updateCategoryProducts(
+            @Valid @NotNull @Positive @PathVariable("categoryId") Long categoryId,
+            @Valid @RequestBody AdminCategoryProductsRequest request) {
+        adminProductAppService.updateCategoryProducts(categoryId, request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{productId}/categories/{categoryId}")
+    public ResponseEntity<Void> addCategoryToProduct(
+            @Valid @NotNull @Positive @PathVariable("productId") Long productId,
+            @Valid @NotNull @Positive @PathVariable("categoryId") Long categoryId) {
+        adminProductAppService.addCategoryToProduct(productId, categoryId);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{productId}/categories/{categoryId}")
+    public ResponseEntity<Void> removeCategoryFromProduct(
+            @Valid @NotNull @Positive @PathVariable("productId") Long productId,
+            @Valid @NotNull @Positive @PathVariable("categoryId") Long categoryId) {
+        adminProductAppService.removeCategoryFromProduct(productId, categoryId);
+        return ResponseEntity.ok().build();
+    }
+
+    @PutMapping("/{productId}/categories")
+    public ResponseEntity<Void> updateProductCategories(
+            @Valid @NotNull @Positive @PathVariable("productId") Long productId,
+            @Valid @RequestBody AdminProductCategoriesRequest request) {
+        adminProductAppService.updateProductCategories(productId, request.categoryIds());
         return ResponseEntity.ok().build();
     }
 }

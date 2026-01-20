@@ -109,6 +109,24 @@ public abstract class IntegrationTestBase {
     }
 
     /**
+     * PUT 요청 (인증 없음)
+     */
+    protected <T> ApiResponse<T> putAction(String uri, Object request, Class<T> responseType) throws Exception {
+        return performAction(
+                put(uri).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)),
+                responseType);
+    }
+
+    /**
+     * PUT 요청 (인증 없음, 바디 없음 응답)
+     */
+    protected ApiResponse<Void> putAction(String uri, Object request) throws Exception {
+        return performAction(
+                put(uri).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)),
+                Void.class);
+    }
+
+    /**
      * GET 요청 (인증 없음)
      */
     protected <T> ApiResponse<T> getAction(String uri, Class<T> responseType) throws Exception {

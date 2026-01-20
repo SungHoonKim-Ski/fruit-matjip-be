@@ -8,9 +8,9 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.*;
-import store.onuljang.controller.response.ProductKeywordResponse;
+import store.onuljang.controller.response.ProductCategoryResponse;
 import store.onuljang.event.admin_product.AdminProductLogEvent;
-import store.onuljang.repository.entity.ProductKeyword;
+import store.onuljang.repository.entity.ProductCategory;
 import store.onuljang.repository.entity.ProductOrder;
 import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.AdminProductAction;
@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AdminProductAppService {
     ProductsService productsService;
-    ProductKeywordService productKeywordService;
+    ProductCategoryService productCategoryService;
     ProductOrderService productOrderService;
     AdminUploadService adminUploadService;
     AdminService adminService;
@@ -58,7 +58,7 @@ public class AdminProductAppService {
             product.setPrice(request.price());
         if (request.stock() != null)
             product.setStock(request.stock());
-        if (request.sellDate() != null) {
+        if (request.sellDate() != null && !request.sellDate().isEmpty()) {
             product.setSellDate(LocalDate.parse(request.sellDate()));
         }
         if (request.description() != null)
@@ -161,31 +161,49 @@ public class AdminProductAppService {
     }
 
     @Transactional
-    public void saveKeyword(AdminCreateKeywordRequestRequest request) {
-        if (productKeywordService.existKeyword(request.keyword())) {
-            throw new IllegalArgumentException("이미 존재하는 키워드");
+    public void saveCategory(AdminCreateCategoryRequest request) {
+        if (productCategoryService.existsByName(request.name())) {
+            throw new IllegalArgumentException("이미 존재하는 카테고리");
         }
 
-        productKeywordService.save(AdminCreateKeywordRequestRequest.toEntity(request));
+        productCategoryService
+                .save(ProductCategory.builder().name(request.name()).imageUrl(request.imageUrl()).build());
     }
 
     @Transactional
-    public void updateKeywords(AdminProductKeywordsRequest request) {
-        productKeywordService.deleteAllWithFlush();
+    public void updateCategory(Long categoryId, AdminUpdateCategoryRequest request) {
+        ProductCategory category = productCategoryService.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리"));
 
-        productKeywordService
-            .saveAll(
-                request.keywords().stream().map(
-                keyword -> ProductKeyword.builder()
-                        .name(keyword.keyword())
-                        .keywordUrl(keyword.keywordUrl())
-                        .build())
-                .toList());
+        if (request.name() != null) {
+            category.setName(request.name());
+        }
+        if (request.imageUrl() != null) {
+            category.setImageUrl(request.imageUrl());
+        }
     }
 
     @Transactional
-    public void deleteKeyword(String keywords) {
-        productKeywordService.delete(keywords);
+    public void deleteCategory(String categoryName) {
+        productCategoryService.delete(categoryName);
+    }
+
+    @Transactional
+    public void updateCategoryProducts(Long categoryId, AdminCategoryProductsRequest request) {
+        ProductCategory category = productCategoryService.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리"));
+
+        // 1. 기존 연결된 상품들에서 이 카테고리 제거
+        List<Product> oldProducts = productsService.findAllByCategoryId(categoryId);
+        for (Product p : oldProducts) {
+            p.getProductCategories().remove(category);
+        }
+
+        // 2. 새로운 상품들에 이 카테고리 추가
+        List<Product> newProducts = productsService.findAllByIdIn(request.productIds());
+        for (Product p : newProducts) {
+            p.getProductCategories().add(category);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -203,19 +221,41 @@ public class AdminProductAppService {
     }
 
     @Transactional(readOnly = true)
-    public ProductKeywordResponse getProductKeywords() {
-        List<ProductKeyword> keywords = productKeywordService.findAll();
+    public ProductCategoryResponse getProductCategories() {
+        List<ProductCategory> categories = productCategoryService.findAll();
 
-        return ProductKeywordResponse.of(keywords);
+        return ProductCategoryResponse.of(categories);
+    }
+
+    @Transactional
+    public void addCategoryToProduct(Long productId, Long categoryId) {
+        Product product = productsService.findByIdWithLock(productId);
+        ProductCategory category = productCategoryService.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리"));
+
+        product.getProductCategories().add(category);
+    }
+
+    @Transactional
+    public void removeCategoryFromProduct(Long productId, Long categoryId) {
+        Product product = productsService.findByIdWithLock(productId);
+        ProductCategory category = productCategoryService.findById(categoryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리"));
+
+        product.getProductCategories().remove(category);
+    }
+
+    @Transactional
+    public void updateProductCategories(Long productId, List<Long> categoryIds) {
+        Product product = productsService.findByIdWithLock(productId);
+        product.getProductCategories().clear();
+
+        for (Long categoryId : categoryIds) {
+            ProductCategory category = productCategoryService.findById(categoryId)
+                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리: " + categoryId));
+            product.getProductCategories().add(category);
+        }
     }
 
     private void saveProductLog(long productId, Integer quantity, AdminProductAction action) {
-        eventPublisher.publishEvent(
-            AdminProductLogEvent.builder()
-                .adminId(SessionUtil.getAdminId())
-                .productId(productId)
-                .quantity(quantity)
-                .action(action)
-                .build());
-    }
-}
+        eventPublisher.publishEvent(AdminProductLogEvent.builder().adminId(SessionUtil.getAdminId())                .productId(productId).quantity(quantity).action(action).build());    }}

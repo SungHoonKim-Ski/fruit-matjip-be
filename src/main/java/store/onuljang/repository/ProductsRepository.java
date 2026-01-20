@@ -44,5 +44,19 @@ public interface ProductsRepository extends JpaRepository<Product, Long> {
         where p.id in(:ids)
     """)
     int bulkUpdateSellDateIdIn(@Param("ids") List<Long> ids, @Param("sellDate") LocalDate sellDate);
-}
 
+
+    @EntityGraph(attributePaths = {"productOrder"})
+    @Query("""
+                select distinct p from Product p
+                join p.productCategories c
+                where p.sellDate between :from and :to
+                and p.visible = :visible
+                and c.id = :categoryId
+            """)
+    List<Product> findAllBySellDateBetweenAndVisibleAndCategoryId(@Param("from") LocalDate from,
+            @Param("to") LocalDate to, @Param("visible") boolean visible, @Param("categoryId") Long categoryId);
+
+    @Query("select p from Product p join p.productCategories c where c.id = :categoryId")
+    List<Product> findAllByCategoryId(@Param("categoryId") Long categoryId);
+}

@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
-import store.onuljang.repository.ProductKeywordRepository;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.entity.Product;
 
@@ -21,7 +20,6 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class ProductsService {
     ProductsRepository productsRepository;
-    ProductKeywordRepository productKeywordRepository;
 
     @Transactional
     public Product findByIdWithDetailImagesWithLock(long id) {
@@ -62,6 +60,12 @@ public class ProductsService {
     }
 
     @Transactional(readOnly = true)
+    public List<Product> findAllVisibleBetweenByCategory(LocalDate from, LocalDate to, boolean visible,
+            Long categoryId) {
+        return productsRepository.findAllBySellDateBetweenAndVisibleAndCategoryId(from, to, visible, categoryId);
+    }
+
+    @Transactional(readOnly = true)
     public Product findByIdWithDetailImages(long id) {
         return productsRepository.findAllById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 제품"));
@@ -70,5 +74,10 @@ public class ProductsService {
     @Transactional(readOnly = true)
     public List<Product> findAllByIdIn(Collection<Long> ids) {
         return productsRepository.findAllByIdIn(ids);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Product> findAllByCategoryId(Long categoryId) {
+        return productsRepository.findAllByCategoryId(categoryId);
     }
 }

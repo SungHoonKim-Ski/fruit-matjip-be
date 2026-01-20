@@ -5,7 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import store.onuljang.controller.response.ProductDetailResponse;
-import store.onuljang.controller.response.ProductKeywordResponse;
+import store.onuljang.controller.response.ProductCategoryResponse;
 import store.onuljang.controller.response.ProductListResponse;
 import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
@@ -114,6 +114,57 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             // then
             assertThat(response.isBadRequest()).isTrue();
         }
+
+        @Test
+        @DisplayName("카테고리로 상품 목록 조회 성공 (다중 카테고리 상품)")
+        void getProducts_ByCategory_MultiCategoryProduct() throws Exception {
+            // given
+            LocalDate today = nowDate();
+            var cat1 = testFixture.createProductCategory("과일");
+            var cat2 = testFixture.createProductCategory("채소");
+
+            Product product = testFixture.createTodayProduct("멀티카테고리상품", 10, new BigDecimal("10000"), admin);
+            testFixture.addCategoryToProduct(product, cat1);
+            testFixture.addCategoryToProduct(product, cat2);
+
+            String fromDate = today.format(DateTimeFormatter.ISO_DATE);
+            String toDate = today.format(DateTimeFormatter.ISO_DATE);
+
+            // when & then - 카테고리 1로 조회
+            var response1 = getAction(
+                    "/api/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=" + cat1.getId(),
+                    accessToken, ProductListResponse.class);
+            assertThat(response1.isOk()).isTrue();
+            assertThat(response1.body().response()).hasSize(1);
+            assertThat(response1.body().response().get(0).name()).isEqualTo("멀티카테고리상품");
+
+            // when & then - 카테고리 2로 조회
+            var response2 = getAction(
+                    "/api/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=" + cat2.getId(),
+                    accessToken, ProductListResponse.class);
+            assertThat(response2.isOk()).isTrue();
+            assertThat(response2.body().response()).hasSize(1);
+            assertThat(response2.body().response().get(0).name()).isEqualTo("멀티카테고리상품");
+        }
+
+        @Test
+        @DisplayName("존재하지 않는 카테고리 ID로 조회 시 빈 목록 반환")
+        void getProducts_ByInvalidCategory() throws Exception {
+            // given
+            LocalDate today = nowDate();
+            testFixture.createTodayProduct("공개상품", 10, new BigDecimal("10000"), admin);
+
+            String fromDate = today.format(DateTimeFormatter.ISO_DATE);
+            String toDate = today.format(DateTimeFormatter.ISO_DATE);
+
+            // when
+            var response = getAction("/api/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=9999",
+                    accessToken, ProductListResponse.class);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+            assertThat(response.body().response()).isEmpty();
+        }
     }
 
     @Nested
@@ -157,19 +208,19 @@ class ProductsIntegrationTest extends IntegrationTestBase {
     }
 
     @Nested
-    @DisplayName("GET /api/auth/products/keywords - 상품 키워드 조회")
-    class GetProductKeywords {
+    @DisplayName("GET /api/auth/products/categories - 상품 카테고리 조회")
+    class GetProductCategories {
 
         @Test
-        @DisplayName("상품 키워드 목록 조회 성공")
-        void getProductKeywords_Success() throws Exception {
+        @DisplayName("상품 카테고리 목록 조회 성공")
+        void getProductCategories_Success() throws Exception {
             // given
-            testFixture.createProductKeyword("과일");
-            testFixture.createProductKeyword("채소");
-            testFixture.createProductKeyword("육류");
+            testFixture.createProductCategory("과일");
+            testFixture.createProductCategory("채소");
+            testFixture.createProductCategory("육류");
 
             // when
-            var response = getAction("/api/auth/products/keywords", accessToken, ProductKeywordResponse.class);
+            var response = getAction("/api/auth/products/categories", accessToken, ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -177,10 +228,10 @@ class ProductsIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("키워드가 없는 경우 빈 배열 반환")
-        void getProductKeywords_Empty() throws Exception {
+        @DisplayName("카테고리가 없는 경우 빈 배열 반환")
+        void getProductCategories_Empty() throws Exception {
             // when
-            var response = getAction("/api/auth/products/keywords", accessToken, ProductKeywordResponse.class);
+            var response = getAction("/api/auth/products/categories", accessToken, ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();

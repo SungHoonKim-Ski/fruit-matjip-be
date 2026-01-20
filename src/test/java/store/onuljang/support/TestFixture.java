@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import store.onuljang.auth.JwtUtil;
 import store.onuljang.repository.AdminRepository;
-import store.onuljang.repository.ProductKeywordRepository;
+import store.onuljang.repository.ProductCategoryRepository;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.UserRepository;
@@ -15,7 +15,6 @@ import store.onuljang.service.dto.JwtToken;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.UUID;
 
@@ -40,7 +39,7 @@ public class TestFixture {
     private AdminRepository adminRepository;
 
     @Autowired
-    private ProductKeywordRepository productKeywordRepository;
+    private ProductCategoryRepository productCategoryRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -115,9 +114,8 @@ public class TestFixture {
 
     /**
      * 내일 판매 상품 생성 (시간 무관 테스트용)
-     * 
-     * 19:30 이후에도 예약 가능하도록 내일 날짜로 생성.
-     * 시간과 무관하게 테스트가 동작해야 하는 경우 사용.
+     *
+     * 19:30 이후에도 예약 가능하도록 내일 날짜로 생성. 시간과 무관하게 테스트가 동작해야 하는 경우 사용.
      */
     public Product createTomorrowProduct(String name, int stock, BigDecimal price, Admin admin) {
         return createProduct(name, stock, price, nowDate().plusDays(1), admin);
@@ -140,8 +138,8 @@ public class TestFixture {
     /**
      * 특정 날짜와 시간에 판매되는 상품 생성
      */
-    public Product createProductAtDateTime(String name, int stock, BigDecimal price, LocalDateTime sellDateTime,
-            Admin admin) {
+    public Product createProductAtDateTime(String name, int stock, BigDecimal price,
+            java.time.LocalDateTime sellDateTime, Admin admin) {
         Product product = createProduct(name, stock, price, sellDateTime.toLocalDate(), admin);
         product.setSellTime(sellDateTime.toLocalTime());
         return productsRepository.save(product);
@@ -196,11 +194,37 @@ public class TestFixture {
     }
 
     /**
-     * 상품 키워드 생성
+     * 상품 카테고리 생성
      */
-    public ProductKeyword createProductKeyword(String name) {
-        ProductKeyword productKeyword = ProductKeyword.builder().name(name).build();
-        return productKeywordRepository.save(productKeyword);
+    public ProductCategory createProductCategory(String name) {
+        ProductCategory category = ProductCategory.builder().name(name).build();
+        return productCategoryRepository.save(category);
+    }
+
+    /**
+     * 상품 카테고리 생성 (이미지 포함)
+     */
+    public ProductCategory createProductCategory(String name, String imageUrl) {
+        ProductCategory category = ProductCategory.builder().name(name).imageUrl(imageUrl).build();
+        return productCategoryRepository.save(category);
+    }
+
+    /**
+     * 상품에 카테고리 연결
+     */
+    public Product addCategoryToProduct(Product product, ProductCategory category) {
+        product.getProductCategories().add(category);
+        return productsRepository.save(product);
+    }
+
+    /**
+     * 카테고리가 연결된 상품 생성
+     */
+    public Product createProductWithCategory(String name, int stock, BigDecimal price, LocalDate sellDate, Admin admin,
+            ProductCategory category) {
+        Product product = createProduct(name, stock, price, sellDate, admin);
+        product.getProductCategories().add(category);
+        return productsRepository.save(product);
     }
 
     /**

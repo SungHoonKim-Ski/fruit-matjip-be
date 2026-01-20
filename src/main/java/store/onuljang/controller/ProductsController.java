@@ -11,8 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.ProductsAppService;
+import store.onuljang.controller.response.ProductCategoryResponse;
 import store.onuljang.controller.response.ProductDetailResponse;
-import store.onuljang.controller.response.ProductKeywordResponse;
 import store.onuljang.controller.response.ProductListResponse;
 
 import java.time.LocalDate;
@@ -28,8 +28,9 @@ public class ProductsController {
     @GetMapping
     public ResponseEntity<ProductListResponse> getProducts(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate from,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate to) {
-        return ResponseEntity.ok(productsAppService.getProducts(from, to));
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @FutureOrPresent @NotNull LocalDate to,
+            @RequestParam(required = false) Long categoryId) {
+        return ResponseEntity.ok(productsAppService.getProducts(from, to, categoryId));
     }
 
     @GetMapping("/{id}")
@@ -37,8 +38,8 @@ public class ProductsController {
         return ResponseEntity.ok(productsAppService.getDetail(id));
     }
 
-    @GetMapping("/keywords")
-    public ResponseEntity<ProductKeywordResponse> keywords() {
-        return ResponseEntity.ok(productsAppService.getProductKeywords());
+    @GetMapping("/categories")
+    public ResponseEntity<ProductCategoryResponse> categories() {
+        return ResponseEntity.ok(productsAppService.getProductCategories());
     }
 }

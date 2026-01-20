@@ -89,6 +89,12 @@ public class Product extends BaseEntity {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductDetailImage> productDetailImages = new ArrayList<>();
 
+    @Getter
+    @ManyToMany
+    @JoinTable(name = "product_category_mapping", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @Builder.Default
+    private Set<ProductCategory> productCategories = new HashSet<>();
+
     public List<String> getDetailImages() {
         if (this.productDetailImages == null) {
             return List.of();

@@ -5,14 +5,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import store.onuljang.controller.request.AdminCreateProductRequest;
-import store.onuljang.controller.request.AdminProductBulkUpdateSellDateRequest;
-import store.onuljang.controller.request.AdminProductUpdateOrderRequest;
-import store.onuljang.controller.request.AdminUpdateProductDetailsRequest;
+import store.onuljang.controller.request.*;
 import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
-import store.onuljang.controller.request.AdminCreateKeywordRequestRequest;
-import store.onuljang.controller.response.ProductKeywordResponse;
+import store.onuljang.controller.response.ProductCategoryResponse;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
@@ -122,10 +118,11 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             assertThat(response.isOk()).isTrue();
             assertThat(response.body()).isNotNull();
 
-            // 생성 확인
+            // verify
             List<Product> products = productsRepository.findAll();
             assertThat(products).hasSize(1);
             assertThat(products.get(0).getName()).isEqualTo("새상품");
+            assertThat(products.get(0).getProductCategories()).isEmpty();
         }
     }
 
@@ -153,6 +150,37 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             Product updatedProduct = productsRepository.findById(product.getId()).orElseThrow();
             assertThat(updatedProduct.getName()).isEqualTo("수정된상품");
             assertThat(updatedProduct.getStock()).isEqualTo(20);
+            assertThat(updatedProduct.getProductCategories()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("상품 카테고리 수정 성공 (기존 카테고리 교체)")
+        void updateProduct_WithCategories_Success() throws Exception {
+            // given
+            var cat1 = testFixture.createProductCategory("기존");
+            Product product = testFixture.createTodayProduct("상품", 10, new BigDecimal("10000"), admin);
+            testFixture.addCategoryToProduct(product, cat1);
+
+            var cat2 = testFixture.createProductCategory("새거1");
+            var cat3 = testFixture.createProductCategory("새거2");
+
+            AdminProductCategoriesRequest request = new AdminProductCategoriesRequest(
+                    List.of(cat2.getId(), cat3.getId()));
+
+            // when
+            var response = putAction("/api/admin/products/" + product.getId() + "/categories", request);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify
+            entityManager.flush();
+            entityManager.clear();
+            Product updatedProduct = productsRepository.findById(product.getId()).orElseThrow();
+            assertThat(updatedProduct.getProductCategories()).hasSize(2);
+            assertThat(updatedProduct.getProductCategories())
+                    .extracting(store.onuljang.repository.entity.ProductCategory::getName)
+                    .containsExactlyInAnyOrder("새거1", "새거2");
         }
     }
 
@@ -275,18 +303,18 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
     }
 
     @Nested
-    @DisplayName("상품 키워드 관리")
-    class ProductKeywordManagement {
+    @DisplayName("상품 카테고리 관리")
+    class ProductCategoryManagement {
 
         @Test
-        @DisplayName("GET /api/admin/products/keywords - 키워드 목록 조회")
-        void getProductKeywords_Success() throws Exception {
+        @DisplayName("GET /api/admin/products/categories - 카테고리 목록 조회")
+        void getProductCategories_Success() throws Exception {
             // given
-            testFixture.createProductKeyword("과일");
-            testFixture.createProductKeyword("채소");
+            testFixture.createProductCategory("과일");
+            testFixture.createProductCategory("채소");
 
             // when
-            var response = getAction("/api/admin/products/keywords", ProductKeywordResponse.class);
+            var response = getAction("/api/admin/products/categories", ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -294,30 +322,77 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("POST /api/admin/products/keyword - 키워드 추가")
-        void saveProductKeyword_Success() throws Exception {
+        @DisplayName("POST /api/admin/products/category - 카테고리 추가")
+        void saveProductCategory_Success() throws Exception {
             // given
-            AdminCreateKeywordRequestRequest request = new AdminCreateKeywordRequestRequest("새키워드",
+            AdminCreateCategoryRequest request = new AdminCreateCategoryRequest("새카테고리",
                     "https://example.com/image.jpg");
 
             // when
-            var response = postAction("/api/admin/products/keyword", request, Void.class);
+            var response = postAction("/api/admin/products/category", request, Void.class);
 
             // then
             assertThat(response.isOk()).isTrue();
         }
 
         @Test
-        @DisplayName("DELETE /api/admin/products/keyword - 키워드 삭제")
-        void deleteProductKeyword_Success() throws Exception {
+        @DisplayName("DELETE /api/admin/products/category - 카테고리 삭제")
+        void deleteProductCategory_Success() throws Exception {
             // given
-            testFixture.createProductKeyword("삭제할키워드");
+            testFixture.createProductCategory("삭제할카테고리");
 
             // when
-            var response = deleteAction("/api/admin/products/keyword?keyword=삭제할키워드");
+            var response = deleteAction("/api/admin/products/category?keyword=삭제할카테고리");
 
             // then
             assertThat(response.isOk()).isTrue();
+        }
+
+        @Test
+        @DisplayName("PUT /api/admin/products/{productId}/categories - 상품의 카테고리 목록 수정")
+        void updateProductCategories_Success() throws Exception {
+            // given
+            Product product = testFixture.createTodayProduct("테스트상품", 10, new BigDecimal("10000"), admin);
+            var cat1 = testFixture.createProductCategory("카테고리1");
+            var cat2 = testFixture.createProductCategory("카테고리2");
+
+            AdminProductCategoriesRequest request = new AdminProductCategoriesRequest(
+                    List.of(cat1.getId(), cat2.getId()));
+
+            // when
+            var response = putAction("/api/admin/products/" + product.getId() + "/categories", request);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify
+            entityManager.flush();
+            entityManager.clear();
+            Product updatedProduct = productsRepository.findById(product.getId()).orElseThrow();
+            assertThat(updatedProduct.getProductCategories()).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("PUT /api/admin/products/categories/{categoryId}/products - 카테고리에 속한 상품 목록 수정")
+        void updateCategoryProducts_Success() throws Exception {
+            // given
+            var category = testFixture.createProductCategory("테스트카테고리");
+            Product p1 = testFixture.createTodayProduct("상품1", 10, new BigDecimal("10000"), admin);
+            Product p2 = testFixture.createTodayProduct("상품2", 5, new BigDecimal("5000"), admin);
+
+            AdminCategoryProductsRequest request = new AdminCategoryProductsRequest(List.of(p1.getId(), p2.getId()));
+
+            // when
+            var response = putAction("/api/admin/products/categories/" + category.getId() + "/products", request);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify
+            entityManager.flush();
+            entityManager.clear();
+            List<Product> products = productsRepository.findAllByCategoryId(category.getId());
+            assertThat(products).hasSize(2);
         }
     }
 }
