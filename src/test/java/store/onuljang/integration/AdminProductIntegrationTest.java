@@ -153,35 +153,6 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             assertThat(updatedProduct.getProductCategories()).isEmpty();
         }
 
-        @Test
-        @DisplayName("상품 카테고리 수정 성공 (기존 카테고리 교체)")
-        void updateProduct_WithCategories_Success() throws Exception {
-            // given
-            var cat1 = testFixture.createProductCategory("기존");
-            Product product = testFixture.createTodayProduct("상품", 10, new BigDecimal("10000"), admin);
-            testFixture.addCategoryToProduct(product, cat1);
-
-            var cat2 = testFixture.createProductCategory("새거1");
-            var cat3 = testFixture.createProductCategory("새거2");
-
-            AdminProductCategoriesRequest request = new AdminProductCategoriesRequest(
-                    List.of(cat2.getId(), cat3.getId()));
-
-            // when
-            var response = putAction("/api/admin/products/" + product.getId() + "/categories", request);
-
-            // then
-            assertThat(response.isOk()).isTrue();
-
-            // verify
-            entityManager.flush();
-            entityManager.clear();
-            Product updatedProduct = productsRepository.findById(product.getId()).orElseThrow();
-            assertThat(updatedProduct.getProductCategories()).hasSize(2);
-            assertThat(updatedProduct.getProductCategories())
-                    .extracting(store.onuljang.repository.entity.ProductCategory::getName)
-                    .containsExactlyInAnyOrder("새거1", "새거2");
-        }
     }
 
     @Nested
@@ -346,30 +317,6 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
 
             // then
             assertThat(response.isOk()).isTrue();
-        }
-
-        @Test
-        @DisplayName("PUT /api/admin/products/{productId}/categories - 상품의 카테고리 목록 수정")
-        void updateProductCategories_Success() throws Exception {
-            // given
-            Product product = testFixture.createTodayProduct("테스트상품", 10, new BigDecimal("10000"), admin);
-            var cat1 = testFixture.createProductCategory("카테고리1");
-            var cat2 = testFixture.createProductCategory("카테고리2");
-
-            AdminProductCategoriesRequest request = new AdminProductCategoriesRequest(
-                    List.of(cat1.getId(), cat2.getId()));
-
-            // when
-            var response = putAction("/api/admin/products/" + product.getId() + "/categories", request);
-
-            // then
-            assertThat(response.isOk()).isTrue();
-
-            // verify
-            entityManager.flush();
-            entityManager.clear();
-            Product updatedProduct = productsRepository.findById(product.getId()).orElseThrow();
-            assertThat(updatedProduct.getProductCategories()).hasSize(2);
         }
 
         @Test

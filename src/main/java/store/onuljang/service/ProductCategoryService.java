@@ -1,10 +1,10 @@
 package store.onuljang.service;
 
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.repository.ProductCategoryRepository;
 import store.onuljang.repository.entity.ProductCategory;
 
@@ -14,8 +14,8 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Transactional(readOnly = true)
 public class ProductCategoryService {
-
     ProductCategoryRepository productCategoryRepository;
 
     public void save(ProductCategory productCategory) {
@@ -23,18 +23,8 @@ public class ProductCategoryService {
     }
 
     @Transactional
-    public void saveAll(List<ProductCategory> productCategories) {
-        productCategoryRepository.saveAll(productCategories);
-    }
-
-    @Transactional
     public void delete(String name) {
         productCategoryRepository.deleteByName(name);
-    }
-
-    @Transactional
-    public void deleteAllWithFlush() {
-        productCategoryRepository.deleteAllCategories();
     }
 
     public boolean existsByName(String name) {
@@ -42,18 +32,15 @@ public class ProductCategoryService {
     }
 
     public List<ProductCategory> findAll() {
-        return productCategoryRepository.findAllByOrderByCreatedAtAsc();
+        return productCategoryRepository.findAllByOrderBySortOrderAsc();
     }
 
     public List<ProductCategory> findAllOrderBySortOrder() {
         return productCategoryRepository.findAllByOrderBySortOrderAsc();
     }
 
+    @Transactional
     public Optional<ProductCategory> findById(Long id) {
         return productCategoryRepository.findById(id);
-    }
-
-    public Optional<ProductCategory> findByName(String name) {
-        return productCategoryRepository.findByName(name);
     }
 }

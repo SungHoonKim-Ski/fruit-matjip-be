@@ -24,7 +24,10 @@ public class ProductCategory extends BaseLogEntity {
     @Builder.Default
     private Integer sortOrder = 0;
 
-    @ManyToMany(mappedBy = "productCategories")
+    @ManyToMany
+    @JoinTable(name = "product_category_mapping",
+            joinColumns = @JoinColumn(name = "category_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
     @Builder.Default
     private Set<Product> products = new HashSet<>();
 

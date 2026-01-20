@@ -213,8 +213,9 @@ public class TestFixture {
      * 상품에 카테고리 연결
      */
     public Product addCategoryToProduct(Product product, ProductCategory category) {
-        product.getProductCategories().add(category);
-        return productsRepository.save(product);
+        category.getProducts().add(product);
+        productCategoryRepository.saveAndFlush(category);
+        return productsRepository.findById(product.getId()).orElse(product);
     }
 
     /**
@@ -223,8 +224,9 @@ public class TestFixture {
     public Product createProductWithCategory(String name, int stock, BigDecimal price, LocalDate sellDate, Admin admin,
             ProductCategory category) {
         Product product = createProduct(name, stock, price, sellDate, admin);
-        product.getProductCategories().add(category);
-        return productsRepository.save(product);
+        category.getProducts().add(product);
+        productCategoryRepository.saveAndFlush(category);
+        return product;
     }
 
     /**

@@ -193,17 +193,8 @@ public class AdminProductAppService {
         ProductCategory category = productCategoryService.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리"));
 
-        // 1. 기존 연결된 상품들에서 이 카테고리 제거
-        List<Product> oldProducts = productsService.findAllByCategoryId(categoryId);
-        for (Product p : oldProducts) {
-            p.getProductCategories().remove(category);
-        }
-
-        // 2. 새로운 상품들에 이 카테고리 추가
-        List<Product> newProducts = productsService.findAllByIdIn(request.productIds());
-        for (Product p : newProducts) {
-            p.getProductCategories().add(category);
-        }
+        category.getProducts().clear();
+        category.getProducts().addAll(productsService.findAllByIdIn(request.productIds()));
     }
 
     @Transactional(readOnly = true)
@@ -233,7 +224,8 @@ public class AdminProductAppService {
         ProductCategory category = productCategoryService.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리"));
 
-        product.getProductCategories().add(category);
+        // 카테고리(주인) 쪽 컬렉션에 추가해야 DB에 반영됨
+        category.getProducts().add(product);
     }
 
     @Transactional
@@ -242,23 +234,12 @@ public class AdminProductAppService {
         ProductCategory category = productCategoryService.findById(categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리"));
 
-        product.getProductCategories().remove(category);
+        category.getProducts().remove(product);
     }
 
-    @Transactional
-    public void updateProductCategories(Long productId, List<Long> categoryIds) {
-        Product product = productsService.findByIdWithLock(productId);
-        product.getProductCategories().clear();
-
-        for (Long categoryId : categoryIds) {
-            ProductCategory category = productCategoryService.findById(categoryId)
-                    .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리: " + categoryId));
-            product.getProductCategories().add(category);
-        }
-    }
 
     @Transactional
-    public void updateCategories(AdminUpdateCategoryListRequest request) {
+    public void updateCategorySortOrders(AdminUpdateCategoryListRequest request) {
         List<AdminUpdateCategoryListRequest.CategoryItemRequest> list = request.categories();
         for (int i = 0; i < list.size(); i++) {
             AdminUpdateCategoryListRequest.CategoryItemRequest item = list.get(i);
@@ -266,8 +247,6 @@ public class AdminProductAppService {
                 ProductCategory category = productCategoryService.findById(item.id())
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리 ID: " + item.id()));
 
-                category.setName(item.name());
-                category.setImageUrl(item.imageUrl());
                 category.setSortOrder(i);
             }
         }
@@ -278,7 +257,6 @@ public class AdminProductAppService {
                 .productId(productId)
                 .quantity(quantity)
                 .action(action)
-                .build()
-        );
+                .build());
     }
 }

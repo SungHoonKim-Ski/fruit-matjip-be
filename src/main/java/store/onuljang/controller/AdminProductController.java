@@ -120,9 +120,9 @@ public class AdminProductController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/categories")
-    public ResponseEntity<Void> updateProductCategories(@RequestBody @Valid AdminUpdateCategoryListRequest request) {
-        adminProductAppService.updateCategories(request);
+    @PatchMapping("/categories/order")
+    public ResponseEntity<Void> updateCategorySortOrders(@RequestBody @Valid AdminUpdateCategoryListRequest request) {
+        adminProductAppService.updateCategorySortOrders(request);
 
         return ResponseEntity.ok().build();
     }
@@ -140,14 +140,6 @@ public class AdminProductController {
             @Valid @NotNull @Positive @PathVariable("productId") Long productId,
             @Valid @NotNull @Positive @PathVariable("categoryId") Long categoryId) {
         adminProductAppService.removeCategoryFromProduct(productId, categoryId);
-        return ResponseEntity.ok().build();
-    }
-
-    @PutMapping("/{productId}/categories")
-    public ResponseEntity<Void> updateProductCategories(
-            @Valid @NotNull @Positive @PathVariable("productId") Long productId,
-            @Valid @RequestBody AdminProductCategoriesRequest request) {
-        adminProductAppService.updateProductCategories(productId, request.categoryIds());
         return ResponseEntity.ok().build();
     }
 }

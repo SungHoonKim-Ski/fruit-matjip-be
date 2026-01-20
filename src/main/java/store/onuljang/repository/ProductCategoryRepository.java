@@ -12,18 +12,9 @@ public interface ProductCategoryRepository extends JpaRepository<ProductCategory
 
     List<ProductCategory> findAllByOrderBySortOrderAsc();
 
-    List<ProductCategory> findAllByOrderByCreatedAtAsc();
-
-    Optional<ProductCategory> findByName(String name);
 
     List<ProductCategory> findAllByName(String name);
 
-    boolean existsByName(String name);
-
     @Modifying(flushAutomatically = true)
     void deleteByName(String name);
-
-    @Modifying(flushAutomatically = true)
-    @Query("delete from ProductCategory")
-    void deleteAllCategories();
 }

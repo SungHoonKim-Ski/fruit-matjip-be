@@ -90,8 +90,7 @@ public class Product extends BaseEntity {
     private List<ProductDetailImage> productDetailImages = new ArrayList<>();
 
     @Getter
-    @ManyToMany
-    @JoinTable(name = "product_category_mapping", joinColumns = @JoinColumn(name = "product_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @ManyToMany(mappedBy = "products")
     @Builder.Default
     private Set<ProductCategory> productCategories = new HashSet<>();
 
