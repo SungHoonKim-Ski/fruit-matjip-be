@@ -257,5 +257,28 @@ public class AdminProductAppService {
         }
     }
 
+    @Transactional
+    public void updateCategories(AdminUpdateCategoryListRequest request) {
+        List<AdminUpdateCategoryListRequest.CategoryItemRequest> list = request.categories();
+        for (int i = 0; i < list.size(); i++) {
+            AdminUpdateCategoryListRequest.CategoryItemRequest item = list.get(i);
+            if (item.id() != null) {
+                ProductCategory category = productCategoryService.findById(item.id())
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 카테고리 ID: " + item.id()));
+
+                category.setName(item.name());
+                category.setImageUrl(item.imageUrl());
+                category.setSortOrder(i);
+            }
+        }
+    }
+
     private void saveProductLog(long productId, Integer quantity, AdminProductAction action) {
-        eventPublisher.publishEvent(AdminProductLogEvent.builder().adminId(SessionUtil.getAdminId())                .productId(productId).quantity(quantity).action(action).build());    }}
+        eventPublisher.publishEvent(AdminProductLogEvent.builder().adminId(SessionUtil.getAdminId())
+                .productId(productId)
+                .quantity(quantity)
+                .action(action)
+                .build()
+        );
+    }
+}

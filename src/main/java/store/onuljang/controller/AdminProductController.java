@@ -120,6 +120,13 @@ public class AdminProductController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/categories")
+    public ResponseEntity<Void> updateProductCategories(@RequestBody @Valid AdminUpdateCategoryListRequest request) {
+        adminProductAppService.updateCategories(request);
+
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/{productId}/categories/{categoryId}")
     public ResponseEntity<Void> addCategoryToProduct(
             @Valid @NotNull @Positive @PathVariable("productId") Long productId,
