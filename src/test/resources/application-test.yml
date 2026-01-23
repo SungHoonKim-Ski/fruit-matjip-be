@@ -37,6 +37,15 @@ security:
 KAKAO:
   KEY: test-kakao-key
 
+DELIVERY:
+  STORE_LAT: 37.556504
+  STORE_LNG: 126.8372613
+  MAX_DISTANCE_KM: 2
+  FEE_DISTANCE_KM: 1
+  MIN_AMOUNT: 15000
+  FEE_NEAR: 2900
+  FEE_FAR: 3900
+
 cloud:
   aws:
     s3:

@@ -63,6 +63,11 @@ public class Product extends BaseEntity {
     private Boolean selfPick = true;
 
     @Getter
+    @Column(name = "delivery_available", nullable = false)
+    @Builder.Default
+    private Boolean deliveryAvailable = true;
+
+    @Getter
     @Column(name = "total_sold", nullable = false)
     @Builder.Default
     private Long totalSold = 0L;
@@ -164,8 +169,13 @@ public class Product extends BaseEntity {
         return removeKeys;
     }
 
+    @Deprecated
     public void toggleSelfPick() {
         this.selfPick = !this.selfPick;
+    }
+
+    public void toggleDeliveryAvailable() {
+        this.deliveryAvailable = !this.deliveryAvailable;
     }
 
     public void toggleVisible() {
@@ -219,6 +229,7 @@ public class Product extends BaseEntity {
         this.sellTime = sellTime;
     }
 
+    @Deprecated
     public void assertCanSelfPick() {
         if (!this.selfPick) {
             throw new ProductUnavailableException("셀프 수령이 불가능한 상품입니다.");

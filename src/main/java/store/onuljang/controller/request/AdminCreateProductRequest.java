@@ -40,6 +40,7 @@ public record AdminCreateProductRequest (
             .sellDate(LocalDate.parse(request.sellDate))
             .visible(request.visible)
             .selfPick(true)
+            .deliveryAvailable(true)
             .registeredAdmin(admin)
             .build();
     }

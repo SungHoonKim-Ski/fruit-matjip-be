@@ -109,6 +109,7 @@ public class Reservation extends BaseEntity {
         this.amount = this.sellPrice.multiply(new BigDecimal(this.quantity));
     }
 
+    @Deprecated
     public void requestSelfPick(LocalDate today, LocalTime deadline, ZoneId zone) {
         if (this.pickupDate.isBefore(today)) {
             throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
@@ -139,6 +140,10 @@ public class Reservation extends BaseEntity {
 
     public boolean getSelfPick() {
         return this.product.getSelfPick();
+    }
+
+    public boolean getDeliveryAvailable() {
+        return this.product.getDeliveryAvailable();
     }
 
     public String getReservationProductUrl() {
