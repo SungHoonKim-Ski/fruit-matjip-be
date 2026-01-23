@@ -48,6 +48,7 @@ public class UserAppService {
     }
 
     @Transactional(readOnly = true)
+    @Deprecated
     public boolean canSelfPick(String uid) {
         Users user = userService.findByUId(uid);
 

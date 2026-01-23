@@ -13,7 +13,8 @@ public record ProductDetailResponse(
     BigDecimal price,
     String imageUrl,
     String description,
-    List<String> detailImages
+    List<String> detailImages,
+    boolean deliveryAvailable
 ) {
     public static ProductDetailResponse from(Product entity) {
         return ProductDetailResponse.builder()
@@ -23,6 +24,7 @@ public record ProductDetailResponse(
             .imageUrl(entity.getProductUrl())
             .description(entity.getDescription())
             .detailImages(entity.getDetailImages())
+            .deliveryAvailable(entity.getDeliveryAvailable())
             .build();
     }
 }

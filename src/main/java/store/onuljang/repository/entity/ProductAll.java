@@ -49,6 +49,10 @@ public class ProductAll extends BaseEntity {
     private Boolean selfPick = true;
 
     @Getter
+    @Column(name = "delivery_available", nullable = false)
+    private Boolean deliveryAvailable = true;
+
+    @Getter
     @Column(name = "total_sold", nullable = false)
     private Long totalSold;
 

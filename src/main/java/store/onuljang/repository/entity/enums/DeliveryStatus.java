@@ -1,0 +1,10 @@
+package store.onuljang.repository.entity.enums;
+
+public enum DeliveryStatus {
+    PENDING_PAYMENT,
+    PAID,
+    OUT_FOR_DELIVERY,
+    DELIVERED,
+    CANCELED,
+    FAILED
+}

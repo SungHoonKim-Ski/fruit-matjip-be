@@ -21,6 +21,7 @@ import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
+import store.onuljang.service.DeliveryOrderService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -53,6 +54,9 @@ class ReservationAppServiceTest {
 
     @Mock
     private ApplicationEventPublisher eventPublisher;
+
+    @Mock
+    private DeliveryOrderService deliveryOrderService;
 
     private Users testUser;
     private Product testProduct;

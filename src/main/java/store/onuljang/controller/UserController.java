@@ -45,6 +45,7 @@ public class UserController {
         return ResponseEntity.ok(userAppService.existName(name));
     }
 
+    @Deprecated
     @GetMapping("/reservation/self-pick")
     public ResponseEntity<Boolean> canSelfPick(Authentication auth) {
         String uid = auth.getName();

@@ -99,10 +99,18 @@ public class AdminProductAppService {
     }
 
     @Transactional
+    @Deprecated
     public void toggleSelfPick(long productId) {
         productsService.findByIdWithLock(productId).toggleSelfPick();
 
         saveProductLog(productId, -3, AdminProductAction.UPDATE);
+    }
+
+    @Transactional
+    public void toggleDeliveryAvailable(long productId) {
+        productsService.findByIdWithLock(productId).toggleDeliveryAvailable();
+
+        saveProductLog(productId, -4, AdminProductAction.UPDATE);
     }
 
     @Transactional

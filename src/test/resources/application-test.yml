@@ -37,6 +37,28 @@ security:
 KAKAO:
   KEY: test-kakao-key
 
+KAKAOPAY:
+  ENABLED: false
+  ADMIN_KEY: test-admin-key
+  CID: test-cid
+  APPROVAL_URL: http://localhost/approve
+  CANCEL_URL: http://localhost/cancel
+  FAIL_URL: http://localhost/fail
+  HOST: https://kapi.kakao.com
+
+DELIVERY:
+  STORE_LAT: 37.556504
+  STORE_LNG: 126.8372613
+  MAX_DISTANCE_KM: 3
+  FEE_DISTANCE_KM: 1.5
+  MIN_AMOUNT: 15000
+  FEE_NEAR: 2900
+  FEE_PER_100M: 50
+  START_HOUR: 12
+  START_MINUTE: 0
+  END_HOUR: 19
+  END_MINUTE: 30
+
 cloud:
   aws:
     s3:

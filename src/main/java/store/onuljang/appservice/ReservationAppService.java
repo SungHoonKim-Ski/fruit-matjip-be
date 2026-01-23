@@ -15,6 +15,7 @@ import store.onuljang.repository.entity.enums.UserProductAction;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
+import store.onuljang.service.DeliveryOrderService;
 import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
@@ -33,6 +34,7 @@ public class ReservationAppService {
     ReservationService reservationService;
     UserService userService;
     ProductsService productsService;
+    DeliveryOrderService deliveryOrderService;
     ApplicationEventPublisher eventPublisher;
 
     @Transactional
@@ -83,6 +85,13 @@ public class ReservationAppService {
         Users user = userService.findByUidWithLock(uId);
 
         validateUserReservation(user, reservation);
+        deliveryOrderService.findByReservation(reservation).ifPresent(order -> {
+            if (order.getStatus() == store.onuljang.repository.entity.enums.DeliveryStatus.PAID
+                || order.getStatus() == store.onuljang.repository.entity.enums.DeliveryStatus.OUT_FOR_DELIVERY
+                || order.getStatus() == store.onuljang.repository.entity.enums.DeliveryStatus.DELIVERED) {
+                throw new UserValidateException("결제 완료된 배달 예약은 취소할 수 없습니다.");
+            }
+        });
 
         reservation.cancelByUser();
         product.cancel(reservation.getQuantity());
@@ -92,6 +101,7 @@ public class ReservationAppService {
     }
 
     @Transactional
+    @Deprecated
     public void selfPick(String uId, long reservationId) {
         Reservation reservation = reservationService.findByIdWithLock(reservationId);
         Product product = productsService.findById(reservation.getProduct().getId());
@@ -113,7 +123,21 @@ public class ReservationAppService {
         List<Reservation> entities = reservationService
                 .findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(user, from, to);
 
-        return ReservationListResponse.from(entities);
+        java.util.Set<Long> reservationIds = entities.stream().map(Reservation::getId).collect(java.util.stream.Collectors.toSet());
+        java.util.Map<Long, store.onuljang.controller.response.UserDeliveryOrderResponse> deliveryByReservationId;
+        if (reservationIds.isEmpty()) {
+            deliveryByReservationId = java.util.Collections.emptyMap();
+        } else {
+            java.util.List<store.onuljang.repository.entity.DeliveryOrderReservation> links = deliveryOrderService.findAllLinksByReservationIds(reservationIds);
+            deliveryByReservationId = links.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                    link -> link.getReservation().getId(),
+                    link -> store.onuljang.controller.response.UserDeliveryOrderResponse.from(link.getDeliveryOrder(),
+                        link.getReservation())
+                ));
+        }
+
+        return ReservationListResponse.from(entities, deliveryByReservationId);
     }
 
     private void validateUserReservation(Users user, Reservation reservation) {

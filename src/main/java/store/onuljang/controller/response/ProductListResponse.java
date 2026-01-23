@@ -23,6 +23,7 @@ public record ProductListResponse(
         LocalTime sellTime,
         boolean visible,
         boolean selfPick,
+        boolean deliveryAvailable,
         int orderIndex,
         long totalSold
     ) {
@@ -38,6 +39,7 @@ public record ProductListResponse(
                 .visible(product.getVisible())
                 .orderIndex(product.getOrderIndex())
                 .selfPick(product.getSelfPick())
+                .deliveryAvailable(product.getDeliveryAvailable())
                 .totalSold(product.getTotalSold())
                 .build();
         }

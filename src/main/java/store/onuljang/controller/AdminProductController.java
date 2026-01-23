@@ -50,9 +50,17 @@ public class AdminProductController {
         return ResponseEntity.ok().build();
     }
 
+    @Deprecated
     @PatchMapping("/self-pick/{productId}")
     public ResponseEntity<Void> toggleSelfPick(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
         adminProductAppService.toggleSelfPick(productId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/delivery-available/{productId}")
+    public ResponseEntity<Void> toggleDeliveryAvailable(@Valid @NotNull @Positive @PathVariable("productId") Long productId) {
+        adminProductAppService.toggleDeliveryAvailable(productId);
 
         return ResponseEntity.ok().build();
     }

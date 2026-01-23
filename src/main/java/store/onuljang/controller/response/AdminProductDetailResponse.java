@@ -19,7 +19,8 @@ public record AdminProductDetailResponse (
     List<String> detailUrls,
     LocalDate sellDate,
     LocalTime sellTime,
-    String description
+    String description,
+    boolean deliveryAvailable
 ){
     public static AdminProductDetailResponse from(Product product) {
         return AdminProductDetailResponse.builder()
@@ -33,6 +34,7 @@ public record AdminProductDetailResponse (
             .sellDate(product.getSellDate())
             .sellTime(product.getSellTime())
             .description(product.getDescription())
+            .deliveryAvailable(product.getDeliveryAvailable())
             .build();
     }
 }
