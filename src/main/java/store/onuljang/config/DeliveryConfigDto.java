@@ -4,7 +4,9 @@ import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.time.LocalTime;
 
 @Component
 @Getter
@@ -42,4 +44,29 @@ public class DeliveryConfigDto {
     @Value("${DELIVERY.END_MINUTE:30}")
     int endMinute;
 
+    @PostConstruct
+    void validateTimeRange() {
+        validateHour(startHour, "START_HOUR");
+        validateHour(endHour, "END_HOUR");
+        validateMinute(startMinute, "START_MINUTE");
+        validateMinute(endMinute, "END_MINUTE");
+
+        LocalTime start = LocalTime.of(startHour, startMinute);
+        LocalTime end = LocalTime.of(endHour, endMinute);
+        if (!start.isBefore(end)) {
+            throw new IllegalStateException("DELIVERY start time must be before end time.");
+        }
+    }
+
+    private void validateHour(int hour, String key) {
+        if (hour < 0 || hour > 23) {
+            throw new IllegalStateException("DELIVERY " + key + " must be between 0 and 23.");
+        }
+    }
+
+    private void validateMinute(int minute, String key) {
+        if (minute < 0 || minute > 59) {
+            throw new IllegalStateException("DELIVERY " + key + " must be between 0 and 59.");
+        }
+    }
 }
