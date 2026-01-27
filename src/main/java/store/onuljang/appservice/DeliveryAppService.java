@@ -64,7 +64,7 @@ public class DeliveryAppService {
         if (reservationIdSet.isEmpty()) {
             throw new UserValidateException("배달 주문 대상이 없습니다.");
         }
-        java.util.List<Reservation> reservations = reservationService.findAllUserIdInWithUserWithLock(reservationIdSet);
+        java.util.List<Reservation> reservations = reservationService.findAllUserIdInWithUser(reservationIdSet);
         if (reservations.size() != reservationIdSet.size()) {
             throw new UserValidateException("존재하지 않는 예약이 포함되어 있습니다.");
         }
@@ -171,7 +171,7 @@ public class DeliveryAppService {
 
     @Transactional
     public void approve(String uid, long orderId, String pgToken) {
-        Users user = userService.findByUidWithLock(uid);
+        Users user = userService.findByUId(uid);
         DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
 
         if (order.getStatus() != DeliveryStatus.PENDING_PAYMENT) {
@@ -200,7 +200,7 @@ public class DeliveryAppService {
 
     @Transactional
     public void cancel(String uid, long orderId) {
-        Users user = userService.findByUidWithLock(uid);
+        Users user = userService.findByUId(uid);
         DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
         if (order.getStatus() == DeliveryStatus.PAID) {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");
@@ -212,7 +212,7 @@ public class DeliveryAppService {
 
     @Transactional
     public void fail(String uid, long orderId) {
-        Users user = userService.findByUidWithLock(uid);
+        Users user = userService.findByUId(uid);
         DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
         if (order.getStatus() == DeliveryStatus.PAID) {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");

@@ -66,6 +66,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
+    public List<Reservation> findAllUserIdInWithUser(Set<Long> reservationIdSet) {
+        return reservationRepository.findAllByIdIn(reservationIdSet);
+    }
+
+    @Transactional(readOnly = true)
     public Reservation findById(long id) {
         return reservationRepository.findById(id).orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
     }
