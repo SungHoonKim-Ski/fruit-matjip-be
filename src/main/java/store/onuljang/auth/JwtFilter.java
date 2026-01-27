@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -33,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = header.substring(7);
         try {
             var jws = jwtUtil.parseAndValidate(token);
-            var auth = new UsernamePasswordAuthenticationToken(jws.getBody().getSubject(), null, java.util.List.of());
+            var auth = new UsernamePasswordAuthenticationToken(jws.getBody().getSubject(), null, List.of());
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(req, res);
         } catch (JwtException e) {

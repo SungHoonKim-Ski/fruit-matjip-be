@@ -2,6 +2,7 @@ package store.onuljang.controller.response;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.DeliveryOrder;
+import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ public record UserDeliveryOrderResponse(
     int deliveryHour,
     int deliveryMinute
 ) {
-    public static UserDeliveryOrderResponse from(DeliveryOrder order, store.onuljang.repository.entity.Reservation reservation) {
+    public static UserDeliveryOrderResponse from(DeliveryOrder order, Reservation reservation) {
         return UserDeliveryOrderResponse.builder()
             .reservationId(reservation.getId())
             .orderId(order.getId())

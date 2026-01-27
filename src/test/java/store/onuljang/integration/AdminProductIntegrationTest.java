@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static store.onuljang.util.TimeUtil.nowDate;
@@ -238,7 +239,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             LocalDate newSellDate = nowDate().plusDays(7);
 
             AdminProductBulkUpdateSellDateRequest request = new AdminProductBulkUpdateSellDateRequest(newSellDate,
-                    java.util.Set.of(product1.getId(), product2.getId()));
+                    Set.of(product1.getId(), product2.getId()));
 
             // when
             var response = patchAction("/api/admin/products/bulk-sell-date", request, Integer.class);

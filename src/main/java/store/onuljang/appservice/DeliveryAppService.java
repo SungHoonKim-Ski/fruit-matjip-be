@@ -25,6 +25,9 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -60,11 +63,11 @@ public class DeliveryAppService {
     @Transactional
     public DeliveryReadyResponse ready(String uid, DeliveryReadyRequest request) {
         Users user = userService.findByUidWithLock(uid);
-        java.util.Set<Long> reservationIdSet = new java.util.HashSet<>(request.reservationIds());
+        Set<Long> reservationIdSet = new HashSet<>(request.reservationIds());
         if (reservationIdSet.isEmpty()) {
             throw new UserValidateException("배달 주문 대상이 없습니다.");
         }
-        java.util.List<Reservation> reservations = reservationService.findAllUserIdInWithUser(reservationIdSet);
+        List<Reservation> reservations = reservationService.findAllUserIdInWithUser(reservationIdSet);
         if (reservations.size() != reservationIdSet.size()) {
             throw new UserValidateException("존재하지 않는 예약이 포함되어 있습니다.");
         }
@@ -118,7 +121,7 @@ public class DeliveryAppService {
             .build();
 
         DeliveryOrder saved = deliveryOrderService.save(order);
-        java.util.List<DeliveryOrderReservation> links = reservations.stream()
+        List<DeliveryOrderReservation> links = reservations.stream()
             .map(reservation -> DeliveryOrderReservation.builder()
                 .deliveryOrder(saved)
                 .reservation(reservation)
@@ -228,7 +231,7 @@ public class DeliveryAppService {
         }
     }
 
-    private void validateDeliveryReservations(Users user, java.util.List<Reservation> reservations) {
+    private void validateDeliveryReservations(Users user, List<Reservation> reservations) {
         LocalDate today = TimeUtil.nowDate();
         LocalDate deliveryDate = reservations.get(0).getPickupDate();
         if (!deliveryDate.isEqual(today)) {
@@ -287,7 +290,7 @@ public class DeliveryAppService {
         return hour + "시 " + minute + "분";
     }
 
-    private String buildReservationTitle(java.util.List<Reservation> reservations) {
+    private String buildReservationTitle(List<Reservation> reservations) {
         if (reservations.isEmpty()) return "배달 주문";
         String first = reservations.get(0).getReservationProductName();
         if (reservations.size() == 1) return first;

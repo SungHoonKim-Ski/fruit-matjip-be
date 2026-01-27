@@ -16,6 +16,7 @@ import store.onuljang.auth.AdminAuthenticationToken;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -42,7 +43,7 @@ public class AdminLogFilter extends OncePerRequestFilter {
             throws IOException, ServletException {
 
         String requestId = Optional.ofNullable(req.getHeader("X-Request-Id"))
-                .orElseGet(() -> java.util.UUID.randomUUID().toString());
+                .orElseGet(() -> UUID.randomUUID().toString());
 
         res.setHeader("X-Request-Id", requestId);
 

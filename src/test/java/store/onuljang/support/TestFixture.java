@@ -10,6 +10,7 @@ import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.*;
+import store.onuljang.repository.entity.enums.AdminRole;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.dto.JwtToken;
 
@@ -84,7 +85,7 @@ public class TestFixture {
      */
     public Admin createAdmin(String name, String email, String password) {
         Admin admin = Admin.builder().name(name).email(email).password(password)
-                .role(store.onuljang.repository.entity.enums.AdminRole.OWNER).build();
+                .role(AdminRole.OWNER).build();
         return adminRepository.saveAndFlush(admin);
     }
 
