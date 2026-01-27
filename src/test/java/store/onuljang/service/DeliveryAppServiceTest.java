@@ -4,8 +4,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import store.onuljang.appservice.DeliveryAppService;
 import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.exception.UserValidateException;
@@ -44,6 +44,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
     @Autowired
     DeliveryOrderService deliveryOrderService;
 
+    @MockitoBean
+    KakaoLocalService kakaoLocalService;
 
     private static final String ADDRESS = "서울 강서구 과일맛집";
 
