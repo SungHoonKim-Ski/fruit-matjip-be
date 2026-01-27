@@ -106,8 +106,7 @@ public class DeliveryAppService {
         }
 
         order.markPaid();
-        deliveryPaymentService.findLatestByOrder(order)
-            .ifPresent(payment -> payment.markApproved(approve.aid()));
+        deliveryPaymentService.markApproved(order, approve.aid());
         eventPublisher.publishEvent(new DeliveryPaidEvent(order.getId()));
     }
 
@@ -119,8 +118,7 @@ public class DeliveryAppService {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");
         }
         order.markCanceled();
-        deliveryPaymentService.findLatestByOrder(order)
-            .ifPresent(DeliveryPayment::markCanceled);
+        deliveryPaymentService.markCanceled(order);
     }
 
     @Transactional
@@ -131,8 +129,7 @@ public class DeliveryAppService {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");
         }
         order.markFailed();
-        deliveryPaymentService.findLatestByOrder(order)
-            .ifPresent(DeliveryPayment::markFailed);
+        deliveryPaymentService.markFailed(order);
     }
 
     // 예약 상품 총액 합산

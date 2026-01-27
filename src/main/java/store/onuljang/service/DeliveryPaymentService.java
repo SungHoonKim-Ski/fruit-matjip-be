@@ -23,8 +23,22 @@ public class DeliveryPaymentService {
         return deliveryPaymentRepository.save(payment);
     }
 
-    @Transactional(readOnly = true)
-    public Optional<DeliveryPayment> findLatestByOrder(DeliveryOrder order) {
+    @Transactional
+    public void markApproved(DeliveryOrder order, String aid) {
+        this.findLatestByOrder(order).ifPresent(payment -> payment.markApproved(aid));
+    }
+
+    @Transactional
+    public void markCanceled(DeliveryOrder order) {
+        findLatestByOrder(order).ifPresent(DeliveryPayment::markCanceled);
+    }
+
+    @Transactional
+    public void markFailed(DeliveryOrder order) {
+        findLatestByOrder(order).ifPresent(DeliveryPayment::markFailed);
+    }
+
+    private Optional<DeliveryPayment> findLatestByOrder(DeliveryOrder order) {
         return deliveryPaymentRepository.findTopByDeliveryOrderOrderByIdDesc(order);
     }
 }
