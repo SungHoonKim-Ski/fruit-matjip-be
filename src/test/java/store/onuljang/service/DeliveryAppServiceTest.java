@@ -21,6 +21,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -70,10 +71,10 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         double storeLat = 37.556504;
         double storeLng = 126.8372613;
         given(kakaoLocalService.geocodeAddress(ADDRESS))
-            .willReturn(Optional.of(new KakaoLocalService.Coordinate(37.556904, 126.8372613)));
+            .willReturn(new KakaoLocalService.Coordinate(37.556904, 126.8372613));
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            java.util.List.of(reservation.getId()),
+            List.of(reservation.getId()),
             12,
             0,
             "01012345678",
@@ -101,10 +102,10 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         double storeLat = 37.556504;
         double storeLng = 126.8372613;
         given(kakaoLocalService.geocodeAddress(ADDRESS))
-            .willReturn(Optional.of(new KakaoLocalService.Coordinate(37.574504, 126.8372613)));
+            .willReturn(new KakaoLocalService.Coordinate(37.574504, 126.8372613));
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            java.util.List.of(reservation.getId()),
+            List.of(reservation.getId()),
             13,
             0,
             "01012345678",
@@ -130,10 +131,10 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         Reservation reservation = testFixture.createReservation(user, product, 1);
 
         given(kakaoLocalService.geocodeAddress(ADDRESS))
-            .willReturn(Optional.of(new KakaoLocalService.Coordinate(37.586504, 126.8372613)));
+            .willReturn(new KakaoLocalService.Coordinate(37.586504, 126.8372613));
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            java.util.List.of(reservation.getId()),
+            List.of(reservation.getId()),
             14,
             0,
             "01012345678",
