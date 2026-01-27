@@ -76,6 +76,10 @@ public class DeliveryOrder extends BaseEntity {
     private String phone;
 
     @Getter
+    @Column(name = "idempotency_key", length = 64)
+    private String idempotencyKey;
+
+    @Getter
     @Column(name = "latitude", nullable = false)
     private Double latitude;
 

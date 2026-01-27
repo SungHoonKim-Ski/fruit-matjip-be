@@ -61,6 +61,24 @@ public class DeliveryAppService {
     public DeliveryReadyResponse ready(String uid, DeliveryReadyRequest request) {
         // 1) 사용자/예약 조회 및 기본 검증
         Users user = userService.findByUId(uid);
+        DeliveryOrder existingOrder = deliveryOrderService.findByUserAndIdempotencyKey(user, request.idempotencyKey());
+        if (existingOrder != null) {
+            if (existingOrder.getStatus() == DeliveryStatus.PENDING_PAYMENT) {
+                List<Reservation> existingReservations = existingOrder.getReservations();
+                BigDecimal totalProductAmount = calculateTotalProductAmount(existingReservations);
+                return deliveryPaymentProcessor.preparePayment(
+                    existingOrder,
+                    user,
+                    existingReservations,
+                    totalProductAmount,
+                    existingOrder.getDeliveryFee()
+                );
+            }
+            return DeliveryReadyResponse.builder()
+                .orderId(existingOrder.getId())
+                .redirectUrl("/me/orders")
+                .build();
+        }
         List<Reservation> reservations = loadReservations(request);
 
         // 2) 배달 가능 여부 및 시간 검증
@@ -183,16 +201,28 @@ public class DeliveryAppService {
                 .phone(request.phone())
                 .latitude(coordinate.latitude())
                 .longitude(coordinate.longitude())
+                .idempotencyKey(request.idempotencyKey())
                 .build());
     }
 
     // 배달 주문-예약 연결 저장
     private void saveDeliveryOrderLinks(DeliveryOrder order, List<Reservation> reservations) {
         List<DeliveryOrderReservation> links = reservations.stream()
-                .map(reservation -> DeliveryOrderReservation.builder()
+                .map(reservation -> {
+                    DeliveryOrderReservation existing = deliveryOrderService.findLinkByReservation(reservation);
+                    if (existing != null) {
+                        DeliveryStatus status = existing.getDeliveryOrder().getStatus();
+                        if (status == DeliveryStatus.CANCELED || status == DeliveryStatus.FAILED) {
+                            existing.changeDeliveryOrder(order);
+                            return existing;
+                        }
+                        return existing;
+                    }
+                    return DeliveryOrderReservation.builder()
                         .deliveryOrder(order)
                         .reservation(reservation)
-                        .build())
+                        .build();
+                })
                 .toList();
         deliveryOrderService.saveLinks(links);
         order.getDeliveryOrderReservations().addAll(links);

@@ -12,5 +12,6 @@ public record DeliveryReadyRequest(
     @NotBlank String phone,
     @NotBlank String postalCode,
     @NotBlank String address1,
-    String address2
+    String address2,
+    @NotBlank String idempotencyKey
 ) {}
