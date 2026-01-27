@@ -140,6 +140,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("UserValidateException", ex.getMessage()));
     }
 
+    @ExceptionHandler(AdminValidateException.class)
+    public ResponseEntity<ErrorResponse> handleAdminValidate(AdminValidateException ex) {
+        log.info("AdminValidateException: {}", ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("AdminValidateException", ex.getMessage()));
+    }
+
     @ExceptionHandler(ProductUnavailableException.class)
     public ResponseEntity<ErrorResponse> handleProductUnavailable(ProductUnavailableException ex) {
         log.info("ProductUnavailableException: {}", ex.getMessage());
