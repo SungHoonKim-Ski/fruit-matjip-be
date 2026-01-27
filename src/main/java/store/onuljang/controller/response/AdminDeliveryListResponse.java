@@ -16,15 +16,8 @@ public record AdminDeliveryListResponse(
     @Builder
     public record AdminDeliveryResponse(
         long id,
-        List<Long> reservationIds,
-        int reservationCount,
         String buyerName,
-        String productSummary,
-        int totalQuantity,
-        LocalDate deliveryDate,
-        int deliveryHour,
-        int deliveryMinute,
-        BigDecimal deliveryFee,
+        List<ReservationItem> reservationItems,
         BigDecimal totalAmount,
         DeliveryStatus status,
         String phone,
@@ -35,19 +28,16 @@ public record AdminDeliveryListResponse(
         public static AdminDeliveryResponse from(DeliveryOrder order) {
             List<Reservation> reservations = order.getReservations();
             BigDecimal totalAmount = order.getTotalAmount();
-            int totalQuantity = order.getTotalQuantity();
-            String productSummary = order.getProductSummary();
             return AdminDeliveryResponse.builder()
                 .id(order.getId())
-                .reservationIds(order.getReservationIds())
-                .reservationCount(reservations.size())
                 .buyerName(order.getUser().getName())
-                .productSummary(productSummary)
-                .totalQuantity(totalQuantity)
-                .deliveryDate(order.getDeliveryDate())
-                .deliveryHour(order.getDeliveryHour())
-                .deliveryMinute(order.getDeliveryMinute())
-                .deliveryFee(order.getDeliveryFee())
+                .reservationItems(reservations.stream()
+                    .map(reservation -> ReservationItem.builder()
+                        .id(reservation.getId())
+                        .productName(reservation.getReservationProductName())
+                        .quantity(reservation.getQuantity())
+                        .build())
+                    .toList())
                 .totalAmount(totalAmount)
                 .status(order.getStatus())
                 .phone(order.getPhone())
@@ -57,6 +47,13 @@ public record AdminDeliveryListResponse(
                 .build();
         }
     }
+
+    @Builder
+    public record ReservationItem(
+        long id,
+        String productName,
+        int quantity
+    ) {}
 
     public static AdminDeliveryListResponse from(List<DeliveryOrder> orders) {
         return AdminDeliveryListResponse.builder()

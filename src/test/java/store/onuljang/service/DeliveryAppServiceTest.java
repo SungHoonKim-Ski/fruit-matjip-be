@@ -80,7 +80,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "01012345678",
             "12345",
             ADDRESS,
-            "101호"
+            "101호",
+            "test-key-1"
         );
 
         long orderId = deliveryAppService.ready(user.getUid(), request).orderId();
@@ -111,7 +112,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "01012345678",
             "12345",
             ADDRESS,
-            "101호"
+            "101호",
+            "test-key-2"
         );
 
         long orderId = deliveryAppService.ready(user.getUid(), request).orderId();
@@ -140,7 +142,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "01012345678",
             "12345",
             ADDRESS,
-            "101호"
+            "101호",
+            "test-key-3"
         );
 
         assertThatThrownBy(() -> deliveryAppService.ready(user.getUid(), request))

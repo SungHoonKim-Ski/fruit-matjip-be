@@ -169,6 +169,13 @@ public class Reservation extends BaseEntity {
         return first + " 외 " + (reservations.size() - 1) + "건";
     }
 
+    public static String buildFullSummary(List<Reservation> reservations) {
+        if (reservations == null || reservations.isEmpty()) return "배달 주문";
+        return reservations.stream()
+            .map(Reservation::getReservationProductName)
+            .collect(java.util.stream.Collectors.joining(", "));
+    }
+
     public boolean isNoShow() {
         return this.status == ReservationStatus.NO_SHOW;
     }

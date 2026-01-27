@@ -25,7 +25,7 @@ public record AdminDeliverySseResponse(
             .reservationIds(order.getReservationIds())
             .reservationCount(reservations.size())
             .buyerName(order.getUser().getName())
-            .productSummary(Reservation.buildSummary(reservations))
+            .productSummary(Reservation.buildFullSummary(reservations))
             .deliveryDate(order.getDeliveryDate())
             .deliveryHour(order.getDeliveryHour())
             .deliveryMinute(order.getDeliveryMinute())

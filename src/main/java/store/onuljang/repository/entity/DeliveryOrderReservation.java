@@ -35,4 +35,8 @@ public class DeliveryOrderReservation extends BaseEntity {
         foreignKey = @ForeignKey(name = "fk_delivery_order_reservations_reservation")
     )
     private Reservation reservation;
+
+    public void changeDeliveryOrder(DeliveryOrder deliveryOrder) {
+        this.deliveryOrder = deliveryOrder;
+    }
 }

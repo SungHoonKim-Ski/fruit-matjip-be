@@ -112,7 +112,9 @@ public class DeliveryOrder extends BaseEntity {
     }
 
     public boolean canCancelByAdmin() {
-        return this.status != DeliveryStatus.DELIVERED;
+        return this.status != DeliveryStatus.DELIVERED
+            && this.status != DeliveryStatus.CANCELED
+            && this.status != DeliveryStatus.FAILED;
     }
 
     public boolean canCancelByUser() {
