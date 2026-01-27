@@ -36,6 +36,7 @@ security:
 
 KAKAO:
   KEY: test-kakao-key
+  LOCAL_HOST: https://dapi.kakao.com
 
 KAKAOPAY:
   ENABLED: false

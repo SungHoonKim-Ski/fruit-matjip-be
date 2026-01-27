@@ -34,6 +34,7 @@ spring:
 
 KAKAO:
   KEY: ${API_KAKAO_KEY:TODO}
+  LOCAL_HOST: ${KAKAO_LOCAL_HOST:https://dapi.kakao.com}
 
 KAKAOPAY:
   ENABLED: ${KAKAOPAY_ENABLED:false}
