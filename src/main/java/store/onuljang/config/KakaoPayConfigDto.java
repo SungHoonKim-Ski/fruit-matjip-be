@@ -29,4 +29,14 @@ public class KakaoPayConfigDto {
     String host;
 
     final String contentType = "application/x-www-form-urlencoded;charset=utf-8";
+
+    public KakaoPayRedirectUrls buildRedirectUrls(long orderId) {
+        return new KakaoPayRedirectUrls(
+            approvalUrl + "?order_id=" + orderId,
+            cancelUrl + "?order_id=" + orderId,
+            failUrl + "?order_id=" + orderId
+        );
+    }
+
+    public record KakaoPayRedirectUrls(String approvalUrl, String cancelUrl, String failUrl) {}
 }
