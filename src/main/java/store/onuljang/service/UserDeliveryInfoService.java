@@ -23,16 +23,10 @@ public class UserDeliveryInfoService {
     }
 
     @Transactional
-    public UserDeliveryInfo saveOrUpdate(Users user, String phone, String postalCode, String address1, String address2,
+    public UserDeliveryInfo create(Users user, String phone, String postalCode, String address1, String address2,
             Double latitude, Double longitude) {
-        Optional<UserDeliveryInfo> existing = userDeliveryInfoRepository.findByUser(user);
         Double lat = latitude == null ? 0.0 : latitude;
         Double lng = longitude == null ? 0.0 : longitude;
-        if (existing.isPresent()) {
-            UserDeliveryInfo info = existing.get();
-            info.update(phone, postalCode, address1, address2, lat, lng);
-            return info;
-        }
         UserDeliveryInfo created = UserDeliveryInfo.builder()
             .user(user)
             .phone(phone)
@@ -43,5 +37,14 @@ public class UserDeliveryInfoService {
             .longitude(lng)
             .build();
         return userDeliveryInfoRepository.save(created);
+    }
+
+    @Transactional
+    public UserDeliveryInfo update(UserDeliveryInfo info, String phone, String postalCode, String address1,
+            String address2, Double latitude, Double longitude) {
+        Double lat = latitude == null ? 0.0 : latitude;
+        Double lng = longitude == null ? 0.0 : longitude;
+        info.update(phone, postalCode, address1, address2, lat, lng);
+        return info;
     }
 }

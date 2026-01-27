@@ -53,8 +53,8 @@ public class DeliveryAppService {
     @Transactional
     public void saveDeliveryInfo(String uid, DeliveryInfoRequest request) {
         Users user = userService.findByUidWithLock(uid);
-        userDeliveryInfoService.saveOrUpdate(user, request.phone(), request.postalCode(), request.address1(),
-            request.address2(), 0.0, 0.0);
+        upsertDeliveryInfo(user, request.phone(), request.postalCode(), request.address1(), request.address2(),
+            0.0, 0.0);
     }
 
     @Transactional
@@ -154,8 +154,18 @@ public class DeliveryAppService {
 
     // 사용자 배송 정보 저장/갱신
     private void saveDeliveryInfo(Users user, DeliveryReadyRequest request, KakaoLocalService.Coordinate coordinate) {
-        userDeliveryInfoService.saveOrUpdate(user, request.phone(), request.postalCode(), request.address1(),
-                request.address2(), coordinate.latitude(), coordinate.longitude());
+        upsertDeliveryInfo(user, request.phone(), request.postalCode(), request.address1(), request.address2(),
+            coordinate.latitude(), coordinate.longitude());
+    }
+
+    private void upsertDeliveryInfo(Users user, String phone, String postalCode, String address1, String address2,
+            Double latitude, Double longitude) {
+        UserDeliveryInfo existing = userDeliveryInfoService.findByUser(user).orElse(null);
+        if (existing != null) {
+            userDeliveryInfoService.update(existing, phone, postalCode, address1, address2, latitude, longitude);
+        } else {
+            userDeliveryInfoService.create(user, phone, postalCode, address1, address2, latitude, longitude);
+        }
     }
 
     // 배달 주문 생성 및 저장
