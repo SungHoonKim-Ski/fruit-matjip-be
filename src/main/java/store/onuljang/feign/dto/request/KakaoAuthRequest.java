@@ -1,4 +1,4 @@
-package store.onuljang.feign.dto;
+package store.onuljang.feign.dto.request;
 
 import org.springframework.web.bind.annotation.RequestParam;
 

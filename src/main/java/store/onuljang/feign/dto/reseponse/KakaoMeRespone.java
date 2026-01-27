@@ -1,4 +1,4 @@
-package store.onuljang.feign.dto;
+package store.onuljang.feign.dto.reseponse;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

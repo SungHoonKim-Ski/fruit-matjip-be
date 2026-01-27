@@ -1,4 +1,4 @@
-package store.onuljang.feign.dto;
+package store.onuljang.feign.dto.reseponse;
 
 
 public record KakaoLoginResponse(
