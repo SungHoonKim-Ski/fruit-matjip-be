@@ -44,8 +44,6 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
     @Autowired
     DeliveryOrderService deliveryOrderService;
 
-    @MockBean
-    KakaoLocalService kakaoLocalService;
 
     private static final String ADDRESS = "서울 강서구 과일맛집";
 
