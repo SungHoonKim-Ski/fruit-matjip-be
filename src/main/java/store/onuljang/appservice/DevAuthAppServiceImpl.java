@@ -24,6 +24,7 @@ public class DevAuthAppServiceImpl implements AuthAppService {
     TokenService tokenService;
     JwtUtil jwtUtil;
 
+    @Transactional
     public LoginResponse socialLogin(LoginRequest request) {
         Users user = userService.findBySocialId("7777777");
         String accessToken = tokenService.generateToken(user);
