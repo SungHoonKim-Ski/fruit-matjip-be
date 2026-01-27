@@ -115,4 +115,33 @@ public class DeliveryOrder extends BaseEntity {
     public void markCanceled() {
         this.status = DeliveryStatus.CANCELED;
     }
+
+    public List<Reservation> getReservations() {
+        return deliveryOrderReservations.stream()
+            .map(DeliveryOrderReservation::getReservation)
+            .toList();
+    }
+
+    public List<Long> getReservationIds() {
+        return deliveryOrderReservations.stream()
+            .map(link -> link.getReservation().getId())
+            .toList();
+    }
+
+    public int getTotalQuantity() {
+        return getReservations().stream()
+            .mapToInt(Reservation::getQuantity)
+            .sum();
+    }
+
+    public BigDecimal getTotalAmount() {
+        return getReservations().stream()
+            .map(Reservation::getAmount)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .add(getDeliveryFee());
+    }
+
+    public String getProductSummary() {
+        return Reservation.buildSummary(getReservations());
+    }
 }

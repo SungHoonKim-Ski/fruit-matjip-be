@@ -2,6 +2,7 @@ package store.onuljang.controller.response;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.DeliveryOrder;
+import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 
 import java.math.BigDecimal;
@@ -32,19 +33,13 @@ public record AdminDeliveryListResponse(
         String address2
     ) {
         public static AdminDeliveryResponse from(DeliveryOrder order) {
-            List<store.onuljang.repository.entity.DeliveryOrderReservation> links = order.getDeliveryOrderReservations();
-            List<store.onuljang.repository.entity.Reservation> reservations = links.stream()
-                .map(store.onuljang.repository.entity.DeliveryOrderReservation::getReservation)
-                .toList();
-            BigDecimal totalAmount = reservations.stream()
-                .map(store.onuljang.repository.entity.Reservation::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .add(order.getDeliveryFee());
-            int totalQuantity = reservations.stream().mapToInt(store.onuljang.repository.entity.Reservation::getQuantity).sum();
-            String productSummary = buildSummary(reservations);
+            List<Reservation> reservations = order.getReservations();
+            BigDecimal totalAmount = order.getTotalAmount();
+            int totalQuantity = order.getTotalQuantity();
+            String productSummary = order.getProductSummary();
             return AdminDeliveryResponse.builder()
                 .id(order.getId())
-                .reservationIds(reservations.stream().map(store.onuljang.repository.entity.Reservation::getId).toList())
+                .reservationIds(order.getReservationIds())
                 .reservationCount(reservations.size())
                 .buyerName(order.getUser().getName())
                 .productSummary(productSummary)
@@ -60,13 +55,6 @@ public record AdminDeliveryListResponse(
                 .address1(order.getAddress1())
                 .address2(order.getAddress2())
                 .build();
-        }
-
-        private static String buildSummary(List<store.onuljang.repository.entity.Reservation> reservations) {
-            if (reservations.isEmpty()) return "배달 주문";
-            String first = reservations.get(0).getReservationProductName();
-            if (reservations.size() == 1) return first;
-            return first + " 외 " + (reservations.size() - 1) + "건";
         }
     }
 

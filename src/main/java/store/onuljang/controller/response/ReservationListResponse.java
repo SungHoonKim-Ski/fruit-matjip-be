@@ -25,7 +25,7 @@ public record ReservationListResponse(
         ReservationStatus status,
         UserDeliveryOrderResponse delivery) {
 
-        public static ReservationResponse from(Reservation entity, UserDeliveryOrderResponse delivery) {
+        public static ReservationResponse from(Reservation entity) {
             return ReservationResponse.builder()
                 .id(entity.getId())
                 .amount(entity.getAmount())
@@ -36,14 +36,14 @@ public record ReservationListResponse(
                 .selfPick(entity.getSelfPick())
                 .deliveryAvailable(entity.getDeliveryAvailable())
                 .status(entity.getStatus())
-                .delivery(delivery)
+                .delivery(UserDeliveryOrderResponse.from(entity))
             .build();
         }
     }
 
-    public static ReservationListResponse from(List<Reservation> entities, java.util.Map<Long, UserDeliveryOrderResponse> deliveryByReservationId) {
+    public static ReservationListResponse from(List<Reservation> entities) {
         return ReservationListResponse.builder()
-            .response(entities.stream().map(entity -> ReservationResponse.from(entity, deliveryByReservationId.get(entity.getId()))).toList())
+            .response(entities.stream().map(ReservationResponse::from).toList())
             .build();
     }
 }

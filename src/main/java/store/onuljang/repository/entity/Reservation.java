@@ -11,6 +11,7 @@ import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.*;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,6 +39,10 @@ public class Reservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @Getter
+    @OneToOne(mappedBy = "reservation", fetch = FetchType.LAZY)
+    private DeliveryOrderReservation deliveryOrderReservation;
 
     @Getter
     @Setter
@@ -148,6 +153,20 @@ public class Reservation extends BaseEntity {
 
     public String getReservationProductUrl() {
         return this.product.getProductUrl();
+    }
+
+    public DeliveryOrder getDeliveryOrder() {
+        if (deliveryOrderReservation == null) {
+            return null;
+        }
+        return deliveryOrderReservation.getDeliveryOrder();
+    }
+
+    public static String buildSummary(List<Reservation> reservations) {
+        if (reservations == null || reservations.isEmpty()) return "배달 주문";
+        String first = reservations.get(0).getReservationProductName();
+        if (reservations.size() == 1) return first;
+        return first + " 외 " + (reservations.size() - 1) + "건";
     }
 
     public boolean isNoShow() {

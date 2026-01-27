@@ -2,6 +2,7 @@ package store.onuljang.controller.response;
 
 import lombok.Builder;
 import store.onuljang.repository.entity.DeliveryOrder;
+import store.onuljang.repository.entity.Reservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -18,25 +19,16 @@ public record AdminDeliverySseResponse(
     int deliveryMinute
 ) {
     public static AdminDeliverySseResponse from(DeliveryOrder order) {
-        List<store.onuljang.repository.entity.Reservation> reservations = order.getDeliveryOrderReservations().stream()
-            .map(store.onuljang.repository.entity.DeliveryOrderReservation::getReservation)
-            .toList();
+        List<Reservation> reservations = order.getReservations();
         return AdminDeliverySseResponse.builder()
             .orderId(order.getId())
-            .reservationIds(reservations.stream().map(store.onuljang.repository.entity.Reservation::getId).toList())
+            .reservationIds(order.getReservationIds())
             .reservationCount(reservations.size())
             .buyerName(order.getUser().getName())
-            .productSummary(buildSummary(reservations))
+            .productSummary(Reservation.buildSummary(reservations))
             .deliveryDate(order.getDeliveryDate())
             .deliveryHour(order.getDeliveryHour())
             .deliveryMinute(order.getDeliveryMinute())
             .build();
-    }
-
-    private static String buildSummary(List<store.onuljang.repository.entity.Reservation> reservations) {
-        if (reservations.isEmpty()) return "배달 주문";
-        String first = reservations.get(0).getReservationProductName();
-        if (reservations.size() == 1) return first;
-        return first + " 외 " + (reservations.size() - 1) + "건";
     }
 }

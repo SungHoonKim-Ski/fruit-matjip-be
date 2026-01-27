@@ -90,6 +90,20 @@ public class ReservationQueryRepository {
             .fetch();
     }
 
+    public List<Reservation> findAllByUserAndPickupDateBetweenWithProductAndDelivery(Users user, LocalDate from, LocalDate to) {
+        return queryFactory
+            .selectFrom(reservation)
+            .leftJoin(reservation.product).fetchJoin()
+            .leftJoin(reservation.deliveryOrderReservation).fetchJoin()
+            .leftJoin(reservation.deliveryOrderReservation.deliveryOrder).fetchJoin()
+            .where(
+                reservation.user.eq(user),
+                reservation.pickupDate.between(from, to)
+            )
+            .orderBy(reservation.pickupDate.desc())
+            .fetch();
+    }
+
     public Optional<Reservation> findByIdWithLock(long id) {
         Reservation result = queryFactory
             .selectFrom(reservation)

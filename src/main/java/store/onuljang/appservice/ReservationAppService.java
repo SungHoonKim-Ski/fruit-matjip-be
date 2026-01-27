@@ -10,7 +10,9 @@ import store.onuljang.controller.request.ReservationRequest;
 import store.onuljang.controller.response.ReservationListResponse;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.event.user_product.UserReservationLogEvent;
-import store.onuljang.repository.entity.*;
+import store.onuljang.repository.entity.Product;
+import store.onuljang.repository.entity.Reservation;
+import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.UserProductAction;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
@@ -122,23 +124,8 @@ public class ReservationAppService {
         Users user = userService.findByUId(uId);
 
         List<Reservation> entities = reservationService
-                .findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(user, from, to);
-
-        java.util.Set<Long> reservationIds = entities.stream().map(Reservation::getId).collect(java.util.stream.Collectors.toSet());
-        java.util.Map<Long, store.onuljang.controller.response.UserDeliveryOrderResponse> deliveryByReservationId;
-        if (reservationIds.isEmpty()) {
-            deliveryByReservationId = java.util.Collections.emptyMap();
-        } else {
-            java.util.List<store.onuljang.repository.entity.DeliveryOrderReservation> links = deliveryOrderService.findAllLinksByReservationIds(reservationIds);
-            deliveryByReservationId = links.stream()
-                .collect(java.util.stream.Collectors.toMap(
-                    link -> link.getReservation().getId(),
-                    link -> store.onuljang.controller.response.UserDeliveryOrderResponse.from(link.getDeliveryOrder(),
-                        link.getReservation())
-                ));
-        }
-
-        return ReservationListResponse.from(entities, deliveryByReservationId);
+                .findAllByUserAndPickupDateBetweenWithProductAndDeliveryOrderByPickupDateDesc(user, from, to);
+        return ReservationListResponse.from(entities);
     }
 
     private void validateUserReservation(Users user, Reservation reservation) {

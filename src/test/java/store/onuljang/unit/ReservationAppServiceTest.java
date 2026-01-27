@@ -87,7 +87,7 @@ class ReservationAppServiceTest {
             // given
             int initialStock = testProduct.getStock();
             int quantity = 3;
-            String uid = testUser.getUid().toString();
+            String uid = testUser.getUid();
             ReservationRequest request = new ReservationRequest(1L, quantity, new BigDecimal("30000"));
 
             given(productsService.findByIdWithLock(1L)).willReturn(testProduct);
@@ -219,7 +219,7 @@ class ReservationAppServiceTest {
             ReflectionTestUtils.setField(reservation, "id", 1L);
 
             given(userService.findByUId(testUser.getUid())).willReturn(testUser);
-            given(reservationService.findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(testUser, from, to))
+            given(reservationService.findAllByUserAndPickupDateBetweenWithProductAndDeliveryOrderByPickupDateDesc(testUser, from, to))
                     .willReturn(List.of(reservation));
 
             // when

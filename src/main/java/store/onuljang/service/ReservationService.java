@@ -81,9 +81,9 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Reservation> findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(Users user, LocalDate from,
-            LocalDate to) {
-        return reservationRepository.findAllByUserAndPickupDateBetweenOrderByPickupDateDesc(user, from, to);
+    public List<Reservation> findAllByUserAndPickupDateBetweenWithProductAndDeliveryOrderByPickupDateDesc(Users user,
+            LocalDate from, LocalDate to) {
+        return reservationQueryRepository.findAllByUserAndPickupDateBetweenWithProductAndDelivery(user, from, to);
     }
 
     @Transactional(readOnly = true)

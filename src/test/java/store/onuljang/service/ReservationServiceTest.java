@@ -202,7 +202,7 @@ class ReservationServiceTest {
                 .thenReturn(reservations);
 
         // when
-        List<Reservation> result = reservationService.findAllByUserAndOrderDateBetweenWithProductOrderByOrderDate(user,
+        List<Reservation> result = reservationService.findAllByUserAndPickupDateBetweenWithProductAndDeliveryOrderByPickupDateDesc(user,
                 from, to);
 
         // then

@@ -26,4 +26,12 @@ public record UserDeliveryOrderResponse(
             .deliveryMinute(order.getDeliveryMinute())
             .build();
     }
+
+    public static UserDeliveryOrderResponse from(Reservation reservation) {
+        DeliveryOrder order = reservation.getDeliveryOrder();
+        if (order == null) {
+            return null;
+        }
+        return from(order, reservation);
+    }
 }
