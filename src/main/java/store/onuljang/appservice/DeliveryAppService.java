@@ -27,6 +27,7 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryAppService {

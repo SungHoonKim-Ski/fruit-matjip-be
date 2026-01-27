@@ -16,6 +16,7 @@ import store.onuljang.service.UserService;
 import store.onuljang.util.TimeUtil;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserAppService {

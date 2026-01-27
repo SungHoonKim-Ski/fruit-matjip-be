@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.KakaoConfigDto;
 import store.onuljang.feign.dto.KakaoLoginResponse;
 import store.onuljang.feign.KakaoAuthFeignClient;
@@ -12,6 +13,7 @@ import store.onuljang.feign.KakaoMeFeignClient;
 import store.onuljang.feign.dto.KakaoMeRespone;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j

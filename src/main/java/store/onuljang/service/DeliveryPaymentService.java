@@ -12,6 +12,7 @@ import store.onuljang.repository.entity.DeliveryPayment;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryPaymentService {

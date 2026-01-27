@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Slf4j

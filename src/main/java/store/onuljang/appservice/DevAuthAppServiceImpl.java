@@ -15,6 +15,7 @@ import store.onuljang.service.TokenService;
 import store.onuljang.service.UserService;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Profile("!PROD")

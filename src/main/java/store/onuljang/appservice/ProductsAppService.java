@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductsAppService {

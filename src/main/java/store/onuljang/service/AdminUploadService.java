@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.S3Config;
 import store.onuljang.controller.response.PresignedUrlResponse;
 
@@ -25,6 +26,7 @@ import java.time.Duration;
 import java.util.*;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 @Slf4j

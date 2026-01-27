@@ -11,6 +11,7 @@ import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.service.DeliveryOrderService;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminDeliveryAppService {

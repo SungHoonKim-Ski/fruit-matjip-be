@@ -14,6 +14,7 @@ import store.onuljang.service.AdminService;
 import java.util.Optional;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminAppService {

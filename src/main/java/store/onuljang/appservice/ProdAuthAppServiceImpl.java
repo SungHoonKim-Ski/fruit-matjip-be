@@ -21,6 +21,7 @@ import store.onuljang.service.UserService;
 import java.util.UUID;
 
 @Service
+@Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 @Profile("PROD")
