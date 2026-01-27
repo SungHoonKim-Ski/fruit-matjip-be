@@ -81,7 +81,7 @@ public class DeliveryAppService {
             }
             return DeliveryReadyResponse.builder()
                 .orderId(existingOrder.getId())
-                .redirectUrl("/me/orders")
+                .redirectUrl("/me/orders?tab=delivery")
                 .build();
         }
         List<Reservation> reservations = loadReservations(request);

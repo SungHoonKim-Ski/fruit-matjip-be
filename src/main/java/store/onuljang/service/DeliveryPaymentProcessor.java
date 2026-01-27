@@ -59,7 +59,7 @@ public class DeliveryPaymentProcessor {
         eventPublisher.publishEvent(new DeliveryPaidEvent(order.getId()));
         return DeliveryReadyResponse.builder()
             .orderId(order.getId())
-            .redirectUrl("/me/orders")
+            .redirectUrl("/me/orders?tab=delivery")
             .build();
     }
 
