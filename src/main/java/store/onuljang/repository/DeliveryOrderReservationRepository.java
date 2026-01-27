@@ -15,7 +15,4 @@ public interface DeliveryOrderReservationRepository extends JpaRepository<Delive
 
     @EntityGraph(attributePaths = {"deliveryOrder"})
     List<DeliveryOrderReservation> findAllByReservationIdIn(Set<Long> reservationIds);
-
-    @EntityGraph(attributePaths = {"reservation", "reservation.product"})
-    List<DeliveryOrderReservation> findAllByDeliveryOrderId(Long deliveryOrderId);
 }

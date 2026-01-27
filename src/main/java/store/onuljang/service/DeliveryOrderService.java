@@ -60,7 +60,4 @@ public class DeliveryOrderService {
         return deliveryOrderReservationRepository.findAllByReservationIdIn(reservationIds);
     }
 
-    public List<DeliveryOrderReservation> findAllLinksByDeliveryOrderId(Long deliveryOrderId) {
-        return deliveryOrderReservationRepository.findAllByDeliveryOrderId(deliveryOrderId);
-    }
 }
