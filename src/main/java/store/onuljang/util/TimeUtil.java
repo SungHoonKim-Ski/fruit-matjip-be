@@ -55,4 +55,9 @@ public class TimeUtil {
 
         return nowZonedDateTime().isAfter(deadLine);
     }
+
+    public boolean isAfterDeadline(LocalDate targetDate, LocalTime deadlineTime) {
+        ZonedDateTime deadLine = targetDate.atTime(deadlineTime).atZone(KST);
+        return nowZonedDateTime().isAfter(deadLine);
+    }
 }

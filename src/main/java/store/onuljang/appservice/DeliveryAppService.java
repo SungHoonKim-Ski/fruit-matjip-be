@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZonedDateTime;
 
 @Service
 @Transactional(readOnly = true)
@@ -258,8 +257,7 @@ public class DeliveryAppService {
         }
 
         LocalTime deadlineTime = LocalTime.of(deliveryConfigDto.getEndHour(), deliveryConfigDto.getEndMinute());
-        ZonedDateTime deadline = today.atTime(deadlineTime).atZone(TimeUtil.KST);
-        if (TimeUtil.nowZonedDateTime().isAfter(deadline)) {
+        if (TimeUtil.isAfterDeadline(today, deadlineTime)) {
             throw new UserValidateException("배달 주문 가능 시간이 지났습니다.");
         }
     }
