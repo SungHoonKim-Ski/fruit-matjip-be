@@ -37,9 +37,6 @@ public class DeliveryController {
     public ResponseEntity<DeliveryInfoResponse> getInfo(Authentication auth) {
         String uid = auth.getName();
         DeliveryInfoResponse info = deliveryAppService.getDeliveryInfo(uid);
-        if (info == null) {
-            return ResponseEntity.noContent().build();
-        }
         return ResponseEntity.ok(info);
     }
 

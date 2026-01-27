@@ -47,7 +47,7 @@ public class DeliveryAppService {
         Users user = userService.findByUId(uid);
         return userDeliveryInfoService.findByUser(user)
             .map(DeliveryInfoResponse::from)
-            .orElse(null);
+            .orElseThrow(() -> new UserNoContentException("배송 정보가 없습니다."));
     }
 
     @Transactional
