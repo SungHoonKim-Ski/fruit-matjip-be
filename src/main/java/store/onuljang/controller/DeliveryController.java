@@ -13,8 +13,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.DeliveryAppService;
 import store.onuljang.controller.request.DeliveryInfoRequest;
+import store.onuljang.controller.request.DeliveryFeeRequest;
 import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.controller.response.DeliveryConfigResponse;
+import store.onuljang.controller.response.DeliveryFeeResponse;
 import store.onuljang.controller.response.DeliveryInfoResponse;
 import store.onuljang.controller.response.DeliveryReadyResponse;
 import store.onuljang.service.DeliveryConfigService;
@@ -45,6 +47,13 @@ public class DeliveryController {
         String uid = auth.getName();
         deliveryAppService.saveDeliveryInfo(uid, request);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/fee")
+    public ResponseEntity<DeliveryFeeResponse> estimateFee(@RequestBody @Valid DeliveryFeeRequest request) {
+        return ResponseEntity.ok(DeliveryFeeResponse.from(
+            deliveryAppService.estimateFee(request.latitude(), request.longitude())
+        ));
     }
 
     @PostMapping("/ready")

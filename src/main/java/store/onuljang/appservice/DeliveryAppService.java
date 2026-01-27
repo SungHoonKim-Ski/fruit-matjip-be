@@ -54,7 +54,12 @@ public class DeliveryAppService {
     public void saveDeliveryInfo(String uid, DeliveryInfoRequest request) {
         Users user = userService.findByUidWithLock(uid);
         upsertDeliveryInfo(user, request.phone(), request.postalCode(), request.address1(), request.address2(),
-            0.0, 0.0);
+            request.latitude(), request.longitude());
+    }
+
+    @Transactional(readOnly = true)
+    public DeliveryFeeCalculator.FeeResult estimateFee(double latitude, double longitude) {
+        return deliveryFeeCalculator.calculate(latitude, longitude);
     }
 
     @Transactional
@@ -86,14 +91,13 @@ public class DeliveryAppService {
         deliveryValidator.validateDeliveryTime(request.deliveryHour(), request.deliveryMinute());
 
         // 3) 주소 → 좌표 변환 및 배달비 산정
-        KakaoLocalService.Coordinate coordinate = kakaoLocalService.geocodeAddress(request.address1());
-        DeliveryFeeCalculator.FeeResult feeResult = deliveryFeeCalculator.calculate(coordinate.latitude(), coordinate.longitude());
+        DeliveryFeeCalculator.FeeResult feeResult = deliveryFeeCalculator.calculate(request.latitude(), request.longitude());
         BigDecimal totalProductAmount = calculateTotalProductAmount(reservations);
         deliveryValidator.validateMinimumAmount(totalProductAmount);
 
         // 4) 배송 정보 저장 및 주문 생성/연결
-        saveDeliveryInfo(user, request, coordinate);
-        DeliveryOrder saved = createDeliveryOrder(user, request, reservations, coordinate, feeResult);
+        saveDeliveryInfo(user, request);
+        DeliveryOrder saved = createDeliveryOrder(user, request, reservations, feeResult);
         saveDeliveryOrderLinks(saved, reservations);
 
         // 5) 결제 준비 (카카오페이 or 즉시 결제 처리)
@@ -168,9 +172,9 @@ public class DeliveryAppService {
     }
 
     // 사용자 배송 정보 저장/갱신
-    private void saveDeliveryInfo(Users user, DeliveryReadyRequest request, KakaoLocalService.Coordinate coordinate) {
+    private void saveDeliveryInfo(Users user, DeliveryReadyRequest request) {
         upsertDeliveryInfo(user, request.phone(), request.postalCode(), request.address1(), request.address2(),
-            coordinate.latitude(), coordinate.longitude());
+            request.latitude(), request.longitude());
     }
 
     private void upsertDeliveryInfo(Users user, String phone, String postalCode, String address1, String address2,
@@ -185,7 +189,7 @@ public class DeliveryAppService {
 
     // 배달 주문 생성 및 저장
     private DeliveryOrder createDeliveryOrder(Users user, DeliveryReadyRequest request, List<Reservation> reservations,
-                  KakaoLocalService.Coordinate coordinate, DeliveryFeeCalculator.FeeResult feeResult) {
+                  DeliveryFeeCalculator.FeeResult feeResult) {
 
         return deliveryOrderService.save(DeliveryOrder.builder()
                 .user(user)
@@ -199,8 +203,8 @@ public class DeliveryAppService {
                 .address1(request.address1())
                 .address2(request.address2())
                 .phone(request.phone())
-                .latitude(coordinate.latitude())
-                .longitude(coordinate.longitude())
+                .latitude(request.latitude())
+                .longitude(request.longitude())
                 .idempotencyKey(request.idempotencyKey())
                 .build());
     }

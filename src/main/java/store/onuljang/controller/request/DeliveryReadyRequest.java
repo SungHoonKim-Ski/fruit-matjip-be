@@ -13,5 +13,7 @@ public record DeliveryReadyRequest(
     @NotBlank String postalCode,
     @NotBlank String address1,
     String address2,
+    @NotNull Double latitude,
+    @NotNull Double longitude,
     @NotBlank String idempotencyKey
 ) {}
