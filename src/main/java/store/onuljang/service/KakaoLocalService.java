@@ -61,7 +61,5 @@ public class KakaoLocalService {
 
     public record Coordinate(double latitude, double longitude) {}
 
-    public record KakaoAddressSearchResponse(List<Document> documents) {
-        public record Document(String x, String y) {}
     }
 }

@@ -74,38 +74,4 @@ public class KakaoPayService {
         body.add("pg_token", request.pgToken());
         return body;
     }
-
-    public record KakaoPayReadyRequest(
-        String partnerOrderId,
-        String partnerUserId,
-        String itemName,
-        int quantity,
-        int totalAmount,
-        String approvalUrl,
-        String cancelUrl,
-        String failUrl
-    ) {}
-
-    public record KakaoPayReadyResponse(
-        String tid,
-        String next_redirect_pc_url
-    ) {}
-
-    public record KakaoPayApproveRequest(
-        String tid,
-        String partnerOrderId,
-        String partnerUserId,
-        String pgToken
-    ) {}
-
-    public record KakaoPayApproveResponse(
-        String aid,
-        String tid,
-        String cid,
-        String partner_order_id,
-        String partner_user_id,
-        String payment_method_type,
-        String item_name,
-        String approved_at
-    ) {}
 }
