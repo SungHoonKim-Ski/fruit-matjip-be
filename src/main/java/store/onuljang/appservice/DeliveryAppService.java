@@ -87,7 +87,7 @@ public class DeliveryAppService {
         Users user = userService.findByUId(uid);
         DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
 
-        if (order.getStatus() != DeliveryStatus.PENDING_PAYMENT) {
+        if (!order.canMarkPaid()) {
             throw new UserValidateException("결제 진행 상태가 아닙니다.");
         }
 
@@ -115,7 +115,7 @@ public class DeliveryAppService {
     public void cancel(String uid, long orderId) {
         Users user = userService.findByUId(uid);
         DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
-        if (order.getStatus() == DeliveryStatus.PAID) {
+        if (!order.canCancelByUser()) {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");
         }
         order.markCanceled();
@@ -127,7 +127,7 @@ public class DeliveryAppService {
     public void fail(String uid, long orderId) {
         Users user = userService.findByUId(uid);
         DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
-        if (order.getStatus() == DeliveryStatus.PAID) {
+        if (!order.canFailByUser()) {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");
         }
         order.markFailed();

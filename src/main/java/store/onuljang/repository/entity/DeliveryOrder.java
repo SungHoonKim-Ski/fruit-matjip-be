@@ -95,6 +95,30 @@ public class DeliveryOrder extends BaseEntity {
         this.kakaoTid = kakaoTid;
     }
 
+    public boolean canMarkPaid() {
+        return this.status == DeliveryStatus.PENDING_PAYMENT;
+    }
+
+    public boolean canMarkOutForDelivery() {
+        return this.status == DeliveryStatus.PAID;
+    }
+
+    public boolean canMarkDelivered() {
+        return this.status == DeliveryStatus.OUT_FOR_DELIVERY;
+    }
+
+    public boolean canCancelByAdmin() {
+        return this.status != DeliveryStatus.DELIVERED;
+    }
+
+    public boolean canCancelByUser() {
+        return this.status == DeliveryStatus.PENDING_PAYMENT;
+    }
+
+    public boolean canFailByUser() {
+        return this.status == DeliveryStatus.PENDING_PAYMENT;
+    }
+
     public void markPaid() {
         this.status = DeliveryStatus.PAID;
         this.paidAt = TimeUtil.nowDateTime();
