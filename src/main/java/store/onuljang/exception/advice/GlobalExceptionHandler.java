@@ -146,6 +146,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("AdminValidateException", ex.getMessage()));
     }
 
+    @ExceptionHandler(GeocodeFailedException.class)
+    public ResponseEntity<ErrorResponse> handleGeocodeFailed(GeocodeFailedException ex) {
+        log.info("GeocodeFailedException: {}", ex.getMessage());
+        return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("GeocodeFailedException", ex.getMessage()));
+    }
+
     @ExceptionHandler(ProductUnavailableException.class)
     public ResponseEntity<ErrorResponse> handleProductUnavailable(ProductUnavailableException ex) {
         log.info("ProductUnavailableException: {}", ex.getMessage());
