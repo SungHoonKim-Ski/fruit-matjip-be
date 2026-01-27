@@ -9,13 +9,10 @@ import java.util.List;
 import java.util.Set;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
-    @EntityGraph(attributePaths = {"product"})
-    List<Reservation> findAllByUserAndPickupDateBetweenOrderByPickupDateDesc(Users user, LocalDate from, LocalDate to);
 
     @EntityGraph(attributePaths = {"user", "product"})
     List<Reservation> findAllByPickupDate(LocalDate date);
 
     @EntityGraph(attributePaths = {"user"})
     List<Reservation> findAllByIdIn(Set<Long> ids);
-
 }
