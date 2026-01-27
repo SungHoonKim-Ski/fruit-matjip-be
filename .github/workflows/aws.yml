@@ -87,10 +87,10 @@ jobs:
               -DLOG_HOME=/var/log/onuljang \
               -jar onuljang.jar \
               --server.port=8088 \
-              > /dev/null 2>&1 &
+              >> /var/log/onuljang/app.log 2>&1 &
           
             echo "Tail last logs:"
-            tail -n 50 app.log || true
+            tail -n 50 /var/log/onuljang/app.log || true
           EOF
 
       - name: Health Check
