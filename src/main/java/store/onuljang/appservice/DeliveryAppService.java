@@ -3,28 +3,22 @@ package store.onuljang.appservice;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.config.DeliveryConfigDto;
-import store.onuljang.config.KakaoPayConfigDto;
 import store.onuljang.controller.request.DeliveryInfoRequest;
 import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.controller.response.DeliveryInfoResponse;
 import store.onuljang.controller.response.DeliveryReadyResponse;
+import store.onuljang.event.delivery.DeliveryPaidEvent;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.exception.UserNoContentException;
 import store.onuljang.repository.entity.*;
-import store.onuljang.repository.entity.enums.DeliveryPaymentStatus;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
-import store.onuljang.repository.entity.enums.PaymentProvider;
-import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.*;
-import store.onuljang.util.TimeUtil;
+import store.onuljang.validator.DeliveryValidator;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,10 +34,11 @@ public class DeliveryAppService {
     DeliveryOrderService deliveryOrderService;
     DeliveryPaymentService deliveryPaymentService;
     KakaoPayService kakaoPayService;
-    KakaoPayConfigDto kakaoPayConfigDto;
     KakaoLocalService kakaoLocalService;
-    DeliveryConfigDto deliveryConfigDto;
-    AdminDeliverySseService adminDeliverySseService;
+    DeliveryValidator deliveryValidator;
+    DeliveryFeeCalculator deliveryFeeCalculator;
+    DeliveryPaymentProcessor deliveryPaymentProcessor;
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional(readOnly = true)
     public DeliveryInfoResponse getDeliveryInfo(String uid) {
@@ -62,114 +57,27 @@ public class DeliveryAppService {
 
     @Transactional
     public DeliveryReadyResponse ready(String uid, DeliveryReadyRequest request) {
+        // 1) 사용자/예약 조회 및 기본 검증
         Users user = userService.findByUidWithLock(uid);
-        Set<Long> reservationIdSet = new HashSet<>(request.reservationIds());
-        if (reservationIdSet.isEmpty()) {
-            throw new UserValidateException("배달 주문 대상이 없습니다.");
-        }
-        List<Reservation> reservations = reservationService.findAllUserIdInWithUser(reservationIdSet);
-        if (reservations.size() != reservationIdSet.size()) {
-            throw new UserValidateException("존재하지 않는 예약이 포함되어 있습니다.");
-        }
+        List<Reservation> reservations = loadReservations(request);
 
-        validateDeliveryReservations(user, reservations);
-        validateDeliveryTime(request.deliveryHour(), request.deliveryMinute());
+        // 2) 배달 가능 여부 및 시간 검증
+        deliveryValidator.validateReservations(user, reservations);
+        deliveryValidator.validateDeliveryTime(request.deliveryHour(), request.deliveryMinute());
 
-        KakaoLocalService.Coordinate coordinate = kakaoLocalService.geocodeAddress(request.address1())
-            .orElseThrow(() -> new UserValidateException("주소 좌표를 찾을 수 없습니다."));
-        double distanceKmValue = calculateDistanceKm(deliveryConfigDto.getStoreLat(), deliveryConfigDto.getStoreLng(),
-            coordinate.latitude(), coordinate.longitude());
-        if (distanceKmValue > deliveryConfigDto.getMaxDistanceKm()) {
-            throw new UserValidateException("배달 가능 거리(" + trimDistance(deliveryConfigDto.getMaxDistanceKm()) + "km)를 초과했습니다.");
-        }
-        BigDecimal distanceKm = BigDecimal.valueOf(distanceKmValue).setScale(3, RoundingMode.HALF_UP);
-        BigDecimal deliveryFee;
-        double baseDistance = deliveryConfigDto.getFeeDistanceKm();
-        if (distanceKmValue <= baseDistance) {
-            deliveryFee = deliveryConfigDto.getFeeNear();
-        } else {
-            double extraKm = Math.max(0, distanceKmValue - baseDistance);
-            long extraUnits = (long) Math.ceil(extraKm / 0.1d);
-            deliveryFee = deliveryConfigDto.getFeeNear()
-                .add(deliveryConfigDto.getFeePer100m().multiply(BigDecimal.valueOf(extraUnits)));
-        }
+        // 3) 주소 → 좌표 변환 및 배달비 산정
+        KakaoLocalService.Coordinate coordinate = kakaoLocalService.geocodeAddress(request.address1());
+        DeliveryFeeCalculator.FeeResult feeResult = deliveryFeeCalculator.calculate(coordinate.latitude(), coordinate.longitude());
+        BigDecimal totalProductAmount = calculateTotalProductAmount(reservations);
+        deliveryValidator.validateMinimumAmount(totalProductAmount);
 
-        BigDecimal totalProductAmount = reservations.stream()
-            .map(Reservation::getAmount)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        if (totalProductAmount.compareTo(deliveryConfigDto.getMinAmount()) < 0) {
-            throw new UserValidateException("배달 주문은 " + formatAmount(deliveryConfigDto.getMinAmount()) + "원 이상부터 가능합니다.");
-        }
+        // 4) 배송 정보 저장 및 주문 생성/연결
+        saveDeliveryInfo(user, request, coordinate);
+        DeliveryOrder saved = createDeliveryOrder(user, request, reservations, coordinate, feeResult);
+        saveDeliveryOrderLinks(saved, reservations);
 
-        userDeliveryInfoService.saveOrUpdate(user, request.phone(), request.postalCode(), request.address1(),
-            request.address2(), coordinate.latitude(), coordinate.longitude());
-
-        DeliveryOrder order = DeliveryOrder.builder()
-            .user(user)
-            .status(DeliveryStatus.PENDING_PAYMENT)
-            .deliveryDate(reservations.get(0).getPickupDate())
-            .deliveryHour(request.deliveryHour())
-            .deliveryMinute(request.deliveryMinute())
-            .deliveryFee(deliveryFee)
-            .distanceKm(distanceKm)
-            .postalCode(request.postalCode())
-            .address1(request.address1())
-            .address2(request.address2())
-            .phone(request.phone())
-            .latitude(coordinate.latitude())
-            .longitude(coordinate.longitude())
-            .build();
-
-        DeliveryOrder saved = deliveryOrderService.save(order);
-        List<DeliveryOrderReservation> links = reservations.stream()
-            .map(reservation -> DeliveryOrderReservation.builder()
-                .deliveryOrder(saved)
-                .reservation(reservation)
-                .build())
-            .toList();
-        deliveryOrderService.saveLinks(links);
-        saved.getDeliveryOrderReservations().addAll(links);
-
-        if (!kakaoPayConfigDto.isEnabled()) {
-            saved.markPaid();
-            adminDeliverySseService.notifyPaid(saved);
-            return DeliveryReadyResponse.builder()
-                .orderId(saved.getId())
-                .redirectUrl("/me/orders")
-                .build();
-        }
-
-        int totalAmount = totalProductAmount.add(deliveryFee).intValue();
-        String approvalUrl = kakaoPayConfigDto.getApprovalUrl() + "?order_id=" + saved.getId();
-        String cancelUrl = kakaoPayConfigDto.getCancelUrl() + "?order_id=" + saved.getId();
-        String failUrl = kakaoPayConfigDto.getFailUrl() + "?order_id=" + saved.getId();
-
-        KakaoPayService.KakaoPayReadyResponse ready = kakaoPayService.ready(
-            new KakaoPayService.KakaoPayReadyRequest(
-                String.valueOf(saved.getId()),
-                user.getUid(),
-                buildReservationTitle(reservations),
-                reservations.stream().mapToInt(Reservation::getQuantity).sum(),
-                totalAmount,
-                approvalUrl,
-                cancelUrl,
-                failUrl
-            )
-        );
-
-        saved.setKakaoTid(ready.tid());
-        deliveryPaymentService.save(DeliveryPayment.builder()
-            .deliveryOrder(saved)
-            .pgProvider(PaymentProvider.KAKAOPAY)
-            .status(DeliveryPaymentStatus.READY)
-            .amount(BigDecimal.valueOf(totalAmount))
-            .tid(ready.tid())
-            .build());
-
-        return DeliveryReadyResponse.builder()
-            .orderId(saved.getId())
-            .redirectUrl(ready.next_redirect_pc_url())
-            .build();
+        // 5) 결제 준비 (카카오페이 or 즉시 결제 처리)
+        return deliveryPaymentProcessor.preparePayment(saved, user, reservations, totalProductAmount, feeResult.deliveryFee());
     }
 
     @Transactional
@@ -198,7 +106,7 @@ public class DeliveryAppService {
         order.markPaid();
         deliveryPaymentService.findLatestByOrder(order)
             .ifPresent(payment -> payment.markApproved(approve.aid()));
-        adminDeliverySseService.notifyPaid(order);
+        eventPublisher.publishEvent(new DeliveryPaidEvent(order.getId()));
     }
 
     @Transactional
@@ -225,96 +133,59 @@ public class DeliveryAppService {
             .ifPresent(DeliveryPayment::markFailed);
     }
 
-    private void validateUserReservation(Users user, Reservation reservation) {
-        if (!user.getUid().equals(reservation.getUser().getUid())) {
-            throw new UserValidateException("다른 유저가 예약한 상품입니다.");
-        }
+    // 예약 상품 총액 합산
+    private BigDecimal calculateTotalProductAmount(List<Reservation> reservations) {
+        return reservations.stream()
+                .map(Reservation::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private void validateDeliveryReservations(Users user, List<Reservation> reservations) {
-        LocalDate today = TimeUtil.nowDate();
-        LocalDate deliveryDate = reservations.get(0).getPickupDate();
-        if (!deliveryDate.isEqual(today)) {
-            throw new UserValidateException("배달 주문은 오늘 수령 예약만 가능합니다.");
+    // 예약 목록 로드 및 존재 여부 검증
+    private List<Reservation> loadReservations(DeliveryReadyRequest request) {
+        Set<Long> reservationIdSet = new HashSet<>(request.reservationIds());
+        List<Reservation> reservations = reservationService.findAllUserIdInWithUser(reservationIdSet);
+        if (reservations.size() != request.reservationIds().size()) {
+            throw new UserValidateException("존재하지 않는 예약이 포함되어 있습니다.");
         }
-        for (Reservation reservation : reservations) {
-            validateUserReservation(user, reservation);
-            if (!reservation.getProduct().getSellDate().isEqual(today)) {
-                throw new UserValidateException("판매일이 오늘인 상품만 배달 가능합니다.");
-            }
-            if (reservation.getStatus() != ReservationStatus.PENDING) {
-                throw new UserValidateException("배달 주문이 불가능한 예약입니다.");
-            }
-            if (!reservation.getDeliveryAvailable()) {
-                throw new UserValidateException("배달 불가 상품이 포함되어 있습니다.");
-            }
-            if (!reservation.getPickupDate().isEqual(deliveryDate)) {
-                throw new UserValidateException("같은 수령일 예약만 묶을 수 있습니다.");
-            }
-            deliveryOrderService.findByReservation(reservation).ifPresent(existing -> {
-                DeliveryStatus status = existing.getStatus();
-                if (status != DeliveryStatus.CANCELED && status != DeliveryStatus.FAILED) {
-                    throw new UserValidateException("이미 배달 주문이 진행 중인 예약이 포함되어 있습니다.");
-                }
-            });
-        }
-
-        LocalTime deadlineTime = LocalTime.of(deliveryConfigDto.getEndHour(), deliveryConfigDto.getEndMinute());
-        if (TimeUtil.isAfterDeadline(today, deadlineTime)) {
-            throw new UserValidateException("배달 주문 가능 시간이 지났습니다.");
-        }
+        return reservations;
     }
 
-    private void validateDeliveryTime(Integer deliveryHour, Integer deliveryMinute) {
-        int startHour = deliveryConfigDto.getStartHour();
-        int startMinute = deliveryConfigDto.getStartMinute();
-        int endHour = deliveryConfigDto.getEndHour();
-        int endMinute = deliveryConfigDto.getEndMinute();
-        if (deliveryHour == null || deliveryMinute == null) {
-            throw new UserValidateException("배달 수령 시간을 확인해주세요.");
-        }
-        if (deliveryHour < startHour || (deliveryHour == startHour && deliveryMinute < startMinute)) {
-            throw new UserValidateException("배달 수령 시간은 " + formatTime(startHour, startMinute)
-                + "~" + formatTime(endHour, endMinute) + " 사이여야 합니다.");
-        }
-        if (deliveryHour > endHour || (deliveryHour == endHour && deliveryMinute > endMinute)) {
-            throw new UserValidateException("배달 수령 시간은 " + formatTime(startHour, startMinute)
-                + "~" + formatTime(endHour, endMinute) + " 사이여야 합니다.");
-        }
+    // 사용자 배송 정보 저장/갱신
+    private void saveDeliveryInfo(Users user, DeliveryReadyRequest request, KakaoLocalService.Coordinate coordinate) {
+        userDeliveryInfoService.saveOrUpdate(user, request.phone(), request.postalCode(), request.address1(),
+                request.address2(), coordinate.latitude(), coordinate.longitude());
     }
 
-    private String formatTime(int hour, int minute) {
-        if (minute <= 0) {
-            return hour + "시";
-        }
-        return hour + "시 " + minute + "분";
+    // 배달 주문 생성 및 저장
+    private DeliveryOrder createDeliveryOrder(Users user, DeliveryReadyRequest request, List<Reservation> reservations,
+                  KakaoLocalService.Coordinate coordinate, DeliveryFeeCalculator.FeeResult feeResult) {
+
+        return deliveryOrderService.save(DeliveryOrder.builder()
+                .user(user)
+                .status(DeliveryStatus.PENDING_PAYMENT)
+                .deliveryDate(reservations.get(0).getPickupDate())
+                .deliveryHour(request.deliveryHour())
+                .deliveryMinute(request.deliveryMinute())
+                .deliveryFee(feeResult.deliveryFee())
+                .distanceKm(feeResult.distanceKm())
+                .postalCode(request.postalCode())
+                .address1(request.address1())
+                .address2(request.address2())
+                .phone(request.phone())
+                .latitude(coordinate.latitude())
+                .longitude(coordinate.longitude())
+                .build());
     }
 
-    private String buildReservationTitle(List<Reservation> reservations) {
-        if (reservations.isEmpty()) return "배달 주문";
-        String first = reservations.get(0).getReservationProductName();
-        if (reservations.size() == 1) return first;
-        return first + " 외 " + (reservations.size() - 1) + "건";
-    }
-
-    private String formatAmount(BigDecimal amount) {
-        return amount.stripTrailingZeros().toPlainString();
-    }
-
-    private String trimDistance(double distanceKm) {
-        if (Math.floor(distanceKm) == distanceKm) {
-            return String.valueOf((int) distanceKm);
-        }
-        return BigDecimal.valueOf(distanceKm).stripTrailingZeros().toPlainString();
-    }
-
-    private double calculateDistanceKm(double lat1, double lng1, double lat2, double lng2) {
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2 - lng1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
-            + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
-            * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        return 6371 * c;
+    // 배달 주문-예약 연결 저장
+    private void saveDeliveryOrderLinks(DeliveryOrder order, List<Reservation> reservations) {
+        List<DeliveryOrderReservation> links = reservations.stream()
+                .map(reservation -> DeliveryOrderReservation.builder()
+                        .deliveryOrder(order)
+                        .reservation(reservation)
+                        .build())
+                .toList();
+        deliveryOrderService.saveLinks(links);
+        order.getDeliveryOrderReservations().addAll(links);
     }
 }

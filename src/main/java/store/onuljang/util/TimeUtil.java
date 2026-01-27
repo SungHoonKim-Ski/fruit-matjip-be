@@ -60,4 +60,25 @@ public class TimeUtil {
         ZonedDateTime deadLine = targetDate.atTime(deadlineTime).atZone(KST);
         return nowZonedDateTime().isAfter(deadLine);
     }
+
+    public String formatTime(int hour, int minute) {
+        if (minute <= 0) {
+            return hour + "시";
+        }
+        return hour + "시 " + minute + "분";
+    }
+
+    public boolean isBefore(int hour, int minute, int targetHour, int targetMinute) {
+        if (hour < targetHour) {
+            return true;
+        }
+        return hour == targetHour && minute < targetMinute;
+    }
+
+    public boolean isAfter(int hour, int minute, int targetHour, int targetMinute) {
+        if (hour > targetHour) {
+            return true;
+        }
+        return hour == targetHour && minute > targetMinute;
+    }
 }
