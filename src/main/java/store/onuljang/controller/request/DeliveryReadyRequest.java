@@ -5,7 +5,7 @@ import java.util.List;
 
 public record DeliveryReadyRequest(
     @NotEmpty List<@NotNull @Positive Long> reservationIds,
-    @NotNull Integer deliveryHour,
+    @NotNull @Min(0) @Max(23) Integer deliveryHour,
     @NotNull @Min(0) @Max(59) Integer deliveryMinute,
     @NotBlank String phone,
     @NotBlank String postalCode,
