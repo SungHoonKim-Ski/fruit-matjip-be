@@ -4,14 +4,14 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.config.DeliveryConfigDto;
+import store.onuljang.config.DeliveryConfigSnapshot;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.service.DeliveryConfigService;
 import store.onuljang.service.DeliveryOrderService;
 import store.onuljang.util.MathUtil;
 import store.onuljang.util.TimeUtil;
@@ -27,9 +27,13 @@ import java.util.List;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryValidator {
     DeliveryOrderService deliveryOrderService;
-    DeliveryConfigDto deliveryConfigDto;
+    DeliveryConfigService deliveryConfigService;
 
     public void validateReservations(Users user, List<Reservation> reservations) {
+        DeliveryConfigSnapshot config = deliveryConfigService.getConfig();
+        if (!config.enabled()) {
+            throw new UserValidateException("현재 배달 주문이 중단되어 있습니다.");
+        }
         LocalDate today = TimeUtil.nowDate();
         LocalDate deliveryDate = reservations.get(0).getPickupDate();
         if (!deliveryDate.isEqual(today)) {
@@ -57,17 +61,18 @@ public class DeliveryValidator {
             });
         }
 
-        LocalTime deadlineTime = LocalTime.of(deliveryConfigDto.getEndHour(), deliveryConfigDto.getEndMinute());
+        LocalTime deadlineTime = LocalTime.of(config.endHour(), config.endMinute());
         if (TimeUtil.isAfterDeadline(today, deadlineTime)) {
             throw new UserValidateException("배달 주문 가능 시간이 지났습니다.");
         }
     }
 
     public void validateDeliveryTime(Integer deliveryHour, Integer deliveryMinute) {
-        int startHour = deliveryConfigDto.getStartHour();
-        int startMinute = deliveryConfigDto.getStartMinute();
-        int endHour = deliveryConfigDto.getEndHour();
-        int endMinute = deliveryConfigDto.getEndMinute();
+        DeliveryConfigSnapshot config = deliveryConfigService.getConfig();
+        int startHour = config.startHour();
+        int startMinute = config.startMinute();
+        int endHour = config.endHour();
+        int endMinute = config.endMinute();
         if (deliveryHour == null || deliveryMinute == null) {
             throw new UserValidateException("배달 수령 시간을 확인해주세요.");
         }
@@ -79,8 +84,9 @@ public class DeliveryValidator {
     }
 
     public void validateMinimumAmount(BigDecimal totalProductAmount) {
-        if (totalProductAmount.compareTo(deliveryConfigDto.getMinAmount()) < 0) {
-            throw new UserValidateException("배달 주문은 " + MathUtil.formatAmount(deliveryConfigDto.getMinAmount())
+        DeliveryConfigSnapshot config = deliveryConfigService.getConfig();
+        if (totalProductAmount.compareTo(config.minAmount()) < 0) {
+            throw new UserValidateException("배달 주문은 " + MathUtil.formatAmount(config.minAmount())
                 + "원 이상부터 가능합니다.");
         }
     }

@@ -36,9 +36,17 @@ public class DeliveryOrderService {
         return deliveryOrderReservationRepository.saveAll(links);
     }
 
+    public void deleteLinks(List<DeliveryOrderReservation> links) {
+        deliveryOrderReservationRepository.deleteAll(links);
+    }
+
     public Optional<DeliveryOrder> findByReservation(Reservation reservation) {
         return deliveryOrderReservationRepository.findByReservation(reservation)
             .map(DeliveryOrderReservation::getDeliveryOrder);
+    }
+
+    public DeliveryOrderReservation findLinkByReservation(Reservation reservation) {
+        return deliveryOrderReservationRepository.findByReservation(reservation).orElse(null);
     }
 
     public DeliveryOrder findByIdAndUser(Long id, Users user) {
@@ -56,8 +64,9 @@ public class DeliveryOrderService {
         return deliveryOrderRepository.findAllByDeliveryDate(date);
     }
 
-    public List<DeliveryOrderReservation> findAllLinksByReservationIds(Set<Long> reservationIds) {
-        return deliveryOrderReservationRepository.findAllByReservationIdIn(reservationIds);
+    public DeliveryOrder findByUserAndIdempotencyKey(Users user, String idempotencyKey) {
+        return deliveryOrderRepository.findByUserAndIdempotencyKey(user, idempotencyKey)
+            .orElse(null);
     }
 
 }

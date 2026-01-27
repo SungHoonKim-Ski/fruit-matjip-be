@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import store.onuljang.config.DeliveryConfigDto;
+import store.onuljang.config.DeliveryConfigSnapshot;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.util.MathUtil;
 
@@ -17,30 +17,31 @@ import java.math.RoundingMode;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class DeliveryFeeCalculator {
-    DeliveryConfigDto deliveryConfigDto;
+    DeliveryConfigService deliveryConfigService;
 
     public FeeResult calculate(double targetLat, double targetLng) {
+        DeliveryConfigSnapshot config = deliveryConfigService.getConfig();
         double distanceKmValue = MathUtil.calculateDistanceKm(
-            deliveryConfigDto.getStoreLat(),
-            deliveryConfigDto.getStoreLng(),
+            config.storeLat(),
+            config.storeLng(),
             targetLat,
             targetLng
         );
-        if (distanceKmValue > deliveryConfigDto.getMaxDistanceKm()) {
-            throw new UserValidateException("배달 가능 거리(" + MathUtil.trimDistance(deliveryConfigDto.getMaxDistanceKm())
+        if (distanceKmValue > config.maxDistanceKm()) {
+            throw new UserValidateException("배달 가능 거리(" + MathUtil.trimDistance(config.maxDistanceKm())
                 + "km)를 초과했습니다.");
         }
 
         BigDecimal distanceKm = BigDecimal.valueOf(distanceKmValue).setScale(3, RoundingMode.HALF_UP);
         BigDecimal deliveryFee;
-        double baseDistance = deliveryConfigDto.getFeeDistanceKm();
+        double baseDistance = config.feeDistanceKm();
         if (distanceKmValue <= baseDistance) {
-            deliveryFee = deliveryConfigDto.getFeeNear();
+            deliveryFee = config.feeNear();
         } else {
             double extraKm = Math.max(0, distanceKmValue - baseDistance);
             long extraUnits = (long) Math.ceil(extraKm / 0.1d);
-            deliveryFee = deliveryConfigDto.getFeeNear()
-                .add(deliveryConfigDto.getFeePer100m().multiply(BigDecimal.valueOf(extraUnits)));
+            deliveryFee = config.feeNear()
+                .add(config.feePer100m().multiply(BigDecimal.valueOf(extraUnits)));
         }
         return new FeeResult(distanceKm, deliveryFee, distanceKmValue);
     }

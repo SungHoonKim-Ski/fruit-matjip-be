@@ -12,12 +12,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.DeliveryAppService;
-import store.onuljang.config.DeliveryConfigDto;
 import store.onuljang.controller.request.DeliveryInfoRequest;
 import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.controller.response.DeliveryConfigResponse;
 import store.onuljang.controller.response.DeliveryInfoResponse;
 import store.onuljang.controller.response.DeliveryReadyResponse;
+import store.onuljang.service.DeliveryConfigService;
 
 @RestController
 @RequestMapping("/api/auth/deliveries")
@@ -26,11 +26,11 @@ import store.onuljang.controller.response.DeliveryReadyResponse;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class DeliveryController {
     DeliveryAppService deliveryAppService;
-    DeliveryConfigDto deliveryConfigDto;
+    DeliveryConfigService deliveryConfigService;
 
     @GetMapping("/config")
     public ResponseEntity<DeliveryConfigResponse> getConfig() {
-        return ResponseEntity.ok(DeliveryConfigResponse.from(deliveryConfigDto));
+        return ResponseEntity.ok(DeliveryConfigResponse.from(deliveryConfigService.getConfig()));
     }
 
     @GetMapping("/info")

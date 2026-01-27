@@ -1,12 +1,13 @@
 package store.onuljang.controller.response;
 
 import lombok.Builder;
-import store.onuljang.config.DeliveryConfigDto;
+import store.onuljang.config.DeliveryConfigSnapshot;
 
 import java.math.BigDecimal;
 
 @Builder
 public record DeliveryConfigResponse(
+    boolean enabled,
     double storeLat,
     double storeLng,
     double maxDistanceKm,
@@ -19,19 +20,20 @@ public record DeliveryConfigResponse(
     int endHour,
     int endMinute
 ) {
-    public static DeliveryConfigResponse from(DeliveryConfigDto config) {
+    public static DeliveryConfigResponse from(DeliveryConfigSnapshot config) {
         return DeliveryConfigResponse.builder()
-            .storeLat(config.getStoreLat())
-            .storeLng(config.getStoreLng())
-            .maxDistanceKm(config.getMaxDistanceKm())
-            .feeDistanceKm(config.getFeeDistanceKm())
-            .minAmount(config.getMinAmount())
-            .feeNear(config.getFeeNear())
-            .feePer100m(config.getFeePer100m())
-            .startHour(config.getStartHour())
-            .startMinute(config.getStartMinute())
-            .endHour(config.getEndHour())
-            .endMinute(config.getEndMinute())
+            .enabled(config.enabled())
+            .storeLat(config.storeLat())
+            .storeLng(config.storeLng())
+            .maxDistanceKm(config.maxDistanceKm())
+            .feeDistanceKm(config.feeDistanceKm())
+            .minAmount(config.minAmount())
+            .feeNear(config.feeNear())
+            .feePer100m(config.feePer100m())
+            .startHour(config.startHour())
+            .startMinute(config.startMinute())
+            .endHour(config.endHour())
+            .endMinute(config.endMinute())
             .build();
     }
 }
