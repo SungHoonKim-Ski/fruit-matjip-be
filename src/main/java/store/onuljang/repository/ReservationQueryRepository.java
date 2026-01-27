@@ -4,7 +4,6 @@ import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.repository.*;
 import org.springframework.stereotype.Repository;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.ReservationStatus;
