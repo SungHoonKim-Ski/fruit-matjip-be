@@ -22,30 +22,26 @@ public class AdminDeliveryAppService {
         DeliveryOrder order = deliveryOrderService.findByIdWithLock(orderId);
         DeliveryStatus current = order.getStatus();
 
-        if (nextStatus == DeliveryStatus.OUT_FOR_DELIVERY) {
-            if (current != DeliveryStatus.PAID) {
-                throw new AdminValidateException("배달 시작은 결제 완료 상태에서만 가능합니다.");
+        switch (nextStatus) {
+            case OUT_FOR_DELIVERY -> {
+                if (current != DeliveryStatus.PAID) {
+                    throw new AdminValidateException("배달 시작은 결제 완료 상태에서만 가능합니다.");
+                }
+                order.markOutForDelivery();
             }
-            order.markOutForDelivery();
-            return;
-        }
-
-        if (nextStatus == DeliveryStatus.DELIVERED) {
-            if (current != DeliveryStatus.OUT_FOR_DELIVERY) {
-                throw new AdminValidateException("배달 완료는 배달중 상태에서만 가능합니다.");
+            case DELIVERED -> {
+                if (current != DeliveryStatus.OUT_FOR_DELIVERY) {
+                    throw new AdminValidateException("배달 완료는 배달중 상태에서만 가능합니다.");
+                }
+                order.markDelivered();
             }
-            order.markDelivered();
-            return;
-        }
-
-        if (nextStatus == DeliveryStatus.CANCELED) {
-            if (current == DeliveryStatus.DELIVERED) {
-                throw new AdminValidateException("배달 완료된 주문은 취소할 수 없습니다.");
+            case CANCELED -> {
+                if (current == DeliveryStatus.DELIVERED) {
+                    throw new AdminValidateException("배달 완료된 주문은 취소할 수 없습니다.");
+                }
+                order.markCanceled();
             }
-            order.markCanceled();
-            return;
+            default -> throw new AdminValidateException("변경할 수 없는 상태입니다.");
         }
-
-        throw new AdminValidateException("변경할 수 없는 상태입니다.");
     }
 }
