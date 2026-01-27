@@ -3,7 +3,7 @@ package store.onuljang.feign;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import store.onuljang.feign.dto.KakaoLoginResponse;
+import store.onuljang.feign.dto.reseponse.KakaoLoginResponse;
 
 @FeignClient(name = "KAKAO-AUTH", url = "https://kauth.kakao.com")
 public interface KakaoAuthFeignClient {
