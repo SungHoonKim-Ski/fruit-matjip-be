@@ -12,6 +12,7 @@ import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.controller.response.DeliveryInfoResponse;
 import store.onuljang.controller.response.DeliveryReadyResponse;
 import store.onuljang.exception.UserValidateException;
+import store.onuljang.exception.UserNoContentException;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.DeliveryPaymentStatus;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
@@ -236,6 +237,9 @@ public class DeliveryAppService {
         }
         for (Reservation reservation : reservations) {
             validateUserReservation(user, reservation);
+            if (!reservation.getProduct().getSellDate().isEqual(today)) {
+                throw new UserValidateException("판매일이 오늘인 상품만 배달 가능합니다.");
+            }
             if (reservation.getStatus() != ReservationStatus.PENDING) {
                 throw new UserValidateException("배달 주문이 불가능한 예약입니다.");
             }
