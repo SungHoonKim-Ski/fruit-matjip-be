@@ -11,8 +11,10 @@ import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.controller.response.DeliveryInfoResponse;
 import store.onuljang.controller.response.DeliveryReadyResponse;
 import store.onuljang.event.delivery.DeliveryPaidEvent;
-import store.onuljang.exception.UserValidateException;
 import store.onuljang.exception.UserNoContentException;
+import store.onuljang.exception.UserValidateException;
+import store.onuljang.feign.dto.request.KakaoPayApproveRequest;
+import store.onuljang.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.service.*;
@@ -89,8 +91,8 @@ public class DeliveryAppService {
             throw new UserValidateException("결제 진행 상태가 아닙니다.");
         }
 
-        KakaoPayService.KakaoPayApproveResponse approve = kakaoPayService.approve(
-            new KakaoPayService.KakaoPayApproveRequest(
+        KakaoPayApproveResponse approve = kakaoPayService.approve(
+            new KakaoPayApproveRequest(
                 order.getKakaoTid(),
                 String.valueOf(order.getId()),
                 user.getUid(),

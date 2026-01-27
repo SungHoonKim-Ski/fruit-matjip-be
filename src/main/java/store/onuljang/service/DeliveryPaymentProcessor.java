@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.KakaoPayConfigDto;
 import store.onuljang.controller.response.DeliveryReadyResponse;
 import store.onuljang.event.delivery.DeliveryPaidEvent;
+import store.onuljang.feign.dto.request.KakaoPayReadyRequest;
+import store.onuljang.feign.dto.reseponse.KakaoPayReadyResponse;
 import store.onuljang.repository.entity.DeliveryOrder;
 import store.onuljang.repository.entity.DeliveryPayment;
 import store.onuljang.repository.entity.Reservation;
@@ -42,12 +44,12 @@ public class DeliveryPaymentProcessor {
         KakaoPayConfigDto.KakaoPayRedirectUrls redirectUrls = kakaoPayConfigDto.buildRedirectUrls(order.getId());
 
         // 카카오페이 ready 호출 및 결제 정보 저장
-        KakaoPayService.KakaoPayReadyResponse ready = requestReady(order, user, reservations, totalAmount, redirectUrls);
+        KakaoPayReadyResponse ready = requestReady(order, user, reservations, totalAmount, redirectUrls);
         savePaymentReady(order, totalAmount, ready);
 
         return DeliveryReadyResponse.builder()
             .orderId(order.getId())
-            .redirectUrl(ready.next_redirect_pc_url())
+            .redirectUrl(ready.nextRedirectPcUrl())
             .build();
     }
 
@@ -67,10 +69,10 @@ public class DeliveryPaymentProcessor {
     }
 
     // 카카오페이 ready 요청 수행
-    private KakaoPayService.KakaoPayReadyResponse requestReady(DeliveryOrder order, Users user,
+    private KakaoPayReadyResponse requestReady(DeliveryOrder order, Users user,
             List<Reservation> reservations, int totalAmount, KakaoPayConfigDto.KakaoPayRedirectUrls redirectUrls) {
         return kakaoPayService.ready(
-            new KakaoPayService.KakaoPayReadyRequest(
+            new KakaoPayReadyRequest(
                 String.valueOf(order.getId()),
                 user.getUid(),
                 Reservation.buildSummary(reservations),
@@ -84,7 +86,7 @@ public class DeliveryPaymentProcessor {
     }
 
     // 결제 준비 상태 저장
-    private void savePaymentReady(DeliveryOrder order, int totalAmount, KakaoPayService.KakaoPayReadyResponse ready) {
+    private void savePaymentReady(DeliveryOrder order, int totalAmount, KakaoPayReadyResponse ready) {
         order.setKakaoTid(ready.tid());
         deliveryPaymentService.save(DeliveryPayment.builder()
             .deliveryOrder(order)
