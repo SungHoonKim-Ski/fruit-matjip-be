@@ -32,7 +32,6 @@ jobs:
           echo "EC2_HOST=${{ secrets[format('{0}_EC2_HOST', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
           echo "EC2_SSH_KEY=${{ secrets[format('{0}_EC2_SSH_KEY', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV        
           echo "HEALTH_URL=${{ secrets[format('{0}_HEALTH_URL', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
-          echo "S3_APP_BUCKET_NAME=${{ secrets[format('S3_{0}_APP_BUCKET_NAME', steps.env.outputs.ENV)] }}" >> $GITHUB_ENV
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -66,19 +65,11 @@ jobs:
           
           ssh -i key.pem -o StrictHostKeyChecking=no "ubuntu@$EC2_HOST" \
             ENV="${{ env.PROFILE }}" \
-            DB_URL="${{ secrets.DB_URL }}" \
-            DB_USERNAME="${{ secrets.DB_USERNAME }}" \
-            DB_PASSWORD="${{ secrets.DB_PASSWORD }}" \
-            API_KAKAO_KEY="${{ secrets.API_KAKAO_KEY }}" \
-            JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-            S3_APP_BUCKET_NAME="${{ env.S3_APP_BUCKET_NAME }}" \
-            S3_DEPLOY_BUCKET_NAME="${{ secrets.S3_DEPLOY_BUCKET_NAME }}" \
-            S3_LOG_BUCKET_NAME="${{ secrets.S3_DEPLOY_BUCKET_NAME }}" \
-            AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \
-            AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
             bash -s << 'EOF'
             set -euo pipefail
             cd /home/ubuntu/onuljang-backend
+
+            source /etc/onuljang/app.env
           
             echo "Downloading jar from S3..."
             aws s3 cp "s3://${S3_DEPLOY_BUCKET_NAME}/springboot/app.jar" onuljang.jar
