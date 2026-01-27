@@ -60,7 +60,7 @@ public class DeliveryAppService {
     @Transactional
     public DeliveryReadyResponse ready(String uid, DeliveryReadyRequest request) {
         // 1) 사용자/예약 조회 및 기본 검증
-        Users user = userService.findByUidWithLock(uid);
+        Users user = userService.findByUId(uid);
         List<Reservation> reservations = loadReservations(request);
 
         // 2) 배달 가능 여부 및 시간 검증
