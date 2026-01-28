@@ -28,12 +28,12 @@ public class DeliveryOrderReservation extends BaseEntity {
     private DeliveryOrder deliveryOrder;
 
     @Getter
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
         name = "reservation_id",
         nullable = false,
         foreignKey = @ForeignKey(name = "fk_delivery_order_reservations_reservation")
     )
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     private Reservation reservation;
 
     public void changeDeliveryOrder(DeliveryOrder deliveryOrder) {
