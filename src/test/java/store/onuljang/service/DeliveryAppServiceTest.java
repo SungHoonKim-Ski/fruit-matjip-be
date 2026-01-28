@@ -50,6 +50,9 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
 
     private static final String ADDRESS = "서울 강서구 과일맛집";
 
+    private static final double storeLat = 37.556504;
+    private static final double storeLng = 126.8372613;
+
     @BeforeEach
     void setUpClock() {
         ZonedDateTime fixed = ZonedDateTime.of(LocalDate.of(2026, 1, 21), LocalTime.of(10, 0), TimeUtil.KST);
@@ -68,8 +71,6 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             testFixture.createDefaultAdmin());
         Reservation reservation = testFixture.createReservation(user, product, 1);
 
-        double storeLat = 37.556504;
-        double storeLng = 126.8372613;
         given(kakaoLocalService.geocodeAddress(ADDRESS))
             .willReturn(new KakaoLocalService.Coordinate(37.556904, 126.8372613));
 
@@ -81,6 +82,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "12345",
             ADDRESS,
             "101호",
+            storeLat,
+            storeLng,
             "test-key-1"
         );
 
@@ -95,15 +98,16 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
 
     @Test
     void ready_appliesFarFee_withinTwoKm() {
+        double otherLat = 37.5319560847746;
+        double otherLng = 126.846611592059;
+
         Users user = testFixture.createUser("배달고객");
         Product product = testFixture.createTodayProduct("포도", 5, new BigDecimal("15000"),
             testFixture.createDefaultAdmin());
         Reservation reservation = testFixture.createReservation(user, product, 1);
 
-        double storeLat = 37.556504;
-        double storeLng = 126.8372613;
         given(kakaoLocalService.geocodeAddress(ADDRESS))
-            .willReturn(new KakaoLocalService.Coordinate(37.574504, 126.8372613));
+            .willReturn(new KakaoLocalService.Coordinate(otherLat, otherLat));
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
             List.of(reservation.getId()),
@@ -113,13 +117,15 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "12345",
             ADDRESS,
             "101호",
+            otherLat,
+            otherLng,
             "test-key-2"
         );
 
         long orderId = deliveryAppService.ready(user.getUid(), request).orderId();
         DeliveryOrder order = deliveryOrderService.findByIdWithLock(orderId);
 
-        BigDecimal expectedFee = calculateFee(storeLat, storeLng, 37.574504, 126.8372613);
+        BigDecimal expectedFee = calculateFee(storeLat, storeLng, otherLat, otherLng);
         assertThat(order.getDeliveryFee()).isEqualByComparingTo(expectedFee);
         assertThat(order.getDistanceKm()).isGreaterThan(new BigDecimal("1.500"));
         assertThat(order.getDistanceKm()).isLessThanOrEqualTo(new BigDecimal("3.000"));
@@ -143,6 +149,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "12345",
             ADDRESS,
             "101호",
+            storeLat + 10.0,
+            storeLng + 10.0,
             "test-key-3"
         );
 
