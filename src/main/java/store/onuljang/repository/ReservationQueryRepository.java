@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static store.onuljang.repository.entity.QProductAll.productAll;
 import static store.onuljang.repository.entity.QReservation.reservation;
 
 @Repository
@@ -90,10 +91,10 @@ public class ReservationQueryRepository {
             .fetch();
     }
 
-    public List<Reservation> findAllByUserAndPickupDateBetweenWithProductAndDelivery(Users user, LocalDate from, LocalDate to) {
+    public List<Reservation> findAllByUserAndPickupDateBetweenWithProductAllAndDelivery(Users user, LocalDate from, LocalDate to) {
         return queryFactory
             .selectFrom(reservation)
-            .leftJoin(reservation.product).fetchJoin()
+            .leftJoin(reservation.productAll, productAll).fetchJoin()
             .leftJoin(reservation.deliveryOrderReservation).fetchJoin()
             .leftJoin(reservation.deliveryOrderReservation.deliveryOrder).fetchJoin()
             .where(

@@ -198,12 +198,12 @@ class ReservationServiceTest {
         LocalDate from = LocalDate.now();
         LocalDate to = LocalDate.now().plusDays(7);
         List<Reservation> reservations = List.of(testReservation);
-        when(reservationQueryRepository.findAllByUserAndPickupDateBetweenWithProductAndDelivery(user, from, to))
+        when(reservationQueryRepository.findAllByUserAndPickupDateBetweenWithProductAllAndDelivery(user, from, to))
                 .thenReturn(reservations);
 
         // when
         List<Reservation> result = reservationService
-                .findAllByUserAndPickupDateBetweenWithProductAndDeliveryOrderByPickupDateDesc(user, from, to);
+                .findAllByUserAndPickupDateBetweenWithProductAllAndDeliveryOrderByPickupDateDesc(user, from, to);
 
         // then
         assertThat(result).hasSize(1);

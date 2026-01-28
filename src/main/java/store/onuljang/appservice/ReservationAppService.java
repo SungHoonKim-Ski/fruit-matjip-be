@@ -124,7 +124,7 @@ public class ReservationAppService {
         Users user = userService.findByUId(uId);
 
         List<Reservation> entities = reservationService
-                .findAllByUserAndPickupDateBetweenWithProductAndDeliveryOrderByPickupDateDesc(user, from, to);
+                .findAllByUserAndPickupDateBetweenWithProductAllAndDeliveryOrderByPickupDateDesc(user, from, to);
         return ReservationListResponse.from(entities);
     }
 

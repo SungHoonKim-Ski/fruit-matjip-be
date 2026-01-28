@@ -2,6 +2,7 @@ package store.onuljang.repository.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.exception.UserValidateException;
@@ -39,6 +40,10 @@ public class Reservation extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", insertable = false, updatable = false)
+    private ProductAll productAll;
 
     @Getter
     @OneToOne(mappedBy = "reservation", fetch = FetchType.LAZY)
@@ -140,18 +145,30 @@ public class Reservation extends BaseEntity {
     }
 
     public String getReservationProductName() {
+        if (productAll != null && !Hibernate.isInitialized(product)) {
+            return productAll.getName();
+        }
         return this.product.getName();
     }
 
     public boolean getSelfPick() {
+        if (productAll != null && !Hibernate.isInitialized(product)) {
+            return Boolean.TRUE.equals(productAll.getSelfPick());
+        }
         return this.product.getSelfPick();
     }
 
     public boolean getDeliveryAvailable() {
+        if (productAll != null && !Hibernate.isInitialized(product)) {
+            return Boolean.TRUE.equals(productAll.getDeliveryAvailable());
+        }
         return this.product.getDeliveryAvailable();
     }
 
     public String getReservationProductUrl() {
+        if (productAll != null && !Hibernate.isInitialized(product)) {
+            return productAll.getProductUrl();
+        }
         return this.product.getProductUrl();
     }
 

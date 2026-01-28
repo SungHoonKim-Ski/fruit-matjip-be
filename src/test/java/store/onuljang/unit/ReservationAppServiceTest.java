@@ -219,7 +219,7 @@ class ReservationAppServiceTest {
             ReflectionTestUtils.setField(reservation, "id", 1L);
 
             given(userService.findByUId(testUser.getUid())).willReturn(testUser);
-            given(reservationService.findAllByUserAndPickupDateBetweenWithProductAndDeliveryOrderByPickupDateDesc(testUser, from, to))
+            given(reservationService.findAllByUserAndPickupDateBetweenWithProductAllAndDeliveryOrderByPickupDateDesc(testUser, from, to))
                     .willReturn(List.of(reservation));
 
             // when
