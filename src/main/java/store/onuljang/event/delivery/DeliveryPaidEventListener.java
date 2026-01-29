@@ -19,7 +19,7 @@ public class DeliveryPaidEventListener {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handle(DeliveryPaidEvent event) {
-        DeliveryOrder order = deliveryOrderService.findByIdWithLock(event.orderId());
+        DeliveryOrder order = deliveryOrderService.findById(event.orderId());
         adminDeliverySseService.notifyPaid(order);
     }
 }

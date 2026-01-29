@@ -54,8 +54,7 @@ public class DeliveryOrderService {
             .orElseThrow(() -> new NotFoundException("존재하지 않는 배달 주문입니다."));
     }
 
-    @Transactional
-    public DeliveryOrder findByIdWithLock(long id) {
+    public DeliveryOrder findById(long id) {
         return deliveryOrderRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("존재하지 않는 배달 주문입니다."));
     }

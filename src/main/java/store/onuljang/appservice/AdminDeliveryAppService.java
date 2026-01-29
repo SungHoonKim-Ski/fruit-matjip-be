@@ -19,7 +19,7 @@ public class AdminDeliveryAppService {
 
     @Transactional
     public void updateStatus(long orderId, DeliveryStatus nextStatus) {
-        DeliveryOrder order = deliveryOrderService.findByIdWithLock(orderId);
+        DeliveryOrder order = deliveryOrderService.findById(orderId);
         validateAdminTransition(order, nextStatus);
         applyStatus(order, nextStatus);
     }

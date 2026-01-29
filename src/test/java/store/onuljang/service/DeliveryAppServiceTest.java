@@ -22,7 +22,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -88,7 +87,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         );
 
         long orderId = deliveryAppService.ready(user.getUid(), request).orderId();
-        DeliveryOrder order = deliveryOrderService.findByIdWithLock(orderId);
+        DeliveryOrder order = deliveryOrderService.findById(orderId);
 
         BigDecimal expectedFee = calculateFee(storeLat, storeLng, 37.556904, 126.8372613);
         assertThat(order.getDeliveryFee()).isEqualByComparingTo(expectedFee);
@@ -123,7 +122,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         );
 
         long orderId = deliveryAppService.ready(user.getUid(), request).orderId();
-        DeliveryOrder order = deliveryOrderService.findByIdWithLock(orderId);
+        DeliveryOrder order = deliveryOrderService.findById(orderId);
 
         BigDecimal expectedFee = calculateFee(storeLat, storeLng, otherLat, otherLng);
         assertThat(order.getDeliveryFee()).isEqualByComparingTo(expectedFee);
