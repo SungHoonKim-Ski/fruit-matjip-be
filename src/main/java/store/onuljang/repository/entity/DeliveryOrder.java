@@ -40,6 +40,11 @@ public class DeliveryOrder extends BaseEntity {
     private DeliveryStatus status;
 
     @Getter
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    @Getter
     @Column(name = "delivery_date", nullable = false)
     private LocalDate deliveryDate;
 
