@@ -36,7 +36,6 @@ public class DeliveryAppService {
     DeliveryOrderService deliveryOrderService;
     DeliveryPaymentService deliveryPaymentService;
     KakaoPayService kakaoPayService;
-    KakaoLocalService kakaoLocalService;
     DeliveryValidator deliveryValidator;
     DeliveryFeeCalculator deliveryFeeCalculator;
     DeliveryPaymentProcessor deliveryPaymentProcessor;
