@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.DeliveryOrderRepository;
 import store.onuljang.repository.DeliveryOrderReservationRepository;
+import store.onuljang.repository.DeliveryOrderQueryRepository;
 import store.onuljang.repository.entity.DeliveryOrder;
 import store.onuljang.repository.entity.DeliveryOrderReservation;
 import store.onuljang.repository.entity.Reservation;
@@ -16,7 +17,6 @@ import store.onuljang.repository.entity.Users;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -25,6 +25,7 @@ import java.util.Set;
 public class DeliveryOrderService {
     DeliveryOrderRepository deliveryOrderRepository;
     DeliveryOrderReservationRepository deliveryOrderReservationRepository;
+    DeliveryOrderQueryRepository deliveryOrderQueryRepository;
 
     @Transactional
     public DeliveryOrder save(DeliveryOrder order) {
@@ -59,8 +60,8 @@ public class DeliveryOrderService {
             .orElseThrow(() -> new NotFoundException("존재하지 않는 배달 주문입니다."));
     }
 
-    public List<DeliveryOrder> findAllByDeliveryDate(LocalDate date) {
-        return deliveryOrderRepository.findAllByDeliveryDate(date);
+    public List<DeliveryOrder> findAllByDeliveryDateWithProductAll(LocalDate date) {
+        return deliveryOrderQueryRepository.findAllByDeliveryDateWithProductAll(date);
     }
 
     public DeliveryOrder findByUserAndIdempotencyKey(Users user, String idempotencyKey) {

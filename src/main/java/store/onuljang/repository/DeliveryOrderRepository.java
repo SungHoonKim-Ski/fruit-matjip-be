@@ -13,8 +13,4 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
     Optional<DeliveryOrder> findByIdAndUser(Long id, Users user);
 
     Optional<DeliveryOrder> findByUserAndIdempotencyKey(Users user, String idempotencyKey);
-
-    @EntityGraph(attributePaths = {"deliveryOrderReservations", "deliveryOrderReservations.reservation",
-        "deliveryOrderReservations.reservation.product", "user"})
-    List<DeliveryOrder> findAllByDeliveryDate(LocalDate deliveryDate);
 }

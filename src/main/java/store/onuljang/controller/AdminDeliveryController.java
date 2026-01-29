@@ -35,7 +35,7 @@ public class AdminDeliveryController {
     @GetMapping
     public ResponseEntity<AdminDeliveryListResponse> list(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate date) {
-        return ResponseEntity.ok(AdminDeliveryListResponse.from(deliveryOrderService.findAllByDeliveryDate(date)));
+        return ResponseEntity.ok(AdminDeliveryListResponse.from(deliveryOrderService.findAllByDeliveryDateWithProductAll(date)));
     }
 
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
