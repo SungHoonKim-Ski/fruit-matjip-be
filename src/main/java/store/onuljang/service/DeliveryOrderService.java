@@ -14,7 +14,10 @@ import store.onuljang.repository.entity.DeliveryOrderReservation;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
 
+import store.onuljang.repository.entity.enums.DeliveryStatus;
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,4 +72,11 @@ public class DeliveryOrderService {
             .orElse(null);
     }
 
+    public List<DeliveryOrder> findExpiredPendingPayments(LocalDateTime before) {
+        return deliveryOrderRepository.findByStatusAndCreatedAtBefore(DeliveryStatus.PENDING_PAYMENT, before);
+    }
+
+    public List<DeliveryOrder> findPendingPaymentsByUser(Users user) {
+        return deliveryOrderRepository.findByUserAndStatus(user, DeliveryStatus.PENDING_PAYMENT);
+    }
 }

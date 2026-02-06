@@ -83,6 +83,9 @@ public class DeliveryAppService {
                 .redirectUrl("/me/orders?tab=delivery")
                 .build();
         }
+        // 기존 미결제 주문 자동 취소
+        cancelPendingPayments(user);
+
         List<Reservation> reservations = loadReservations(request);
 
         // 2) 배달 가능 여부 및 시간 검증
@@ -184,6 +187,15 @@ public class DeliveryAppService {
             userDeliveryInfoService.update(existing, phone, postalCode, address1, address2, latitude, longitude);
         } else {
             userDeliveryInfoService.create(user, phone, postalCode, address1, address2, latitude, longitude);
+        }
+    }
+
+    // 기존 미결제 주문 자동 취소
+    private void cancelPendingPayments(Users user) {
+        List<DeliveryOrder> pending = deliveryOrderService.findPendingPaymentsByUser(user);
+        for (DeliveryOrder order : pending) {
+            order.markCanceled();
+            deliveryPaymentService.markCanceled(order);
         }
     }
 

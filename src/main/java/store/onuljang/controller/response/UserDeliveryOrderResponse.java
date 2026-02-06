@@ -32,6 +32,11 @@ public record UserDeliveryOrderResponse(
         if (order == null) {
             return null;
         }
+        if (order.getStatus() == DeliveryStatus.PENDING_PAYMENT
+            || order.getStatus() == DeliveryStatus.CANCELED
+            || order.getStatus() == DeliveryStatus.FAILED) {
+            return null;
+        }
         return from(order, reservation);
     }
 }
