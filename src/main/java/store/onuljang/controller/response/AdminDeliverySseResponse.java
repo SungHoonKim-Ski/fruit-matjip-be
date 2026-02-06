@@ -4,7 +4,9 @@ import lombok.Builder;
 import store.onuljang.repository.entity.DeliveryOrder;
 import store.onuljang.repository.entity.Reservation;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -16,8 +18,18 @@ public record AdminDeliverySseResponse(
     String productSummary,
     LocalDate deliveryDate,
     int deliveryHour,
-    int deliveryMinute
+    int deliveryMinute,
+    Integer estimatedMinutes,
+    LocalDateTime acceptedAt,
+    List<ReservationItem> reservationItems,
+    BigDecimal totalAmount,
+    String phone,
+    String address1,
+    String address2
 ) {
+    @Builder
+    public record ReservationItem(long id, String productName, int quantity) {}
+
     public static AdminDeliverySseResponse from(DeliveryOrder order) {
         List<Reservation> reservations = order.getReservations();
         return AdminDeliverySseResponse.builder()
@@ -29,6 +41,19 @@ public record AdminDeliverySseResponse(
             .deliveryDate(order.getDeliveryDate())
             .deliveryHour(order.getDeliveryHour())
             .deliveryMinute(order.getDeliveryMinute())
+            .estimatedMinutes(order.getEstimatedMinutes())
+            .acceptedAt(order.getAcceptedAt())
+            .reservationItems(reservations.stream()
+                .map(r -> ReservationItem.builder()
+                    .id(r.getId())
+                    .productName(r.getReservationProductName())
+                    .quantity(r.getQuantity())
+                    .build())
+                .toList())
+            .totalAmount(order.getTotalAmount())
+            .phone(order.getPhone())
+            .address1(order.getAddress1())
+            .address2(order.getAddress2())
             .build();
     }
 }
