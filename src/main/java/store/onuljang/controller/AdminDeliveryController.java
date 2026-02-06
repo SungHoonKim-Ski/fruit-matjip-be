@@ -52,8 +52,9 @@ public class AdminDeliveryController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{id}/{status}")
-    public ResponseEntity<Void> updateStatus(@PathVariable("id") long id, @PathVariable("status") String status) {
+    @PatchMapping("/{id}/status/{status}")
+    public ResponseEntity<Void> updateStatus(
+            @PathVariable("id") long id, @PathVariable("status") String status) {
         DeliveryStatus next = DeliveryStatus.valueOf(status.toUpperCase());
         adminDeliveryAppService.updateStatus(id, next);
         return ResponseEntity.ok().build();
