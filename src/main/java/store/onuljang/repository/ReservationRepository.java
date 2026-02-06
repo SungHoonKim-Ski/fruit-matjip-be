@@ -2,7 +2,6 @@ package store.onuljang.repository;
 
 import org.springframework.data.jpa.repository.*;
 import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.Users;
 
 import java.time.LocalDate;
 import java.util.List;

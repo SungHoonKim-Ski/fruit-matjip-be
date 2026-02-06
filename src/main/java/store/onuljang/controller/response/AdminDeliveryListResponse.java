@@ -6,7 +6,6 @@ import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Builder

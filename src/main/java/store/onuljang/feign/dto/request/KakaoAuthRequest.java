@@ -9,4 +9,3 @@ public record KakaoAuthRequest(
     @RequestParam String code
 ) {
 }
-

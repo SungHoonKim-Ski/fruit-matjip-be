@@ -8,7 +8,6 @@ plugins {
 spotless {
     java {
         target 'src/**/*.java'
-        eclipse()
         indentWithSpaces(4)
         trimTrailingWhitespace()
         removeUnusedImports()
