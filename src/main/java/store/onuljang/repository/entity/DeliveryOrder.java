@@ -151,6 +151,11 @@ public class DeliveryOrder extends BaseEntity {
         this.status = DeliveryStatus.CANCELED;
     }
 
+    public boolean isPaid() {
+        return this.status == DeliveryStatus.PAID
+            || this.status == DeliveryStatus.OUT_FOR_DELIVERY;
+    }
+
     public List<Reservation> getReservations() {
         return deliveryOrderReservations.stream()
             .map(DeliveryOrderReservation::getReservation)

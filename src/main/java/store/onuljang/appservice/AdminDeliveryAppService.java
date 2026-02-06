@@ -6,9 +6,12 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.exception.AdminValidateException;
+import store.onuljang.feign.dto.request.KakaoPayCancelRequest;
 import store.onuljang.repository.entity.DeliveryOrder;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.service.DeliveryOrderService;
+import store.onuljang.service.DeliveryPaymentService;
+import store.onuljang.service.KakaoPayService;
 
 @Service
 @Transactional(readOnly = true)
@@ -16,6 +19,8 @@ import store.onuljang.service.DeliveryOrderService;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class AdminDeliveryAppService {
     DeliveryOrderService deliveryOrderService;
+    DeliveryPaymentService deliveryPaymentService;
+    KakaoPayService kakaoPayService;
 
     @Transactional
     public void updateStatus(long orderId, DeliveryStatus nextStatus) {
@@ -49,8 +54,18 @@ public class AdminDeliveryAppService {
         switch (nextStatus) {
             case OUT_FOR_DELIVERY -> order.markOutForDelivery();
             case DELIVERED -> order.markDelivered();
-            case CANCELED -> order.markCanceled();
+            case CANCELED -> cancelOrder(order);
             default -> throw new AdminValidateException("변경할 수 없는 상태입니다.");
         }
+    }
+
+    private void cancelOrder(DeliveryOrder order) {
+        if (order.isPaid() && order.getKakaoTid() != null) {
+            int cancelAmount = deliveryPaymentService.getApprovedAmount(order);
+            kakaoPayService.cancel(
+                new KakaoPayCancelRequest(null, order.getKakaoTid(), cancelAmount, 0));
+        }
+        order.markCanceled();
+        deliveryPaymentService.markCanceled(order);
     }
 }

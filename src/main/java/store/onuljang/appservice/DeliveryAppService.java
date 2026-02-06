@@ -114,6 +114,7 @@ public class DeliveryAppService {
 
         KakaoPayApproveResponse approve = kakaoPayService.approve(
             new KakaoPayApproveRequest(
+                null,
                 order.getKakaoTid(),
                 String.valueOf(order.getId()),
                 user.getUid(),

@@ -10,8 +10,8 @@ public class KakaoPayConfigDto {
     @Value("${KAKAOPAY.ENABLED:true}")
     boolean enabled;
 
-    @Value("${KAKAOPAY.ADMIN_KEY}")
-    String adminKey;
+    @Value("${KAKAOPAY.SECRET_KEY}")
+    String secretKey;
 
     @Value("${KAKAOPAY.CID}")
     String cid;
@@ -25,10 +25,8 @@ public class KakaoPayConfigDto {
     @Value("${KAKAOPAY.FAIL_URL}")
     String failUrl;
 
-    @Value("${KAKAOPAY.HOST:https://kapi.kakao.com}")
+    @Value("${KAKAOPAY.HOST:https://open-api.kakaopay.com}")
     String host;
-
-    final String contentType = "application/x-www-form-urlencoded;charset=utf-8";
 
     public KakaoPayRedirectUrls buildRedirectUrls(long orderId) {
         return new KakaoPayRedirectUrls(

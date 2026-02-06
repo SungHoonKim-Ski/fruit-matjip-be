@@ -38,6 +38,12 @@ public class DeliveryPaymentService {
         findLatestByOrder(order).ifPresent(DeliveryPayment::markFailed);
     }
 
+    public int getApprovedAmount(DeliveryOrder order) {
+        return findLatestByOrder(order)
+            .map(payment -> payment.getAmount().intValue())
+            .orElse(0);
+    }
+
     private Optional<DeliveryPayment> findLatestByOrder(DeliveryOrder order) {
         return deliveryPaymentRepository.findTopByDeliveryOrderOrderByIdDesc(order);
     }

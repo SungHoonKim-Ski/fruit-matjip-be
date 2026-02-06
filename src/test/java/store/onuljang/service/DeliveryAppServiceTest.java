@@ -29,12 +29,12 @@ import static org.mockito.BDDMockito.given;
 
 @TestPropertySource(properties = {
     "KAKAOPAY.ENABLED=false",
-    "KAKAOPAY.ADMIN_KEY=test-admin-key",
+    "KAKAOPAY.SECRET_KEY=test-secret-key",
     "KAKAOPAY.CID=test-cid",
     "KAKAOPAY.APPROVAL_URL=http://localhost/approve",
     "KAKAOPAY.CANCEL_URL=http://localhost/cancel",
     "KAKAOPAY.FAIL_URL=http://localhost/fail",
-    "KAKAOPAY.HOST=https://kapi.kakao.com"
+    "KAKAOPAY.HOST=https://open-api.kakaopay.com"
 })
 class DeliveryAppServiceTest extends IntegrationTestBase {
 

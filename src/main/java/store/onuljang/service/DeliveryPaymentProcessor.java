@@ -73,11 +73,13 @@ public class DeliveryPaymentProcessor {
             List<Reservation> reservations, int totalAmount, KakaoPayConfigDto.KakaoPayRedirectUrls redirectUrls) {
         return kakaoPayService.ready(
             new KakaoPayReadyRequest(
+                null,
                 String.valueOf(order.getId()),
                 user.getUid(),
                 Reservation.buildSummary(reservations),
                 reservations.stream().mapToInt(Reservation::getQuantity).sum(),
                 totalAmount,
+                0,
                 redirectUrls.approvalUrl(),
                 redirectUrls.cancelUrl(),
                 redirectUrls.failUrl()

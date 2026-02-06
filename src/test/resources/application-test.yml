@@ -40,12 +40,12 @@ KAKAO:
 
 KAKAOPAY:
   ENABLED: false
-  ADMIN_KEY: test-admin-key
+  SECRET_KEY: test-secret-key
   CID: test-cid
   APPROVAL_URL: http://localhost/approve
   CANCEL_URL: http://localhost/cancel
   FAIL_URL: http://localhost/fail
-  HOST: https://kapi.kakao.com
+  HOST: https://open-api.kakaopay.com
 
 DELIVERY:
   STORE_LAT: 37.556504
