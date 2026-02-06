@@ -50,6 +50,7 @@ public class DeliveryPaymentProcessor {
         return DeliveryReadyResponse.builder()
             .orderId(order.getId())
             .redirectUrl(ready.nextRedirectPcUrl())
+            .mobileRedirectUrl(ready.nextRedirectMobileUrl())
             .build();
     }
 

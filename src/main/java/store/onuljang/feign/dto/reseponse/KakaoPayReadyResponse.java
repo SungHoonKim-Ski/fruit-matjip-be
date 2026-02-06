@@ -4,5 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record KakaoPayReadyResponse(
     String tid,
-    String nextRedirectPcUrl
+    String nextRedirectPcUrl,
+    String nextRedirectMobileUrl
 ) {}

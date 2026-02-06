@@ -5,5 +5,6 @@ import lombok.Builder;
 @Builder
 public record DeliveryReadyResponse(
     long orderId,
-    String redirectUrl
+    String redirectUrl,
+    String mobileRedirectUrl
 ) {}
