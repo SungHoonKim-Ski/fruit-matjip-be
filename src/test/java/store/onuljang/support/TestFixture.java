@@ -5,12 +5,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import store.onuljang.auth.JwtUtil;
 import store.onuljang.repository.AdminRepository;
+import store.onuljang.repository.DeliveryOrderRepository;
+import store.onuljang.repository.DeliveryOrderReservationRepository;
 import store.onuljang.repository.ProductCategoryRepository;
 import store.onuljang.repository.ProductsRepository;
 import store.onuljang.repository.ReservationRepository;
 import store.onuljang.repository.UserRepository;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.AdminRole;
+import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.dto.JwtToken;
 
@@ -41,6 +44,12 @@ public class TestFixture {
 
     @Autowired
     private ProductCategoryRepository productCategoryRepository;
+
+    @Autowired
+    private DeliveryOrderRepository deliveryOrderRepository;
+
+    @Autowired
+    private DeliveryOrderReservationRepository deliveryOrderReservationRepository;
 
     @Autowired
     private JwtUtil jwtUtil;
@@ -244,5 +253,39 @@ public class TestFixture {
     public String createAccessToken(String uid, String name) {
         JwtToken token = jwtUtil.generateToken(uid, name);
         return token.access();
+    }
+
+    /**
+     * 배달 주문 생성
+     */
+    public DeliveryOrder createDeliveryOrder(Users user, Reservation reservation, DeliveryStatus status) {
+        return deliveryOrderRepository.save(DeliveryOrder.builder()
+            .user(user)
+            .status(status)
+            .deliveryDate(reservation.getPickupDate())
+            .deliveryHour(12)
+            .deliveryMinute(0)
+            .deliveryFee(new BigDecimal("2900"))
+            .distanceKm(new BigDecimal("1.000"))
+            .postalCode("12345")
+            .address1("서울 강서구 테스트로")
+            .address2("101호")
+            .phone("01012345678")
+            .latitude(37.556504)
+            .longitude(126.8372613)
+            .idempotencyKey(UUID.randomUUID().toString())
+            .build());
+    }
+
+    /**
+     * 배달 주문 + 예약 연결 생성
+     */
+    public DeliveryOrder createDeliveryOrderWithLink(Users user, Reservation reservation, DeliveryStatus status) {
+        DeliveryOrder order = createDeliveryOrder(user, reservation, status);
+        deliveryOrderReservationRepository.save(DeliveryOrderReservation.builder()
+            .deliveryOrder(order)
+            .reservation(reservation)
+            .build());
+        return order;
     }
 }

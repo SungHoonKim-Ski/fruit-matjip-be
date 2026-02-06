@@ -9,10 +9,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import store.onuljang.appservice.DeliveryAppService;
 import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.exception.UserValidateException;
+import store.onuljang.repository.DeliveryOrderRepository;
 import store.onuljang.repository.entity.DeliveryOrder;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
+import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.support.IntegrationTestBase;
 import store.onuljang.util.TimeUtil;
 
@@ -43,6 +45,9 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
 
     @Autowired
     DeliveryOrderService deliveryOrderService;
+
+    @Autowired
+    DeliveryOrderRepository deliveryOrderRepository;
 
     @MockitoBean
     KakaoLocalService kakaoLocalService;
@@ -176,5 +181,65 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             * Math.sin(dLng / 2) * Math.sin(dLng / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return 6371 * c;
+    }
+
+    @Test
+    void ready_cancelsExistingPendingPayment_whenNewOrderCreated() {
+        // Arrange
+        Users user = testFixture.createUser("배달고객2");
+        Product product = testFixture.createTodayProduct("수박", 10, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation oldReservation = testFixture.createReservation(user, product, 1);
+        DeliveryOrder oldOrder = testFixture.createDeliveryOrder(user, oldReservation, DeliveryStatus.PENDING_PAYMENT);
+        long oldOrderId = oldOrder.getId();
+
+        Product newProduct = testFixture.createTodayProduct("참외", 10, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation newReservation = testFixture.createReservation(user, newProduct, 1);
+
+        DeliveryReadyRequest request = new DeliveryReadyRequest(
+            List.of(newReservation.getId()),
+            12, 0,
+            "01012345678", "12345", ADDRESS, "101호",
+            storeLat, storeLng,
+            "test-key-cancel-1"
+        );
+
+        // Act
+        deliveryAppService.ready(user.getUid(), request);
+
+        // Assert
+        DeliveryOrder updatedOld = deliveryOrderService.findById(oldOrderId);
+        assertThat(updatedOld.getStatus()).isEqualTo(DeliveryStatus.CANCELED);
+    }
+
+    @Test
+    void ready_doesNotAffectPaidOrder_whenNewOrderCreated() {
+        // Arrange
+        Users user = testFixture.createUser("배달고객3");
+        Product product = testFixture.createTodayProduct("포도2", 10, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation paidReservation = testFixture.createReservation(user, product, 1);
+        DeliveryOrder paidOrder = testFixture.createDeliveryOrder(user, paidReservation, DeliveryStatus.PAID);
+        long paidOrderId = paidOrder.getId();
+
+        Product newProduct = testFixture.createTodayProduct("사과2", 10, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation newReservation = testFixture.createReservation(user, newProduct, 1);
+
+        DeliveryReadyRequest request = new DeliveryReadyRequest(
+            List.of(newReservation.getId()),
+            12, 0,
+            "01012345678", "12345", ADDRESS, "101호",
+            storeLat, storeLng,
+            "test-key-cancel-2"
+        );
+
+        // Act
+        deliveryAppService.ready(user.getUid(), request);
+
+        // Assert
+        DeliveryOrder updatedPaid = deliveryOrderService.findById(paidOrderId);
+        assertThat(updatedPaid.getStatus()).isEqualTo(DeliveryStatus.PAID);
     }
 }
