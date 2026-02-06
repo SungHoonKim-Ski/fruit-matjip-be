@@ -6,6 +6,7 @@ import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Builder
@@ -19,6 +20,8 @@ public record AdminDeliveryListResponse(
         List<ReservationItem> reservationItems,
         BigDecimal totalAmount,
         DeliveryStatus status,
+        Integer estimatedMinutes,
+        LocalDateTime acceptedAt,
         String phone,
         String postalCode,
         String address1,
@@ -39,6 +42,8 @@ public record AdminDeliveryListResponse(
                     .toList())
                 .totalAmount(totalAmount)
                 .status(order.getStatus())
+                .estimatedMinutes(order.getEstimatedMinutes())
+                .acceptedAt(order.getAcceptedAt())
                 .phone(order.getPhone())
                 .postalCode(order.getPostalCode())
                 .address1(order.getAddress1())

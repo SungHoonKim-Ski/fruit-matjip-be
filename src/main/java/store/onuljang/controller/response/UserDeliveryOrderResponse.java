@@ -6,6 +6,7 @@ import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Builder
 public record UserDeliveryOrderResponse(
@@ -14,7 +15,9 @@ public record UserDeliveryOrderResponse(
     DeliveryStatus status,
     BigDecimal deliveryFee,
     int deliveryHour,
-    int deliveryMinute
+    int deliveryMinute,
+    Integer estimatedMinutes,
+    LocalDateTime acceptedAt
 ) {
     public static UserDeliveryOrderResponse from(DeliveryOrder order, Reservation reservation) {
         return UserDeliveryOrderResponse.builder()
@@ -24,6 +27,8 @@ public record UserDeliveryOrderResponse(
             .deliveryFee(order.getDeliveryFee())
             .deliveryHour(order.getDeliveryHour())
             .deliveryMinute(order.getDeliveryMinute())
+            .estimatedMinutes(order.getEstimatedMinutes())
+            .acceptedAt(order.getAcceptedAt())
             .build();
     }
 

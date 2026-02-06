@@ -212,4 +212,64 @@ class AdminDeliveryAppServiceTest {
             .isInstanceOf(AdminValidateException.class)
             .hasMessageContaining("변경할 수 없는 상태");
     }
+
+    // --- accept ---
+
+    @Test
+    @DisplayName("PAID 상태에서 접수 성공 - estimatedMinutes와 acceptedAt 설정")
+    void accept_paid_success() {
+        // given
+        DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PAID);
+
+        // when
+        adminDeliveryAppService.accept(order.getId(), 30);
+
+        // then
+        DeliveryOrder updated = deliveryOrderService.findById(order.getId());
+        assertThat(updated.getEstimatedMinutes()).isEqualTo(30);
+        assertThat(updated.getAcceptedAt()).isEqualTo(TimeUtil.nowDateTime());
+    }
+
+    @Test
+    @DisplayName("PENDING_PAYMENT 상태에서 접수 시 예외")
+    void accept_pendingPayment_throwsException() {
+        // given
+        DeliveryOrder order = testFixture.createDeliveryOrder(
+            user, reservation, DeliveryStatus.PENDING_PAYMENT);
+
+        // when / then
+        assertThatThrownBy(() ->
+            adminDeliveryAppService.accept(order.getId(), 30))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("PAID 상태에서만 접수");
+    }
+
+    @Test
+    @DisplayName("이미 접수된 주문에 다시 접수 시 상태가 유지되므로 예외 없음")
+    void accept_alreadyAccepted_updatesAgain() {
+        // given
+        DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PAID);
+        adminDeliveryAppService.accept(order.getId(), 30);
+
+        // when
+        adminDeliveryAppService.accept(order.getId(), 40);
+
+        // then
+        DeliveryOrder updated = deliveryOrderService.findById(order.getId());
+        assertThat(updated.getEstimatedMinutes()).isEqualTo(40);
+    }
+
+    @Test
+    @DisplayName("OUT_FOR_DELIVERY 상태에서 접수 시 예외")
+    void accept_outForDelivery_throwsException() {
+        // given
+        DeliveryOrder order = testFixture.createDeliveryOrder(
+            user, reservation, DeliveryStatus.OUT_FOR_DELIVERY);
+
+        // when / then
+        assertThatThrownBy(() ->
+            adminDeliveryAppService.accept(order.getId(), 30))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("PAID 상태에서만 접수");
+    }
 }

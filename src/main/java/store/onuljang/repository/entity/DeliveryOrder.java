@@ -100,8 +100,31 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
 
+    @Getter
+    @Column(name = "estimated_minutes")
+    private Integer estimatedMinutes;
+
+    @Getter
+    @Column(name = "accepted_at")
+    private LocalDateTime acceptedAt;
+
     public void setKakaoTid(String kakaoTid) {
         this.kakaoTid = kakaoTid;
+    }
+
+    public void accept(int estimatedMinutes) {
+        if (this.status != DeliveryStatus.PAID) {
+            throw new IllegalStateException("PAID 상태에서만 접수할 수 있습니다.");
+        }
+        this.estimatedMinutes = estimatedMinutes;
+        this.acceptedAt = TimeUtil.nowDateTime();
+    }
+
+    public LocalDateTime getEstimatedArrivalTime() {
+        if (acceptedAt == null || estimatedMinutes == null) {
+            return null;
+        }
+        return acceptedAt.plusMinutes(estimatedMinutes);
     }
 
     public boolean canMarkPaid() {

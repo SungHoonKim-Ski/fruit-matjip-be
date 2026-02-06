@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import store.onuljang.appservice.AdminDeliveryAppService;
+import store.onuljang.controller.request.AdminDeliveryAcceptRequest;
 import store.onuljang.controller.request.AdminDeliveryConfigRequest;
 import store.onuljang.controller.response.AdminDeliveryListResponse;
 import store.onuljang.controller.response.DeliveryConfigResponse;
@@ -41,6 +42,14 @@ public class AdminDeliveryController {
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter stream() {
         return adminDeliverySseService.subscribe();
+    }
+
+    @PatchMapping("/{id}/accept")
+    public ResponseEntity<Void> accept(
+            @PathVariable("id") long id,
+            @RequestBody @Validated AdminDeliveryAcceptRequest request) {
+        adminDeliveryAppService.accept(id, request.estimatedMinutes());
+        return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/{id}/{status}")

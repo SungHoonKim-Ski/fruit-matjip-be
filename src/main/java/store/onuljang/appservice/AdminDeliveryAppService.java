@@ -23,6 +23,12 @@ public class AdminDeliveryAppService {
     KakaoPayService kakaoPayService;
 
     @Transactional
+    public void accept(long orderId, int estimatedMinutes) {
+        DeliveryOrder order = deliveryOrderService.findById(orderId);
+        order.accept(estimatedMinutes);
+    }
+
+    @Transactional
     public void updateStatus(long orderId, DeliveryStatus nextStatus) {
         DeliveryOrder order = deliveryOrderService.findById(orderId);
         validateAdminTransition(order, nextStatus);

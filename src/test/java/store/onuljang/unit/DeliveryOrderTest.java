@@ -1,13 +1,21 @@
 package store.onuljang.unit;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import store.onuljang.repository.entity.DeliveryOrder;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
+import store.onuljang.util.TimeUtil;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZonedDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class DeliveryOrderTest {
 
@@ -252,5 +260,69 @@ class DeliveryOrderTest {
 
         // then
         assertThat(order.getStatus()).isEqualTo(DeliveryStatus.CANCELED);
+    }
+
+    // --- accept ---
+
+    @AfterEach
+    void tearDown() {
+        TimeUtil.resetClock();
+    }
+
+    @Test
+    @DisplayName("PAID 상태에서 accept 성공 - estimatedMinutes와 acceptedAt 설정")
+    void accept_paid_success() {
+        // given
+        ZonedDateTime fixed = ZonedDateTime.of(
+            LocalDate.of(2026, 2, 7), LocalTime.of(14, 0), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(fixed.toInstant(), TimeUtil.KST));
+        DeliveryOrder order = createOrder(DeliveryStatus.PAID);
+
+        // when
+        order.accept(30);
+
+        // then
+        assertThat(order.getEstimatedMinutes()).isEqualTo(30);
+        assertThat(order.getAcceptedAt()).isEqualTo(TimeUtil.nowDateTime());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = DeliveryStatus.class, names = {"PENDING_PAYMENT", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELED", "FAILED"})
+    @DisplayName("PAID 외 상태에서 accept 시 예외")
+    void accept_notPaid_throwsException(DeliveryStatus status) {
+        // given
+        DeliveryOrder order = createOrder(status);
+
+        // when / then
+        assertThatThrownBy(() -> order.accept(30))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("PAID 상태에서만 접수");
+    }
+
+    // --- getEstimatedArrivalTime ---
+
+    @Test
+    @DisplayName("acceptedAt과 estimatedMinutes가 있으면 도착 예정 시간 반환")
+    void getEstimatedArrivalTime_accepted_returnsTime() {
+        // given
+        ZonedDateTime fixed = ZonedDateTime.of(
+            LocalDate.of(2026, 2, 7), LocalTime.of(14, 0), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(fixed.toInstant(), TimeUtil.KST));
+        DeliveryOrder order = createOrder(DeliveryStatus.PAID);
+        order.accept(30);
+
+        // when / then
+        assertThat(order.getEstimatedArrivalTime())
+            .isEqualTo(TimeUtil.nowDateTime().plusMinutes(30));
+    }
+
+    @Test
+    @DisplayName("미접수 주문은 도착 예정 시간이 null")
+    void getEstimatedArrivalTime_notAccepted_returnsNull() {
+        // given
+        DeliveryOrder order = createOrder(DeliveryStatus.PAID);
+
+        // when / then
+        assertThat(order.getEstimatedArrivalTime()).isNull();
     }
 }
