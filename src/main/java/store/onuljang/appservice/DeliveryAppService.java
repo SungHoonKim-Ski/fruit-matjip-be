@@ -5,12 +5,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.controller.request.DeliveryInfoRequest;
 import store.onuljang.controller.request.DeliveryReadyRequest;
 import store.onuljang.controller.response.DeliveryInfoResponse;
 import store.onuljang.controller.response.DeliveryReadyResponse;
-import store.onuljang.event.delivery.DeliveryPaidEvent;
 import store.onuljang.exception.UserNoContentException;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.feign.dto.request.KakaoPayApproveRequest;
@@ -106,33 +106,26 @@ public class DeliveryAppService {
         return deliveryPaymentProcessor.preparePayment(saved, user, reservations, totalProductAmount, feeResult.deliveryFee());
     }
 
-    @Transactional
+    /**
+     * 결제 승인 - 트랜잭션 분리 구조
+     * Step 1: 검증 (Service 읽기 tx) → Step 2: PG 승인 (tx 없음) → Step 3: DB 반영 (Service 쓰기 tx)
+     * PG 호출 중 DB 커넥션을 점유하지 않아 커넥션 풀 고갈을 방지한다.
+     */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void approve(String uid, long orderId, String pgToken) {
+        // Step 1: 검증 (각 Service 메서드의 읽기 트랜잭션)
         Users user = userService.findByUId(uid);
         DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
-
         if (!order.canMarkPaid()) {
             throw new UserValidateException("결제 진행 상태가 아닙니다.");
         }
 
-        KakaoPayApproveResponse approve = kakaoPayService.approve(
-            new KakaoPayApproveRequest(
-                null,
-                order.getKakaoTid(),
-                String.valueOf(order.getId()),
-                user.getUid(),
-                pgToken
-            )
-        );
+        // Step 2: 카카오페이 승인 (트랜잭션 밖 - DB 커넥션 미점유, @Retryable로 재시도)
+        KakaoPayApproveResponse pgResponse = kakaoPayService.approve(
+            new KakaoPayApproveRequest(null, order.getKakaoTid(), String.valueOf(orderId), user.getUid(), pgToken));
 
-        if (approve == null) {
-            order.markFailed();
-            throw new UserValidateException("결제 승인에 실패했습니다.");
-        }
-
-        order.markPaid();
-        deliveryPaymentService.markApproved(order, approve.aid());
-        eventPublisher.publishEvent(new DeliveryPaidEvent(order.getId()));
+        // Step 3: DB 반영 (Service 쓰기 트랜잭션)
+        deliveryOrderService.completePaid(orderId, pgResponse.aid());
     }
 
     @Transactional

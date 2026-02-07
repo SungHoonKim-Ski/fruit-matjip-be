@@ -1,6 +1,9 @@
 spring:
   application:
     name: onuljang-test
+  aop:
+    proxy-target-class: true
+    expose-proxy: true
   autoconfigure:
     exclude:
       - io.awspring.cloud.autoconfigure.s3.S3AutoConfiguration

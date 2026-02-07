@@ -242,4 +242,68 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         DeliveryOrder updatedPaid = deliveryOrderService.findById(paidOrderId);
         assertThat(updatedPaid.getStatus()).isEqualTo(DeliveryStatus.PAID);
     }
+
+    @Test
+    void cancel_pendingPaymentOrder_succeeds() {
+        // Arrange
+        Users user = testFixture.createUser("취소고객");
+        Product product = testFixture.createTodayProduct("딸기", 5, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation reservation = testFixture.createReservation(user, product, 1);
+        DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PENDING_PAYMENT);
+
+        // Act
+        deliveryAppService.cancel(user.getUid(), order.getId());
+
+        // Assert
+        DeliveryOrder updated = deliveryOrderService.findById(order.getId());
+        assertThat(updated.getStatus()).isEqualTo(DeliveryStatus.CANCELED);
+    }
+
+    @Test
+    void cancel_paidOrder_throwsValidateException() {
+        // Arrange
+        Users user = testFixture.createUser("취소고객2");
+        Product product = testFixture.createTodayProduct("사과", 5, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation reservation = testFixture.createReservation(user, product, 1);
+        DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PAID);
+
+        // Act & Assert
+        assertThatThrownBy(() -> deliveryAppService.cancel(user.getUid(), order.getId()))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("이미 결제 완료된 주문입니다.");
+    }
+
+    @Test
+    void fail_pendingPaymentOrder_succeeds() {
+        // Arrange
+        Users user = testFixture.createUser("실패고객");
+        Product product = testFixture.createTodayProduct("포도", 5, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation reservation = testFixture.createReservation(user, product, 1);
+        DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PENDING_PAYMENT);
+
+        // Act
+        deliveryAppService.fail(user.getUid(), order.getId());
+
+        // Assert
+        DeliveryOrder updated = deliveryOrderService.findById(order.getId());
+        assertThat(updated.getStatus()).isEqualTo(DeliveryStatus.FAILED);
+    }
+
+    @Test
+    void fail_paidOrder_throwsValidateException() {
+        // Arrange
+        Users user = testFixture.createUser("실패고객2");
+        Product product = testFixture.createTodayProduct("수박", 5, new BigDecimal("15000"),
+            testFixture.createDefaultAdmin());
+        Reservation reservation = testFixture.createReservation(user, product, 1);
+        DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PAID);
+
+        // Act & Assert
+        assertThatThrownBy(() -> deliveryAppService.fail(user.getUid(), order.getId()))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("이미 결제 완료된 주문입니다.");
+    }
 }

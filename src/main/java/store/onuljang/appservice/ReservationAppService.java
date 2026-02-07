@@ -13,6 +13,7 @@ import store.onuljang.event.user_product.UserReservationLogEvent;
 import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
+import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.repository.entity.enums.UserProductAction;
 import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
@@ -89,9 +90,9 @@ public class ReservationAppService {
 
         validateUserReservation(user, reservation);
         deliveryOrderService.findByReservation(reservation).ifPresent(order -> {
-            if (order.getStatus() == store.onuljang.repository.entity.enums.DeliveryStatus.PAID
-                || order.getStatus() == store.onuljang.repository.entity.enums.DeliveryStatus.OUT_FOR_DELIVERY
-                || order.getStatus() == store.onuljang.repository.entity.enums.DeliveryStatus.DELIVERED) {
+            if (order.getStatus() == DeliveryStatus.PAID
+                || order.getStatus() == DeliveryStatus.OUT_FOR_DELIVERY
+                || order.getStatus() == DeliveryStatus.DELIVERED) {
                 throw new UserValidateException("결제 완료된 배달 예약은 취소할 수 없습니다.");
             }
         });

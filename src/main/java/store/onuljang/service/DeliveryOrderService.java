@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationEventPublisher;
+import store.onuljang.event.delivery.DeliveryPaidEvent;
 import store.onuljang.exception.NotFoundException;
 import store.onuljang.repository.DeliveryOrderRepository;
 import store.onuljang.repository.DeliveryOrderReservationRepository;
@@ -29,6 +31,8 @@ public class DeliveryOrderService {
     DeliveryOrderRepository deliveryOrderRepository;
     DeliveryOrderReservationRepository deliveryOrderReservationRepository;
     DeliveryOrderQueryRepository deliveryOrderQueryRepository;
+    DeliveryPaymentService deliveryPaymentService;
+    ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public DeliveryOrder save(DeliveryOrder order) {
@@ -78,5 +82,14 @@ public class DeliveryOrderService {
 
     public List<DeliveryOrder> findPendingPaymentsByUser(Users user) {
         return deliveryOrderRepository.findByUserAndStatus(user, DeliveryStatus.PENDING_PAYMENT);
+    }
+
+    @Transactional
+    public void completePaid(long orderId, String approveAid) {
+        DeliveryOrder order = findById(orderId);
+        if (!order.canMarkPaid()) return;
+        order.markPaid();
+        deliveryPaymentService.markApproved(order, approveAid);
+        eventPublisher.publishEvent(new DeliveryPaidEvent(orderId));
     }
 }

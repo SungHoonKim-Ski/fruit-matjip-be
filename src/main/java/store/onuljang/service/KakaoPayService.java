@@ -1,9 +1,15 @@
 package store.onuljang.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.KakaoPayConfigDto;
@@ -16,11 +22,14 @@ import store.onuljang.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.feign.dto.reseponse.KakaoPayCancelResponse;
 import store.onuljang.feign.dto.reseponse.KakaoPayReadyResponse;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class KakaoPayService {
+    static final ObjectMapper MAPPER = new ObjectMapper();
+
     KakaoPayConfigDto kakaoPayConfigDto;
     KakaoPayFeignClient kakaoPayFeignClient;
 
@@ -49,24 +58,34 @@ public class KakaoPayService {
         }
     }
 
+    @Retryable(
+        retryFor = FeignException.class,
+        noRetryFor = FeignException.FeignClientException.class,
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
     public KakaoPayApproveResponse approve(KakaoPayApproveRequest request) {
-        try {
-            KakaoPayApproveRequest fullRequest = new KakaoPayApproveRequest(
-                kakaoPayConfigDto.getCid(),
-                request.tid(),
-                request.partnerOrderId(),
-                request.partnerUserId(),
-                request.pgToken()
-            );
-            KakaoPayApproveResponse response = kakaoPayFeignClient.approve(
-                buildAuthorizationHeader(), fullRequest);
-            if (response == null) {
-                throw new KakaoPayException("카카오페이 결제 승인에 실패했습니다.");
-            }
-            return response;
-        } catch (FeignException e) {
-            throw new KakaoPayException("카카오페이 결제 승인에 실패했습니다.");
-        }
+        KakaoPayApproveRequest fullRequest = new KakaoPayApproveRequest(
+            kakaoPayConfigDto.getCid(),
+            request.tid(),
+            request.partnerOrderId(),
+            request.partnerUserId(),
+            request.pgToken()
+        );
+        return kakaoPayFeignClient.approve(buildAuthorizationHeader(), fullRequest);
+    }
+
+    // 4xx: 재시도 없이 카카오페이 에러 메시지 파싱
+    @Recover
+    KakaoPayApproveResponse recoverClientError(FeignException.FeignClientException e, KakaoPayApproveRequest request) {
+        throw new KakaoPayException(parseKakaoPayError(e, "카카오페이 결제 승인에 실패했습니다."));
+    }
+
+    // 5xx/네트워크: 재시도 소진
+    @Recover
+    KakaoPayApproveResponse recoverServerError(FeignException e, KakaoPayApproveRequest request) {
+        log.error("카카오페이 결제 승인 재시도 소진: {}", e.getMessage());
+        throw new KakaoPayException("카카오페이 결제 승인에 실패했습니다. 잠시 후 다시 시도해주세요.");
     }
 
     public KakaoPayCancelResponse cancel(KakaoPayCancelRequest request) {
@@ -86,6 +105,21 @@ public class KakaoPayService {
         } catch (FeignException e) {
             throw new KakaoPayException("카카오페이 결제 취소에 실패했습니다.");
         }
+    }
+
+    private String parseKakaoPayError(FeignException e, String fallback) {
+        try {
+            JsonNode node = MAPPER.readTree(e.contentUTF8());
+            JsonNode extras = node.get("extras");
+            if (extras != null && extras.has("method_result_message")) {
+                return extras.get("method_result_message").asText();
+            }
+            if (node.has("error_message")) {
+                return node.get("error_message").asText();
+            }
+        } catch (Exception ignored) {
+        }
+        return fallback;
     }
 
     private String buildAuthorizationHeader() {
