@@ -11,6 +11,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.KakaoPayConfigDto;
 import store.onuljang.exception.KakaoPayException;
@@ -100,6 +101,12 @@ public class KakaoPayService {
         }
     }
 
+    /**
+     * 외부 PG 호출을 트랜잭션 밖에서 실행한다.
+     * 호출측 트랜잭션에 참여하면 FeignException 발생 시 rollback-only로 마킹되어,
+     * catch 후에도 커밋할 수 없는 문제가 발생한다.
+     */
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public KakaoPayCancelResponse cancel(KakaoPayCancelRequest request) {
         try {
             KakaoPayCancelRequest fullRequest = new KakaoPayCancelRequest(
