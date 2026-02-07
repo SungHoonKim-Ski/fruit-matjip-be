@@ -260,16 +260,18 @@ class AdminDeliveryAppServiceTest {
     }
 
     @Test
-    @DisplayName("OUT_FOR_DELIVERY 상태에서 접수 시 예외")
-    void accept_outForDelivery_throwsException() {
+    @DisplayName("OUT_FOR_DELIVERY 상태에서 접수 시 예상 시간 업데이트 가능")
+    void accept_outForDelivery_updatesEstimatedTime() {
         // given
         DeliveryOrder order = testFixture.createDeliveryOrder(
             user, reservation, DeliveryStatus.OUT_FOR_DELIVERY);
 
-        // when / then
-        assertThatThrownBy(() ->
-            adminDeliveryAppService.accept(order.getId(), 30))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("PAID 상태에서만 접수");
+        // when
+        adminDeliveryAppService.accept(order.getId(), 30);
+
+        // then
+        DeliveryOrder updated = deliveryOrderService.findById(order.getId());
+        assertThat(updated.getEstimatedMinutes()).isEqualTo(30);
+        assertThat(updated.getStatus()).isEqualTo(DeliveryStatus.OUT_FOR_DELIVERY);
     }
 }

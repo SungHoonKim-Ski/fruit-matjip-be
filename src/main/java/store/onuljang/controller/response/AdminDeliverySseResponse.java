@@ -25,7 +25,9 @@ public record AdminDeliverySseResponse(
     BigDecimal totalAmount,
     String phone,
     String address1,
-    String address2
+    String address2,
+    BigDecimal distanceKm,
+    BigDecimal deliveryFee
 ) {
     @Builder
     public record ReservationItem(long id, String productName, int quantity) {}
@@ -54,6 +56,8 @@ public record AdminDeliverySseResponse(
             .phone(order.getPhone())
             .address1(order.getAddress1())
             .address2(order.getAddress2())
+            .distanceKm(order.getDistanceKm())
+            .deliveryFee(order.getDeliveryFee())
             .build();
     }
 }

@@ -25,7 +25,9 @@ public record AdminDeliveryListResponse(
         String phone,
         String postalCode,
         String address1,
-        String address2
+        String address2,
+        BigDecimal distanceKm,
+        BigDecimal deliveryFee
     ) {
         public static AdminDeliveryResponse from(DeliveryOrder order) {
             List<Reservation> reservations = order.getReservations();
@@ -48,6 +50,8 @@ public record AdminDeliveryListResponse(
                 .postalCode(order.getPostalCode())
                 .address1(order.getAddress1())
                 .address2(order.getAddress2())
+                .distanceKm(order.getDistanceKm())
+                .deliveryFee(order.getDeliveryFee())
                 .build();
         }
     }

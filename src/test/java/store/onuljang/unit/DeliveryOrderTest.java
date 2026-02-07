@@ -270,7 +270,7 @@ class DeliveryOrderTest {
     }
 
     @Test
-    @DisplayName("PAID 상태에서 accept 성공 - estimatedMinutes와 acceptedAt 설정")
+    @DisplayName("PAID 상태에서 accept 성공 - estimatedMinutes와 acceptedAt 설정, OUT_FOR_DELIVERY로 전환")
     void accept_paid_success() {
         // given
         ZonedDateTime fixed = ZonedDateTime.of(
@@ -284,12 +284,13 @@ class DeliveryOrderTest {
         // then
         assertThat(order.getEstimatedMinutes()).isEqualTo(30);
         assertThat(order.getAcceptedAt()).isEqualTo(TimeUtil.nowDateTime());
+        assertThat(order.getStatus()).isEqualTo(DeliveryStatus.OUT_FOR_DELIVERY);
     }
 
     @ParameterizedTest
-    @EnumSource(value = DeliveryStatus.class, names = {"PENDING_PAYMENT", "OUT_FOR_DELIVERY", "DELIVERED", "CANCELED", "FAILED"})
-    @DisplayName("PAID 외 상태에서 accept 시 예외")
-    void accept_notPaid_throwsException(DeliveryStatus status) {
+    @EnumSource(value = DeliveryStatus.class, names = {"PENDING_PAYMENT", "DELIVERED", "CANCELED", "FAILED"})
+    @DisplayName("PAID, OUT_FOR_DELIVERY 외 상태에서 accept 시 예외")
+    void accept_notPaidOrOutForDelivery_throwsException(DeliveryStatus status) {
         // given
         DeliveryOrder order = createOrder(status);
 
@@ -297,6 +298,24 @@ class DeliveryOrderTest {
         assertThatThrownBy(() -> order.accept(30))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("PAID 상태에서만 접수");
+    }
+
+    @Test
+    @DisplayName("OUT_FOR_DELIVERY 상태에서 accept 시 estimatedMinutes 업데이트 가능")
+    void accept_outForDelivery_updatesEstimatedMinutes() {
+        // given
+        ZonedDateTime fixed = ZonedDateTime.of(
+            LocalDate.of(2026, 2, 7), LocalTime.of(14, 0), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(fixed.toInstant(), TimeUtil.KST));
+        DeliveryOrder order = createOrder(DeliveryStatus.OUT_FOR_DELIVERY);
+
+        // when
+        order.accept(30);
+
+        // then
+        assertThat(order.getEstimatedMinutes()).isEqualTo(30);
+        assertThat(order.getAcceptedAt()).isEqualTo(TimeUtil.nowDateTime());
+        assertThat(order.getStatus()).isEqualTo(DeliveryStatus.OUT_FOR_DELIVERY);
     }
 
     // --- getEstimatedArrivalTime ---
