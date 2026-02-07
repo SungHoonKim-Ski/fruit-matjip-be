@@ -17,9 +17,11 @@ import store.onuljang.exception.KakaoPayException;
 import store.onuljang.feign.KakaoPayFeignClient;
 import store.onuljang.feign.dto.request.KakaoPayApproveRequest;
 import store.onuljang.feign.dto.request.KakaoPayCancelRequest;
+import store.onuljang.feign.dto.request.KakaoPayOrderRequest;
 import store.onuljang.feign.dto.request.KakaoPayReadyRequest;
 import store.onuljang.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.feign.dto.reseponse.KakaoPayCancelResponse;
+import store.onuljang.feign.dto.reseponse.KakaoPayOrderResponse;
 import store.onuljang.feign.dto.reseponse.KakaoPayReadyResponse;
 
 @Slf4j
@@ -86,6 +88,16 @@ public class KakaoPayService {
     KakaoPayApproveResponse recoverServerError(FeignException e, KakaoPayApproveRequest request) {
         log.error("카카오페이 결제 승인 재시도 소진: {}", e.getMessage());
         throw new KakaoPayException("카카오페이 결제 승인에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    }
+
+    public KakaoPayOrderResponse order(String tid) {
+        try {
+            KakaoPayOrderRequest request = new KakaoPayOrderRequest(
+                kakaoPayConfigDto.getCid(), tid);
+            return kakaoPayFeignClient.order(buildAuthorizationHeader(), request);
+        } catch (FeignException e) {
+            throw new KakaoPayException("카카오페이 주문 조회에 실패했습니다.");
+        }
     }
 
     public KakaoPayCancelResponse cancel(KakaoPayCancelRequest request) {

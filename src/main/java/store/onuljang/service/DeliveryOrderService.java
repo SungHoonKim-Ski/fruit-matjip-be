@@ -80,6 +80,11 @@ public class DeliveryOrderService {
         return deliveryOrderRepository.findByStatusAndCreatedAtBefore(DeliveryStatus.PENDING_PAYMENT, before);
     }
 
+    public List<DeliveryOrder> findPendingPaymentsWithTid(LocalDateTime before) {
+        return deliveryOrderRepository.findByStatusAndKakaoTidIsNotNullAndCreatedAtBefore(
+                DeliveryStatus.PENDING_PAYMENT, before);
+    }
+
     public List<DeliveryOrder> findPendingPaymentsByUser(Users user) {
         return deliveryOrderRepository.findByUserAndStatus(user, DeliveryStatus.PENDING_PAYMENT);
     }

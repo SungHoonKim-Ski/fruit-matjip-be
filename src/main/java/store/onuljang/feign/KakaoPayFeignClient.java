@@ -6,9 +6,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import store.onuljang.feign.dto.request.KakaoPayApproveRequest;
 import store.onuljang.feign.dto.request.KakaoPayCancelRequest;
+import store.onuljang.feign.dto.request.KakaoPayOrderRequest;
 import store.onuljang.feign.dto.request.KakaoPayReadyRequest;
 import store.onuljang.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.feign.dto.reseponse.KakaoPayCancelResponse;
+import store.onuljang.feign.dto.reseponse.KakaoPayOrderResponse;
 import store.onuljang.feign.dto.reseponse.KakaoPayReadyResponse;
 
 @FeignClient(name = "KAKAO-PAY", url = "${KAKAOPAY.HOST}")
@@ -29,5 +31,11 @@ public interface KakaoPayFeignClient {
     KakaoPayCancelResponse cancel(
         @RequestHeader("Authorization") String authorization,
         @RequestBody KakaoPayCancelRequest body
+    );
+
+    @PostMapping(path = "/online/v1/payment/order", consumes = "application/json")
+    KakaoPayOrderResponse order(
+        @RequestHeader("Authorization") String authorization,
+        @RequestBody KakaoPayOrderRequest body
     );
 }
