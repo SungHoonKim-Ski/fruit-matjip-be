@@ -17,4 +17,9 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
     List<DeliveryOrder> findByStatusAndCreatedAtBefore(DeliveryStatus status, LocalDateTime before);
 
     List<DeliveryOrder> findByUserAndStatus(Users user, DeliveryStatus status);
+
+    List<DeliveryOrder> findByStatusAndAcceptedAtBefore(DeliveryStatus status, LocalDateTime cutoff);
+
+    List<DeliveryOrder> findByStatusAndKakaoTidIsNotNullAndCreatedAtBefore(
+        DeliveryStatus status, LocalDateTime before);
 }

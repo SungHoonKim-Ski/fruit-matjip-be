@@ -84,6 +84,10 @@ public class DeliveryOrderService {
         return deliveryOrderRepository.findByUserAndStatus(user, DeliveryStatus.PENDING_PAYMENT);
     }
 
+    public List<DeliveryOrder> findOutForDeliveryBefore(LocalDateTime cutoff) {
+        return deliveryOrderRepository.findByStatusAndAcceptedAtBefore(DeliveryStatus.OUT_FOR_DELIVERY, cutoff);
+    }
+
     @Transactional
     public void completePaid(long orderId, String approveAid) {
         DeliveryOrder order = findById(orderId);

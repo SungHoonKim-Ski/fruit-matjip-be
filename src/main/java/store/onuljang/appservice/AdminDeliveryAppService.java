@@ -14,6 +14,9 @@ import store.onuljang.service.DeliveryOrderService;
 import store.onuljang.service.DeliveryPaymentService;
 import store.onuljang.service.KakaoPayService;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Slf4j
 @Service
 @Transactional(readOnly = true)
@@ -80,5 +83,12 @@ public class AdminDeliveryAppService {
         }
         order.markCanceled();
         deliveryPaymentService.markCanceled(order);
+    }
+
+    @Transactional
+    public long processAutoCompleteDelivery(LocalDateTime cutoff) {
+        List<DeliveryOrder> orders = deliveryOrderService.findOutForDeliveryBefore(cutoff);
+        orders.forEach(DeliveryOrder::markDelivered);
+        return orders.size();
     }
 }
