@@ -14,7 +14,9 @@ import store.onuljang.config.TestS3Config;
 import store.onuljang.exception.AdminValidateException;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.DeliveryOrderService;
+import store.onuljang.service.ReservationService;
 import store.onuljang.service.KakaoPayService;
 import store.onuljang.support.TestFixture;
 import store.onuljang.util.TimeUtil;
@@ -36,6 +38,9 @@ class AdminDeliveryAppServiceTest {
 
     @Autowired
     DeliveryOrderService deliveryOrderService;
+
+    @Autowired
+    ReservationService reservationService;
 
     @Autowired
     TestFixture testFixture;
@@ -99,7 +104,7 @@ class AdminDeliveryAppServiceTest {
     @DisplayName("OUT_FOR_DELIVERY -> DELIVERED 상태 변경 성공")
     void updateStatus_outForDeliveryToDelivered_success() {
         // given
-        DeliveryOrder order = testFixture.createDeliveryOrder(
+        DeliveryOrder order = testFixture.createDeliveryOrderWithLink(
             user, reservation, DeliveryStatus.OUT_FOR_DELIVERY);
 
         // when
@@ -108,6 +113,9 @@ class AdminDeliveryAppServiceTest {
         // then
         DeliveryOrder updated = deliveryOrderService.findById(order.getId());
         assertThat(updated.getStatus()).isEqualTo(DeliveryStatus.DELIVERED);
+
+        Reservation updatedReservation = reservationService.findById(reservation.getId());
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.PICKED);
     }
 
     @Test
@@ -273,5 +281,25 @@ class AdminDeliveryAppServiceTest {
         DeliveryOrder updated = deliveryOrderService.findById(order.getId());
         assertThat(updated.getEstimatedMinutes()).isEqualTo(30);
         assertThat(updated.getStatus()).isEqualTo(DeliveryStatus.OUT_FOR_DELIVERY);
+    }
+
+    @Test
+    @DisplayName("배달 완료 시 PENDING 상태 예약만 PICKED로 변경")
+    void updateStatus_delivered_onlyPendingReservationsMarkedAsPicked() {
+        // given
+        Admin admin = testFixture.createDefaultAdmin();
+        Product product = testFixture.createTodayProduct("사과", 10, new BigDecimal("20000"), admin);
+        Reservation reservation1 = testFixture.createReservation(user, product, 1);
+        Reservation reservation2 = testFixture.createReservationWithStatus(
+            user, product, 1, ReservationStatus.CANCELED);
+
+        DeliveryOrder order = testFixture.createDeliveryOrderWithLink(user, reservation1, DeliveryStatus.OUT_FOR_DELIVERY);
+
+        // when
+        adminDeliveryAppService.updateStatus(order.getId(), DeliveryStatus.DELIVERED);
+
+        // then
+        Reservation updated1 = reservationService.findById(reservation1.getId());
+        assertThat(updated1.getStatus()).isEqualTo(ReservationStatus.PICKED);
     }
 }

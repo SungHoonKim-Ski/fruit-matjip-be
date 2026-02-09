@@ -10,6 +10,7 @@ import store.onuljang.exception.AdminValidateException;
 import store.onuljang.feign.dto.request.KakaoPayCancelRequest;
 import store.onuljang.repository.entity.DeliveryOrder;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.DeliveryOrderService;
 import store.onuljang.service.DeliveryPaymentService;
 import store.onuljang.service.KakaoPayService;
@@ -64,7 +65,10 @@ public class AdminDeliveryAppService {
     private void applyStatus(DeliveryOrder order, DeliveryStatus nextStatus) {
         switch (nextStatus) {
             case OUT_FOR_DELIVERY -> order.markOutForDelivery();
-            case DELIVERED -> order.markDelivered();
+            case DELIVERED -> {
+                order.markDelivered();
+                markReservationsPicked(order);
+            }
             case CANCELED -> cancelOrder(order);
             default -> throw new AdminValidateException("변경할 수 없는 상태입니다.");
         }
@@ -85,10 +89,19 @@ public class AdminDeliveryAppService {
         deliveryPaymentService.markCanceled(order);
     }
 
+    private void markReservationsPicked(DeliveryOrder order) {
+        order.getReservations().stream()
+            .filter(r -> r.getStatus() == ReservationStatus.PENDING)
+            .forEach(r -> r.changeStatus(ReservationStatus.PICKED));
+    }
+
     @Transactional
     public long processAutoCompleteDelivery(LocalDateTime cutoff) {
         List<DeliveryOrder> orders = deliveryOrderService.findOutForDeliveryBefore(cutoff);
-        orders.forEach(DeliveryOrder::markDelivered);
+        orders.forEach(order -> {
+            order.markDelivered();
+            markReservationsPicked(order);
+        });
         return orders.size();
     }
 }

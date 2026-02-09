@@ -282,10 +282,12 @@ public class TestFixture {
      */
     public DeliveryOrder createDeliveryOrderWithLink(Users user, Reservation reservation, DeliveryStatus status) {
         DeliveryOrder order = createDeliveryOrder(user, reservation, status);
-        deliveryOrderReservationRepository.save(DeliveryOrderReservation.builder()
-            .deliveryOrder(order)
-            .reservation(reservation)
-            .build());
+        DeliveryOrderReservation link = deliveryOrderReservationRepository.save(
+            DeliveryOrderReservation.builder()
+                .deliveryOrder(order)
+                .reservation(reservation)
+                .build());
+        order.getDeliveryOrderReservations().add(link);
         return order;
     }
 }

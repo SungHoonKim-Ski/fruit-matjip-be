@@ -17,7 +17,9 @@ import store.onuljang.repository.entity.Product;
 import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.DeliveryOrderService;
+import store.onuljang.service.ReservationService;
 import store.onuljang.support.TestFixture;
 import store.onuljang.util.TimeUtil;
 
@@ -41,6 +43,9 @@ class DeliveryAutoCompleteTest {
 
     @Autowired
     DeliveryOrderService deliveryOrderService;
+
+    @Autowired
+    ReservationService reservationService;
 
     @Autowired
     TestFixture testFixture;
@@ -196,5 +201,34 @@ class DeliveryAutoCompleteTest {
 
         DeliveryOrder result2 = deliveryOrderService.findById(order2.getId());
         assertThat(result2.getStatus()).isEqualTo(DeliveryStatus.OUT_FOR_DELIVERY);
+    }
+
+    @Test
+    @DisplayName("자동 배달 완료 시 연결된 예약 상태가 PICKED로 변경")
+    void processAutoCompleteDelivery_marksReservationsAsPicked() {
+        // given
+        ZonedDateTime acceptTime = ZonedDateTime.of(
+            LocalDate.of(2026, 2, 7), LocalTime.of(13, 0), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(acceptTime.toInstant(), TimeUtil.KST));
+
+        DeliveryOrder order = testFixture.createDeliveryOrderWithLink(user, reservation, DeliveryStatus.PAID);
+        adminDeliveryAppService.accept(order.getId(), 30);
+
+        // when - 현재 시각 15:00 (acceptedAt 13:00 + 120분 경과)
+        ZonedDateTime nowTime = ZonedDateTime.of(
+            LocalDate.of(2026, 2, 7), LocalTime.of(15, 0), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(nowTime.toInstant(), TimeUtil.KST));
+
+        LocalDateTime cutoff = TimeUtil.nowDateTime().minusMinutes(90);
+        long updated = adminDeliveryAppService.processAutoCompleteDelivery(cutoff);
+
+        // then
+        assertThat(updated).isEqualTo(1);
+
+        DeliveryOrder result = deliveryOrderService.findById(order.getId());
+        assertThat(result.getStatus()).isEqualTo(DeliveryStatus.DELIVERED);
+
+        Reservation updatedReservation = reservationService.findById(reservation.getId());
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.PICKED);
     }
 }
