@@ -8,8 +8,8 @@ import java.time.*;
 public class TimeUtil {
     public static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static Clock clock = Clock.system(KST);
-    public final LocalTime RESERVE_DEADLINE = LocalTime.of(23, 59);
-    public final LocalTime CANCEL_DEADLINE = LocalTime.of(23, 59);
+    public final LocalTime RESERVE_DEADLINE = LocalTime.of(19, 30);
+    public final LocalTime CANCEL_DEADLINE = LocalTime.of(19, 0);
 
     public static void setClock(Clock customClock) {
         clock = customClock;
