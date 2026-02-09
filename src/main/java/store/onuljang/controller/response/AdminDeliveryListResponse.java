@@ -40,6 +40,7 @@ public record AdminDeliveryListResponse(
                         .id(reservation.getId())
                         .productName(reservation.getReservationProductName())
                         .quantity(reservation.getQuantity())
+                        .amount(reservation.getAmount())
                         .build())
                     .toList())
                 .totalAmount(totalAmount)
@@ -60,7 +61,8 @@ public record AdminDeliveryListResponse(
     public record ReservationItem(
         long id,
         String productName,
-        int quantity
+        int quantity,
+        BigDecimal amount
     ) {}
 
     public static AdminDeliveryListResponse from(List<DeliveryOrder> orders) {
