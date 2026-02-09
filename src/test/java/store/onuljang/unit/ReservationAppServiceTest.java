@@ -175,34 +175,6 @@ class ReservationAppServiceTest {
     }
 
     @Nested
-    @DisplayName("selfPick - 셀프 픽업 요청")
-    class SelfPick {
-
-        @Test
-        @DisplayName("경고 횟수 초과 사용자 셀프 픽업 요청 시 예외 발생")
-        void selfPick_ExceedWarnCount_ThrowsException() {
-            // given
-            Users warnedUser = Users.builder().socialId("social-warned").uid(UUID.randomUUID()).name("경고유저").build();
-            warnedUser.modifyName("경고유저");
-            warnedUser.warn(2);
-            ReflectionTestUtils.setField(warnedUser, "id", 3L);
-
-            Reservation reservation = Reservation.builder().user(warnedUser).product(testProduct).quantity(2)
-                    .amount(new BigDecimal("20000")).sellPrice(new BigDecimal("10000")).pickupDate(LocalDate.now())
-                    .build();
-            ReflectionTestUtils.setField(reservation, "id", 1L);
-
-            given(reservationService.findByIdWithLock(1L)).willReturn(reservation);
-            given(productsService.findById(1L)).willReturn(testProduct);
-            given(userService.findByUidWithLock(warnedUser.getUid())).willReturn(warnedUser);
-
-            // when & then
-            assertThatThrownBy(() -> reservationAppService.selfPick(warnedUser.getUid(), 1L))
-                    .isInstanceOf(UserValidateException.class).hasMessageContaining("셀프 수령 취소 가능 횟수를 초과");
-        }
-    }
-
-    @Nested
     @DisplayName("getReservations - 예약 목록 조회")
     class GetReservations {
 

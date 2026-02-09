@@ -223,56 +223,6 @@ class ReservationIntegrationTest extends IntegrationTestBase {
     }
 
     @Nested
-    @DisplayName("PATCH /api/auth/reservations/self-pick/{id} - 셀프 픽업 요청")
-    class RequestSelfPick {
-
-        @Test
-        @DisplayName("셀프 픽업 요청 성공")
-        void requestSelfPick_Success() throws Exception {
-            // given
-            Product product = testFixture.createFutureProduct("테스트상품", 10, new BigDecimal("10000"), 1, admin);
-            Reservation reservation = testFixture.createReservation(user, product, 2);
-
-            // when
-            var response = patchAction("/api/auth/reservations/self-pick/" + reservation.getId(), accessToken);
-
-            // then
-            assertThat(response.isOk()).isTrue();
-        }
-
-        @Test
-        @DisplayName("경고 횟수 초과 사용자 셀프 픽업 요청 시 실패")
-        void requestSelfPick_ExceedWarnCount() throws Exception {
-            // given
-            Users warnedUser = testFixture.createUserWithWarns("경고유저", 2);
-            String warnedUserToken = testFixture.createAccessToken(warnedUser);
-            Product product = testFixture.createFutureProduct("테스트상품", 10, new BigDecimal("10000"), 1, admin);
-            Reservation reservation = testFixture.createReservation(warnedUser, product, 2);
-
-            // when
-            var response = patchAction("/api/auth/reservations/self-pick/" + reservation.getId(), warnedUserToken);
-
-            // then
-            assertThat(response.isBadRequest()).isTrue();
-        }
-
-        @Test
-        @DisplayName("셀프 픽업 불가 상품 요청 시 실패")
-        void requestSelfPick_ProductNotAllowed() throws Exception {
-            // given
-            Product product = testFixture.createNoSelfPickProduct("셀프픽업불가상품", 10, new BigDecimal("10000"), nowDate(),
-                    admin);
-            Reservation reservation = testFixture.createReservation(user, product, 2);
-
-            // when
-            var response = patchAction("/api/auth/reservations/self-pick/" + reservation.getId(), accessToken);
-
-            // then
-            assertThat(response.isBadRequest()).isTrue();
-        }
-    }
-
-    @Nested
     @DisplayName("GET /api/auth/reservations/ - 예약 목록 조회")
     class GetReservations {
 

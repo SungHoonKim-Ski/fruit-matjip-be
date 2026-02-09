@@ -54,17 +54,6 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
-    @Deprecated
-    @PatchMapping("/self-pick/{id}")
-    public ResponseEntity<Void> selfPick(Authentication auth,
-            @Valid @PositiveOrZero @PathVariable("id") Long reservationId) {
-        String uid = auth.getName();
-
-        reservationAppService.selfPick(uid, reservationId);
-
-        return ResponseEntity.ok().build();
-    }
-
     @GetMapping("/")
     public ResponseEntity<ReservationListResponse> getList(Authentication auth,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) @NotNull LocalDate from,

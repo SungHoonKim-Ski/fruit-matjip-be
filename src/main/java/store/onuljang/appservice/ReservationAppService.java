@@ -104,22 +104,6 @@ public class ReservationAppService {
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.DELETE);
     }
 
-    @Transactional
-    @Deprecated
-    public void selfPick(String uId, long reservationId) {
-        Reservation reservation = reservationService.findByIdWithLock(reservationId);
-        Product product = productsService.findById(reservation.getProduct().getId());
-        Users user = userService.findByUidWithLock(uId);
-
-        validateUserReservation(user, reservation);
-        user.assertCanSelfPick();
-        product.assertCanSelfPick();
-
-        reservation.requestSelfPick(TimeUtil.nowDate(), SELF_PICK_DEADLINE, KST);
-
-        saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.UPDATE);
-    }
-
     @Transactional(readOnly = true)
     public ReservationListResponse getReservations(String uId, LocalDate from, LocalDate to) {
         Users user = userService.findByUId(uId);
