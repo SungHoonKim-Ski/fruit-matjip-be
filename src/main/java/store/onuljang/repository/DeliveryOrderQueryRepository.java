@@ -11,6 +11,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import store.onuljang.repository.entity.DeliveryOrder;
+import store.onuljang.repository.entity.enums.DeliveryStatus;
 
 @Repository
 @RequiredArgsConstructor
@@ -25,7 +26,10 @@ public class DeliveryOrderQueryRepository {
             .leftJoin(deliveryOrder.deliveryOrderReservations, deliveryOrderReservation).fetchJoin()
             .leftJoin(deliveryOrderReservation.reservation, reservation).fetchJoin()
             .leftJoin(reservation.productAll, productAll).fetchJoin()
-            .where(deliveryOrder.deliveryDate.eq(deliveryDate))
+            .where(
+                deliveryOrder.deliveryDate.eq(deliveryDate),
+                deliveryOrder.status.notIn(DeliveryStatus.PENDING_PAYMENT, DeliveryStatus.FAILED)
+            )
             .fetch();
     }
 }
