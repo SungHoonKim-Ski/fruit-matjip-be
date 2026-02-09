@@ -19,8 +19,7 @@ public interface UserMessageQueueRepository extends JpaRepository<UserMessageQue
       and m.status = 'PENDING'
       and (m.valid_from is null or m.valid_from <= :now)
       and (m.valid_until is null or m.valid_until >= :now)
-    order by m.id
-    limit 1
+    order by t.priority limit 1
     """,nativeQuery = true)
-    Optional<UserMessageQueue> findFirstPendingWithMessageTemplate(@Param("uid") String uid, @Param("now") LocalDateTime now);
+    Optional<UserMessageQueue> findFirstPendingByUidWithMessageTemplate(@Param("uid") String uid, @Param("now") LocalDateTime now);
 }

@@ -33,7 +33,7 @@ public class UserMessageQueueService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<UserMessageQueue> findFirstPendingWithMessageTemplate(String uid) {
-        return userMessageQueueRepository.findFirstPendingWithMessageTemplate(uid, TimeUtil.nowDateTime());
+    public Optional<UserMessageQueue> findFirstPendingByUid(String uid) {
+        return userMessageQueueRepository.findFirstPendingByUidWithMessageTemplate(uid, TimeUtil.nowDateTime());
     }
 }

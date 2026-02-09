@@ -58,7 +58,7 @@ public class UserAppService {
 
     @Transactional
     public UserMessageResponse getMessage(String uid) {
-        UserMessageQueue message = userMessageQueueService.findFirstPendingWithMessageTemplate(uid)
+        UserMessageQueue message = userMessageQueueService.findFirstPendingByUid(uid)
                 .orElseThrow(() -> new UserNoContentException("유저 메시지가 없습니다."));
 
         message.markSent(TimeUtil.nowDateTime());

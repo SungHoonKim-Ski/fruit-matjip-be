@@ -28,13 +28,17 @@ public class MessageTemplate extends BaseEntity {
     @Enumerated(EnumType.STRING)
     MessageType messageType;
 
+    @Column(nullable = false)
+    private int priority;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
     @Builder
-    public MessageTemplate(String title, String body) {
+    public MessageTemplate(String title, String body, int priority) {
         this.title = title;
         this.body = body;
+        this.priority = priority;
     }
 
     public void update(String title, String body) {
