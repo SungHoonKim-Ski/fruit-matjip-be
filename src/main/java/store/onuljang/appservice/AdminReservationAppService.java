@@ -136,6 +136,9 @@ public class AdminReservationAppService {
             user.warn(target.rows());
             userWarnService.noShows(user, target.rows());
             publishUserNoShowMessage(user.getUid());
+
+            // 5. 이용제한 부여
+            applyRestriction(user, today);
         }
 
         return updateReservationRows;
@@ -187,6 +190,38 @@ public class AdminReservationAppService {
         boolean allSameUser = reservationSet.stream().allMatch(r -> r.getUser().getUid().equals(uid));
         if (!allSameUser) {
             throw new IllegalStateException("동일한 유저의 예약만 한번에 변경할 수 있습니다.");
+        }
+    }
+
+    private void applyRestriction(Users user, LocalDate today) {
+        int warnCount = user.getWarnCount();
+        if (warnCount < 2) {
+            return;
+        }
+
+        LocalDate restrictedUntil = (warnCount == 2)
+                ? today.plusDays(2)
+                : today.plusDays(5);
+
+        user.restrict(restrictedUntil);
+
+        // 6. 제한 기간 내 미래 PENDING 예약 취소
+        cancelFutureReservations(user, today, restrictedUntil);
+    }
+
+    private void cancelFutureReservations(Users user, LocalDate today, LocalDate restrictedUntil) {
+        List<Reservation> futureReservations = reservationService
+                .findFutureReservationsByUserAndPeriod(
+                        user.getUid(), ReservationStatus.PENDING,
+                        today.plusDays(1), restrictedUntil);
+
+        for (Reservation reservation : futureReservations) {
+            reservation.changeStatus(ReservationStatus.CANCELED);
+
+            Product product = productService.findByIdWithLock(reservation.getProduct().getId());
+            product.addStock(reservation.getQuantity());
+
+            user.cancelReserve(reservation.getQuantity(), reservation.getAmount());
         }
     }
 

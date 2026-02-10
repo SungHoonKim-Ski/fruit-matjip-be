@@ -37,6 +37,13 @@ public class AdminCustomerController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/users/{uid}/lift-restriction")
+    public ResponseEntity<Void> liftRestriction(@PathVariable("uid") UUID uid) {
+        adminUserAppService.liftRestriction(uid);
+
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/customers")
     public ResponseEntity<AdminCustomerScrollResponse> getCustomers(@Valid AdminCustomerScrollRequest request) {
         return ResponseEntity.ok(adminUserAppService.getUsers(request));

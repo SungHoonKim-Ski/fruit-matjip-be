@@ -6,6 +6,7 @@ import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.base.BaseEntity;
+import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -50,12 +51,16 @@ public class Users extends BaseEntity {
     private LocalDateTime deletedAt;
 
     @Getter
-    @Column
+    @Column(name = "monthly_warn_count")
     private Integer warnCount = 0;
 
     @Getter
     @Column
     private Integer totalWarnCount = 0;
+
+    @Getter
+    @Column(name = "restricted_until")
+    private LocalDate restrictedUntil;
 
     @Builder
     public Users(String socialId, String name, UUID uid) {
@@ -108,14 +113,16 @@ public class Users extends BaseEntity {
         removeTotalRevenue(amount);
     }
 
-    public boolean exceedMaxWarnCount() {
-        return warnCount >= getMaxWarnCount();
+    public boolean isRestricted() {
+        return restrictedUntil != null && !TimeUtil.nowDate().isAfter(restrictedUntil);
     }
 
-    public void assertCanSelfPick() {
-        if (exceedMaxWarnCount()) {
-            throw new UserValidateException("이번 달 셀프 수령 취소 가능 횟수를 초과했습니다.");
-        }
+    public void restrict(LocalDate until) {
+        this.restrictedUntil = until;
+    }
+
+    public void liftRestriction() {
+        this.restrictedUntil = null;
     }
 
     public void noShow(int quantity, BigDecimal amount) {
@@ -141,9 +148,5 @@ public class Users extends BaseEntity {
         if (!changeName) {
             throw new UserValidateException("닉네임 변경 후 주문이 가능합니다.");
         }
-    }
-
-    private int getMaxWarnCount() {
-        return 2;
     }
 }

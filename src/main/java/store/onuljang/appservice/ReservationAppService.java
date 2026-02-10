@@ -47,6 +47,7 @@ public class ReservationAppService {
         validateReserveTime(product.getSellDate(), product.getSellTime());
 
         Users user = userService.findByUidWithLock(uId);
+        validateNotRestricted(user);
         Reservation reservation = Reservation.builder()
             .user(user)
             .product(product)
@@ -111,6 +112,15 @@ public class ReservationAppService {
         List<Reservation> entities = reservationService
                 .findAllByUserAndPickupDateBetweenWithProductAllAndDeliveryOrderByPickupDateDesc(user, from, to);
         return ReservationListResponse.from(entities);
+    }
+
+    private void validateNotRestricted(Users user) {
+        if (user.isRestricted()) {
+            LocalDate until = user.getRestrictedUntil().plusDays(1);
+            throw new UserValidateException(
+                    String.format("노쇼로 인해 서비스 이용이 제한됩니다. %d/%02d/%02d 이후부터 이용 가능합니다.",
+                            until.getYear(), until.getMonthValue(), until.getDayOfMonth()));
+        }
     }
 
     private void validateUserReservation(Users user, Reservation reservation) {

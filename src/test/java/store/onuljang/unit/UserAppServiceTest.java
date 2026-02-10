@@ -112,49 +112,4 @@ class UserAppServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("canSelfPick - 셀프 픽업 가능 여부")
-    class CanSelfPick {
-
-        @Test
-        @DisplayName("경고 없는 사용자는 true 반환")
-        void canSelfPick_NoWarnings_ReturnsTrue() {
-            // given
-            given(userService.findByUId(testUser.getUid())).willReturn(testUser);
-
-            // when
-            boolean result = userAppService.canSelfPick(testUser.getUid());
-
-            // then
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        @DisplayName("경고 1회 사용자는 true 반환")
-        void canSelfPick_OneWarning_ReturnsTrue() {
-            // given
-            testUser.warn();
-            given(userService.findByUId(testUser.getUid())).willReturn(testUser);
-
-            // when
-            boolean result = userAppService.canSelfPick(testUser.getUid());
-
-            // then
-            assertThat(result).isTrue();
-        }
-
-        @Test
-        @DisplayName("경고 2회 이상 사용자는 false 반환")
-        void canSelfPick_TwoWarnings_ReturnsFalse() {
-            // given
-            testUser.warn(2);
-            given(userService.findByUId(testUser.getUid())).willReturn(testUser);
-
-            // when
-            boolean result = userAppService.canSelfPick(testUser.getUid());
-
-            // then
-            assertThat(result).isFalse();
-        }
-    }
 }

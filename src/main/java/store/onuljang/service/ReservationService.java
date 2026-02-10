@@ -92,6 +92,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
+    public List<Reservation> findFutureReservationsByUserAndPeriod(
+            String uid, ReservationStatus status, LocalDate from, LocalDate to) {
+        return reservationRepository.findByUserUidAndStatusAndPickupDateBetween(uid, status, from, to);
+    }
+
+    @Transactional(readOnly = true)
     public List<ReservationWarnTarget> findAllByPickupDateAndStatus(LocalDate today, ReservationStatus status) {
         return reservationQueryRepository.findWarnTargetsByPickupDateAndStatus(today, status);
     }

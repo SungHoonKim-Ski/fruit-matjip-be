@@ -290,4 +290,16 @@ public class TestFixture {
         order.getDeliveryOrderReservations().add(link);
         return order;
     }
+
+    /**
+     * 기존 배달 주문에 예약 연결 추가
+     */
+    public void linkReservationToDeliveryOrder(DeliveryOrder order, Reservation reservation) {
+        DeliveryOrderReservation link = deliveryOrderReservationRepository.save(
+            DeliveryOrderReservation.builder()
+                .deliveryOrder(order)
+                .reservation(reservation)
+                .build());
+        order.getDeliveryOrderReservations().add(link);
+    }
 }

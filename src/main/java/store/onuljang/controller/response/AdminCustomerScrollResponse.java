@@ -4,6 +4,7 @@ import store.onuljang.repository.entity.Users;
 import store.onuljang.util.Pagination;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public record AdminCustomerScrollResponse(
@@ -22,7 +23,8 @@ public record AdminCustomerScrollResponse(
                 user.getTotalRevenue(),
                 user.getWarnCount(),
                 user.getTotalWarnCount(),
-                user.getLastOrderDate() == null
+                user.getLastOrderDate() == null,
+                user.getRestrictedUntil()
             ))
             .toList();
 
@@ -37,6 +39,7 @@ public record AdminCustomerScrollResponse(
         BigDecimal totalRevenue,
         int monthlyWarnCount,
         int totalWarnCount,
-        boolean firstTimeBuyer
+        boolean firstTimeBuyer,
+        LocalDate restrictedUntil
     ) {}
 }

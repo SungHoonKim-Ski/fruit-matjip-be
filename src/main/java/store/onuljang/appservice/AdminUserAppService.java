@@ -11,13 +11,18 @@ import store.onuljang.controller.request.AdminCustomerScrollRequest;
 import store.onuljang.controller.response.AdminCustomerScrollResponse;
 import store.onuljang.controller.response.AdminCustomerWarnResponse;
 import store.onuljang.event.user_message.UserMessageEvent;
+import store.onuljang.repository.entity.Product;
+import store.onuljang.repository.entity.Reservation;
 import store.onuljang.repository.entity.UserWarn;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.repository.entity.enums.MessageType;
+import store.onuljang.repository.entity.enums.ReservationStatus;
 import store.onuljang.service.*;
 import store.onuljang.util.CursorUtil;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +35,8 @@ public class AdminUserAppService {
     UserService userService;
     UserWarnService userWarnService;
     ApplicationEventPublisher eventPublisher;
+    ReservationService reservationService;
+    ProductsService productsService;
 
     @Transactional(readOnly = true)
     public AdminCustomerScrollResponse getUsers(AdminCustomerScrollRequest request) {
@@ -76,6 +83,9 @@ public class AdminUserAppService {
         user.warn();
         userWarnService.warnByAdmin(user);
 
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        applyRestriction(user, today);
+
         publishUserNoShowMessage(uid);
     }
 
@@ -84,6 +94,44 @@ public class AdminUserAppService {
         Users user = userService.findByUidWithLock(uid.toString());
 
         user.resetWarn();
+    }
+
+    @Transactional
+    public void liftRestriction(UUID uid) {
+        Users user = userService.findByUidWithLock(uid.toString());
+
+        user.liftRestriction();
+    }
+
+    private void applyRestriction(Users user, LocalDate today) {
+        int warnCount = user.getWarnCount();
+        if (warnCount < 2) {
+            return;
+        }
+
+        LocalDate restrictedUntil = (warnCount == 2)
+                ? today.plusDays(2)
+                : today.plusDays(5);
+
+        user.restrict(restrictedUntil);
+
+        cancelFutureReservations(user, today, restrictedUntil);
+    }
+
+    private void cancelFutureReservations(Users user, LocalDate today, LocalDate restrictedUntil) {
+        List<Reservation> futureReservations = reservationService
+                .findFutureReservationsByUserAndPeriod(
+                        user.getUid(), ReservationStatus.PENDING,
+                        today.plusDays(1), restrictedUntil);
+
+        for (Reservation reservation : futureReservations) {
+            reservation.changeStatus(ReservationStatus.CANCELED);
+
+            Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
+            product.addStock(reservation.getQuantity());
+
+            user.cancelReserve(reservation.getQuantity(), reservation.getAmount());
+        }
     }
 
     private void publishUserNoShowMessage(UUID uid) {
