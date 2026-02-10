@@ -22,7 +22,7 @@ import store.onuljang.util.CursorUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZoneId;
+import store.onuljang.util.TimeUtil;
 import java.util.List;
 import java.util.UUID;
 
@@ -83,7 +83,7 @@ public class AdminUserAppService {
         user.warn();
         userWarnService.warnByAdmin(user);
 
-        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        LocalDate today = TimeUtil.nowDate();
         applyRestriction(user, today);
 
         publishUserNoShowMessage(uid);

@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.exception.ProductExceedException;
+import store.onuljang.util.TimeUtil;
 import store.onuljang.exception.ProductUnavailableException;
 import store.onuljang.repository.entity.base.BaseEntity;
 import jakarta.persistence.OrderBy;
@@ -183,7 +184,7 @@ public class Product extends BaseEntity {
     }
 
     public void delete() {
-        this.deletedAt = LocalDateTime.now();
+        this.deletedAt = TimeUtil.nowDateTime();
         this.productDetailImages.forEach(ProductDetailImage::delete);
     }
 

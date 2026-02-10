@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.repository.entity.base.BaseEntity;
+import store.onuljang.util.TimeUtil;
 
 import java.time.LocalDateTime;
 
@@ -34,6 +35,6 @@ public class ProductDetailImage extends BaseEntity {
     private LocalDateTime deletedAt;
 
     public void delete() {
-        this.deletedAt = LocalDateTime.now();
+        this.deletedAt = TimeUtil.nowDateTime();
     }
 }

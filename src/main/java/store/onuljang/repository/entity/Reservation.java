@@ -34,7 +34,7 @@ public class Reservation extends BaseEntity {
 
     @Getter
     @Column(name = "pickup_date", nullable = false)
-    private LocalDate pickupDate = LocalDate.now();
+    private LocalDate pickupDate = TimeUtil.nowDate();
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -68,7 +68,7 @@ public class Reservation extends BaseEntity {
     private ReservationStatus status = ReservationStatus.PENDING;
 
     @Column(name = "status_changed_at", nullable = false)
-    private LocalDateTime statusChangedAt = LocalDateTime.now();
+    private LocalDateTime statusChangedAt = TimeUtil.nowDateTime();
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -83,7 +83,7 @@ public class Reservation extends BaseEntity {
         this.pickupDate = pickupDate;
         this.sellPrice = sellPrice;
         this.status = ReservationStatus.PENDING;
-        this.statusChangedAt = LocalDateTime.now();
+        this.statusChangedAt = TimeUtil.nowDateTime();
     }
 
     public void cancelByUser() {
@@ -137,7 +137,7 @@ public class Reservation extends BaseEntity {
 
     public void changeStatus(ReservationStatus status) {
         this.status = status;
-        statusChangedAt = LocalDateTime.now();
+        statusChangedAt = TimeUtil.nowDateTime();
     }
 
     public String getReservationUserName() {

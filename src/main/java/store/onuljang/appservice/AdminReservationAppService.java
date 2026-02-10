@@ -89,7 +89,7 @@ public class AdminReservationAppService {
         validateBulkReservationsUpdate(reservationList, request.status());
 
         return reservationService.bulkUpdateReservationsStatus(request.reservationIds(), request.status(),
-                LocalDateTime.now(TimeUtil.KST));
+                TimeUtil.nowDateTime());
     }
 
     // batch

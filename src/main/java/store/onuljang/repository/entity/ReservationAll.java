@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.SQLDelete;
 import store.onuljang.repository.entity.base.BaseEntity;
 import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -32,7 +33,7 @@ public class ReservationAll extends BaseEntity {
 
     @Getter
     @Column(name = "pickup_date", nullable = false)
-    private LocalDate pickupDate = LocalDate.now();
+    private LocalDate pickupDate = TimeUtil.nowDate();
 
     @Getter
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -53,7 +54,7 @@ public class ReservationAll extends BaseEntity {
     private ReservationStatus status = ReservationStatus.PENDING;
 
     @Column(name = "status_changed_at", nullable = false)
-    private LocalDateTime statusChangedAt = LocalDateTime.now();
+    private LocalDateTime statusChangedAt = TimeUtil.nowDateTime();
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -69,7 +70,7 @@ public class ReservationAll extends BaseEntity {
 
     public void changeStatus(ReservationStatus status) {
         this.status = status;
-        statusChangedAt = LocalDateTime.now();
+        statusChangedAt = TimeUtil.nowDateTime();
     }
 
     public String getReservationUserName() {
