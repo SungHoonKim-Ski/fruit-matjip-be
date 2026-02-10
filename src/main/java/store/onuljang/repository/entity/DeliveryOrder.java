@@ -128,9 +128,11 @@ public class DeliveryOrder extends BaseEntity {
         if (this.status != DeliveryStatus.PAID && this.status != DeliveryStatus.OUT_FOR_DELIVERY) {
             throw new IllegalStateException("PAID 상태에서만 접수할 수 있습니다.");
         }
-        this.estimatedMinutes = estimatedMinutes;
         this.acceptedAt = TimeUtil.nowDateTime();
-        if (!isScheduled()) {
+        if (isScheduled()) {
+            this.estimatedMinutes = null;
+        } else {
+            this.estimatedMinutes = estimatedMinutes;
             this.status = DeliveryStatus.OUT_FOR_DELIVERY;
         }
     }

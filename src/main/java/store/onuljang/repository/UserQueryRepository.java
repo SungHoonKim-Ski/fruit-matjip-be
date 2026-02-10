@@ -68,7 +68,7 @@ public class UserQueryRepository {
         switch (sortKey) {
             case TOTAL_REVENUE -> applyTotalRevenueCursor(where, sortOrder, cursorValue, cursorId);
             case TOTAL_WARN_COUNT -> applyIntegerCursor(where, users.totalWarnCount, sortOrder, cursorValue, cursorId);
-            case WARN_COUNT -> applyIntegerCursor(where, users.warnCount, sortOrder, cursorValue, cursorId);
+            case WARN_COUNT -> applyIntegerCursor(where, users.monthlyWarnCount, sortOrder, cursorValue, cursorId);
         }
     }
 
@@ -121,7 +121,7 @@ public class UserQueryRepository {
             case TOTAL_WARN_COUNT ->
                 orders.add(sortOrder == SortOrder.DESC ? users.totalWarnCount.desc() : users.totalWarnCount.asc());
             case WARN_COUNT ->
-                orders.add(sortOrder == SortOrder.DESC ? users.warnCount.desc() : users.warnCount.asc());
+                orders.add(sortOrder == SortOrder.DESC ? users.monthlyWarnCount.desc() : users.monthlyWarnCount.asc());
         }
         // 항상 id를 tie-breaker 로 사용
         orders.add(sortOrder == SortOrder.DESC ? users.id.desc() : users.id.asc());
