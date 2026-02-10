@@ -99,6 +99,13 @@ public class DeliveryOrderService {
         if (!order.canMarkPaid()) return;
         order.markPaid();
         deliveryPaymentService.markApproved(order, approveAid);
+        markReservationsPicked(order);
         eventPublisher.publishEvent(new DeliveryPaidEvent(orderId));
+    }
+
+    private void markReservationsPicked(DeliveryOrder order) {
+        order.getReservations().stream()
+            .filter(r -> r.getStatus() == store.onuljang.repository.entity.enums.ReservationStatus.PENDING)
+            .forEach(r -> r.changeStatus(store.onuljang.repository.entity.enums.ReservationStatus.PICKED));
     }
 }

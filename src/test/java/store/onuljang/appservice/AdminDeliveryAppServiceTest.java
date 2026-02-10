@@ -104,6 +104,8 @@ class AdminDeliveryAppServiceTest {
     @DisplayName("OUT_FOR_DELIVERY -> DELIVERED 상태 변경 성공")
     void updateStatus_outForDeliveryToDelivered_success() {
         // given
+        // 예약은 이미 PAID 시점에 PICKED로 변경되었음
+        reservation.changeStatus(ReservationStatus.PICKED);
         DeliveryOrder order = testFixture.createDeliveryOrderWithLink(
             user, reservation, DeliveryStatus.OUT_FOR_DELIVERY);
 
@@ -114,6 +116,7 @@ class AdminDeliveryAppServiceTest {
         DeliveryOrder updated = deliveryOrderService.findById(order.getId());
         assertThat(updated.getStatus()).isEqualTo(DeliveryStatus.DELIVERED);
 
+        // DELIVERED 시점에는 예약 상태 변경이 없음 (이미 PICKED 상태 유지)
         Reservation updatedReservation = reservationService.findById(reservation.getId());
         assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.PICKED);
     }
@@ -284,21 +287,20 @@ class AdminDeliveryAppServiceTest {
     }
 
     @Test
-    @DisplayName("배달 완료 시 PENDING 상태 예약만 PICKED로 변경")
-    void updateStatus_delivered_onlyPendingReservationsMarkedAsPicked() {
+    @DisplayName("배달 완료 시 예약 상태 변경 없음 (이미 PAID 시점에 PICKED 처리됨)")
+    void updateStatus_delivered_noReservationStatusChange() {
         // given
         Admin admin = testFixture.createDefaultAdmin();
         Product product = testFixture.createTodayProduct("사과", 10, new BigDecimal("20000"), admin);
-        Reservation reservation1 = testFixture.createReservation(user, product, 1);
-        Reservation reservation2 = testFixture.createReservationWithStatus(
-            user, product, 1, ReservationStatus.CANCELED);
+        // 예약은 이미 PAID 시점에 PICKED로 변경되었음
+        Reservation reservation1 = testFixture.createReservationWithStatus(user, product, 1, ReservationStatus.PICKED);
 
         DeliveryOrder order = testFixture.createDeliveryOrderWithLink(user, reservation1, DeliveryStatus.OUT_FOR_DELIVERY);
 
         // when
         adminDeliveryAppService.updateStatus(order.getId(), DeliveryStatus.DELIVERED);
 
-        // then
+        // then - DELIVERED 시점에는 예약 상태 변경이 없음
         Reservation updated1 = reservationService.findById(reservation1.getId());
         assertThat(updated1.getStatus()).isEqualTo(ReservationStatus.PICKED);
     }

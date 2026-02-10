@@ -65,10 +65,7 @@ public class AdminDeliveryAppService {
     private void applyStatus(DeliveryOrder order, DeliveryStatus nextStatus) {
         switch (nextStatus) {
             case OUT_FOR_DELIVERY -> order.markOutForDelivery();
-            case DELIVERED -> {
-                order.markDelivered();
-                markReservationsPicked(order);
-            }
+            case DELIVERED -> order.markDelivered();
             case CANCELED -> cancelOrder(order);
             default -> throw new AdminValidateException("변경할 수 없는 상태입니다.");
         }
@@ -87,21 +84,19 @@ public class AdminDeliveryAppService {
         }
         order.markCanceled();
         deliveryPaymentService.markCanceled(order);
+        restoreReservationsToPending(order);
     }
 
-    private void markReservationsPicked(DeliveryOrder order) {
+    private void restoreReservationsToPending(DeliveryOrder order) {
         order.getReservations().stream()
-            .filter(r -> r.getStatus() == ReservationStatus.PENDING)
-            .forEach(r -> r.changeStatus(ReservationStatus.PICKED));
+            .filter(r -> r.getStatus() == ReservationStatus.PICKED)
+            .forEach(r -> r.changeStatus(ReservationStatus.PENDING));
     }
 
     @Transactional
     public long processAutoCompleteDelivery(LocalDateTime cutoff) {
         List<DeliveryOrder> orders = deliveryOrderService.findOutForDeliveryBefore(cutoff);
-        orders.forEach(order -> {
-            order.markDelivered();
-            markReservationsPicked(order);
-        });
+        orders.forEach(DeliveryOrder::markDelivered);
         return orders.size();
     }
 }

@@ -204,13 +204,15 @@ class DeliveryAutoCompleteTest {
     }
 
     @Test
-    @DisplayName("자동 배달 완료 시 연결된 예약 상태가 PICKED로 변경")
-    void processAutoCompleteDelivery_marksReservationsAsPicked() {
+    @DisplayName("자동 배달 완료 시 예약 상태 변경 없음 (이미 PAID 시점에 PICKED 처리됨)")
+    void processAutoCompleteDelivery_noReservationStatusChange() {
         // given
         ZonedDateTime acceptTime = ZonedDateTime.of(
             LocalDate.of(2026, 2, 7), LocalTime.of(13, 0), TimeUtil.KST);
         TimeUtil.setClock(Clock.fixed(acceptTime.toInstant(), TimeUtil.KST));
 
+        // 예약은 이미 PAID 시점에 PICKED로 변경되었음
+        reservation.changeStatus(ReservationStatus.PICKED);
         DeliveryOrder order = testFixture.createDeliveryOrderWithLink(user, reservation, DeliveryStatus.PAID);
         adminDeliveryAppService.accept(order.getId(), 30);
 
@@ -228,6 +230,7 @@ class DeliveryAutoCompleteTest {
         DeliveryOrder result = deliveryOrderService.findById(order.getId());
         assertThat(result.getStatus()).isEqualTo(DeliveryStatus.DELIVERED);
 
+        // 자동 완료 시점에는 예약 상태 변경이 없음 (이미 PICKED 상태 유지)
         Reservation updatedReservation = reservationService.findById(reservation.getId());
         assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.PICKED);
     }
