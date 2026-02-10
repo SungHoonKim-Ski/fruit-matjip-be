@@ -15,5 +15,7 @@ public record DeliveryReadyRequest(
     String address2,
     @NotNull Double latitude,
     @NotNull Double longitude,
+    @Min(0) @Max(23) Integer scheduledDeliveryHour,
+    @Min(0) @Max(59) Integer scheduledDeliveryMinute,
     @NotBlank String idempotencyKey
 ) {}

@@ -88,6 +88,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "101호",
             storeLat,
             storeLng,
+            null,
+            null,
             "test-key-1"
         );
 
@@ -123,6 +125,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "101호",
             otherLat,
             otherLng,
+            null,
+            null,
             "test-key-2"
         );
 
@@ -155,6 +159,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "101호",
             storeLat + 10.0,
             storeLng + 10.0,
+            null,
+            null,
             "test-key-3"
         );
 
@@ -202,6 +208,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             12, 0,
             "01012345678", "12345", ADDRESS, "101호",
             storeLat, storeLng,
+            null, null,
             "test-key-cancel-1"
         );
 
@@ -232,6 +239,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             12, 0,
             "01012345678", "12345", ADDRESS, "101호",
             storeLat, storeLng,
+            null, null,
             "test-key-cancel-2"
         );
 

@@ -17,7 +17,9 @@ public record UserDeliveryOrderResponse(
     int deliveryHour,
     int deliveryMinute,
     Integer estimatedMinutes,
-    LocalDateTime acceptedAt
+    LocalDateTime acceptedAt,
+    Integer scheduledDeliveryHour,
+    Integer scheduledDeliveryMinute
 ) {
     public static UserDeliveryOrderResponse from(DeliveryOrder order, Reservation reservation) {
         return UserDeliveryOrderResponse.builder()
@@ -29,6 +31,8 @@ public record UserDeliveryOrderResponse(
             .deliveryMinute(order.getDeliveryMinute())
             .estimatedMinutes(order.getEstimatedMinutes())
             .acceptedAt(order.getAcceptedAt())
+            .scheduledDeliveryHour(order.getScheduledDeliveryHour())
+            .scheduledDeliveryMinute(order.getScheduledDeliveryMinute())
             .build();
     }
 

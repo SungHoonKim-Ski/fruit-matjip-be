@@ -91,6 +91,7 @@ public class DeliveryAppService {
         // 2) 배달 가능 여부 및 시간 검증
         deliveryValidator.validateReservations(user, reservations);
         deliveryValidator.validateDeliveryTime(request.deliveryHour(), request.deliveryMinute());
+        deliveryValidator.validateScheduledDelivery(request.scheduledDeliveryHour(), request.scheduledDeliveryMinute());
 
         // 3) 주소 → 좌표 변환 및 배달비 산정
         DeliveryFeeCalculator.FeeResult feeResult = deliveryFeeCalculator.calculate(request.latitude(), request.longitude());
@@ -211,6 +212,8 @@ public class DeliveryAppService {
                 .latitude(request.latitude())
                 .longitude(request.longitude())
                 .idempotencyKey(request.idempotencyKey())
+                .scheduledDeliveryHour(request.scheduledDeliveryHour())
+                .scheduledDeliveryMinute(request.scheduledDeliveryMinute())
                 .build());
     }
 

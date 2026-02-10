@@ -108,8 +108,20 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "accepted_at")
     private LocalDateTime acceptedAt;
 
+    @Getter
+    @Column(name = "scheduled_delivery_hour")
+    private Integer scheduledDeliveryHour;
+
+    @Getter
+    @Column(name = "scheduled_delivery_minute")
+    private Integer scheduledDeliveryMinute;
+
     public void setKakaoTid(String kakaoTid) {
         this.kakaoTid = kakaoTid;
+    }
+
+    public boolean isScheduled() {
+        return scheduledDeliveryHour != null;
     }
 
     public void accept(int estimatedMinutes) {

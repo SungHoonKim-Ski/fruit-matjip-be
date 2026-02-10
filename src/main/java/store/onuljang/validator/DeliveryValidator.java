@@ -18,6 +18,7 @@ import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -30,6 +31,12 @@ public class DeliveryValidator {
     DeliveryConfigService deliveryConfigService;
 
     public void validateReservations(Users user, List<Reservation> reservations) {
+        if (user.isRestricted()) {
+            java.time.LocalDate until = user.getRestrictedUntil().plusDays(1);
+            throw new UserValidateException(
+                    String.format("노쇼로 인해 서비스 이용이 제한됩니다. %d/%02d/%02d 이후부터 이용 가능합니다.",
+                            until.getYear(), until.getMonthValue(), until.getDayOfMonth()));
+        }
         DeliveryConfigSnapshot config = deliveryConfigService.getConfig();
         if (!config.enabled()) {
             throw new UserValidateException("현재 배달 주문이 중단되어 있습니다.");
@@ -88,6 +95,54 @@ public class DeliveryValidator {
         if (totalProductAmount.compareTo(config.minAmount()) < 0) {
             throw new UserValidateException("배달 주문은 " + MathUtil.formatAmount(config.minAmount())
                 + "원 이상부터 가능합니다.");
+        }
+    }
+
+    public void validateScheduledDelivery(Integer scheduledHour, Integer scheduledMinute) {
+        if (scheduledHour == null) {
+            return;
+        }
+        int safeMinute = scheduledMinute != null ? scheduledMinute : 0;
+        DeliveryConfigSnapshot config = deliveryConfigService.getConfig();
+
+        // 슬롯: (startHour:startMinute + 1h) ~ last valid slot within endHour:endMinute, 1시간 간격
+        int startTotal = config.startHour() * 60 + config.startMinute();
+        int endTotal = config.endHour() * 60 + config.endMinute();
+        int minSlotTotal = startTotal + 60;
+        int scheduledTotal = scheduledHour * 60 + safeMinute;
+
+        // 접수 마감: endTotal - 60분 이후 접수 불가
+        int cutoffTotal = endTotal - 60;
+        LocalDateTime now = TimeUtil.nowDateTime();
+        int currentTotal = now.getHour() * 60 + now.getMinute();
+
+        if (currentTotal >= cutoffTotal) {
+            throw new UserValidateException(
+                "예약배달은 " + TimeUtil.formatTime(cutoffTotal / 60, cutoffTotal % 60) + "까지만 접수 가능합니다.");
+        }
+
+        // 슬롯 유효성 검증 (startMinute과 동일한 분이어야 함)
+        if (safeMinute != config.startMinute()) {
+            throw new UserValidateException(
+                "예약배달 시간은 " + config.startMinute() + "분 단위여야 합니다.");
+        }
+
+        // 슬롯 범위 검증: minSlot ~ endTotal 사이, 그리고 1시간 간격으로 유효한 슬롯
+        if (scheduledTotal < minSlotTotal) {
+            throw new UserValidateException(
+                "예약배달 시간은 " + TimeUtil.formatTime(minSlotTotal / 60, minSlotTotal % 60)
+                    + " 이후여야 합니다.");
+        }
+        if (scheduledTotal > endTotal) {
+            throw new UserValidateException(
+                "예약배달 시간은 " + TimeUtil.formatTime(endTotal / 60, endTotal % 60)
+                    + " 이전이어야 합니다.");
+        }
+
+        // 최소 1시간 이후
+        int remainingMinutes = scheduledTotal - currentTotal;
+        if (remainingMinutes < 60) {
+            throw new UserValidateException("예약배달은 현재 시간 기준 최소 1시간 이후 선택 가능합니다.");
         }
     }
 

@@ -81,6 +81,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
             12, 0,
             "01012345678", "12345", "서울 강서구 테스트로", "101호",
             STORE_LAT, STORE_LNG,
+            null, null,
             "e2e-test-key-1"
         );
 
@@ -178,6 +179,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
             12, 0,
             "01012345678", "12345", "서울 강서구 테스트로", "101호",
             STORE_LAT, STORE_LNG,
+            null, null,
             "e2e-test-key-invalid"
         );
 

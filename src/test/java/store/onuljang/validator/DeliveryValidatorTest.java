@@ -269,4 +269,140 @@ class DeliveryValidatorTest {
             .isInstanceOf(UserValidateException.class)
             .hasMessageContaining("원 이상부터 가능");
     }
+
+    // --- validateScheduledDelivery ---
+
+    @Test
+    @DisplayName("예약배달 시간이 null이면 일반배달로 검증 통과")
+    void validateScheduledDelivery_null_passes() {
+        // given - 일반배달 (scheduledHour = null)
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateScheduledDelivery(null, null))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("유효한 예약배달 시간은 검증 통과")
+    void validateScheduledDelivery_validHour_passes() {
+        // given - 현재 10:00, 슬롯 15시 (5시간 남음, minSlot=13, maxSlot=19)
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateScheduledDelivery(15, 0))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("최소 슬롯(startHour+1)과 동일하면 통과")
+    void validateScheduledDelivery_minSlot_passes() {
+        // given - 현재 10:00, minSlot=13 (3시간 남음)
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateScheduledDelivery(13, 0))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("최대 슬롯(endHour)과 동일하면 통과")
+    void validateScheduledDelivery_maxSlot_passes() {
+        // given - 현재 10:00, maxSlot=19 (9시간 남음)
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateScheduledDelivery(19, 0))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("최소 슬롯 미만이면 예외")
+    void validateScheduledDelivery_belowMinSlot_throwsException() {
+        // given - minSlot=13, 요청=12
+        // when / then
+        assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(12, 0))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("예약배달 시간은");
+    }
+
+    @Test
+    @DisplayName("최대 슬롯 초과이면 예외")
+    void validateScheduledDelivery_aboveMaxSlot_throwsException() {
+        // given - maxSlot=19, 요청=20
+        // when / then
+        assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(20, 0))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("예약배달 시간은");
+    }
+
+    @Test
+    @DisplayName("접수 마감 시간(endHour-1) 이후에는 예약배달 불가")
+    void validateScheduledDelivery_afterCutoff_throwsException() {
+        // given - cutoff=18:30 (endTime 19:30 - 1시간), 현재 18:30으로 변경
+        ZonedDateTime late = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 21), LocalTime.of(18, 30), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(late.toInstant(), TimeUtil.KST));
+
+        // when / then
+        assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(19, 0))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("까지만 접수 가능");
+    }
+
+    @Test
+    @DisplayName("접수 마감 직전(cutoff - 1분)에는 예약배달 가능")
+    void validateScheduledDelivery_justBeforeCutoff_passes() {
+        // given - cutoff=18:30, 현재 17:29로 변경, 슬롯 19:00 (91분 남음)
+        ZonedDateTime beforeCutoff = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 21), LocalTime.of(17, 29), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(beforeCutoff.toInstant(), TimeUtil.KST));
+
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateScheduledDelivery(19, 0))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("현재 시간 기준 1시간 미만 슬롯은 예외")
+    void validateScheduledDelivery_lessThanOneHour_throwsException() {
+        // given - 현재 13:30, 슬롯 14시 (30분 남음)
+        ZonedDateTime now = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 21), LocalTime.of(13, 30), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(now.toInstant(), TimeUtil.KST));
+
+        // when / then
+        assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(14, 0))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("최소 1시간 이후");
+    }
+
+    @Test
+    @DisplayName("현재 시간 기준 정확히 1시간 슬롯은 통과")
+    void validateScheduledDelivery_exactlyOneHour_passes() {
+        // given - 현재 14:00, 슬롯 15시 (정확히 60분)
+        ZonedDateTime now = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 21), LocalTime.of(14, 0), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(now.toInstant(), TimeUtil.KST));
+
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateScheduledDelivery(15, 0))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("현재 시간 기준 59분 남은 슬롯은 예외")
+    void validateScheduledDelivery_59minutes_throwsException() {
+        // given - 현재 14:01, 슬롯 15시 (59분 남음)
+        ZonedDateTime now = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 21), LocalTime.of(14, 1), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(now.toInstant(), TimeUtil.KST));
+
+        // when / then
+        assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(15, 0))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("최소 1시간 이후");
+    }
+
+    @Test
+    @DisplayName("슬롯의 분이 startMinute과 다르면 예외")
+    void validateScheduledDelivery_wrongMinute_throwsException() {
+        // given - startMinute=0인데 30분으로 요청
+        // when / then
+        assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(15, 30))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("분 단위");
+    }
 }

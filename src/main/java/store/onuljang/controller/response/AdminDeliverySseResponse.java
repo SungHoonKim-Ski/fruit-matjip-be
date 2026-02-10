@@ -29,7 +29,8 @@ public record AdminDeliverySseResponse(
     BigDecimal distanceKm,
     BigDecimal deliveryFee,
     LocalDateTime paidAt, // 영수증 출력용 결제 시각
-    Integer scheduledDeliveryHour
+    Integer scheduledDeliveryHour,
+    Integer scheduledDeliveryMinute
 ) {
     @Builder
     public record ReservationItem(
@@ -68,6 +69,7 @@ public record AdminDeliverySseResponse(
             .deliveryFee(order.getDeliveryFee())
             .paidAt(order.getPaidAt())
             .scheduledDeliveryHour(order.getScheduledDeliveryHour())
+            .scheduledDeliveryMinute(order.getScheduledDeliveryMinute())
             .build();
     }
 }
