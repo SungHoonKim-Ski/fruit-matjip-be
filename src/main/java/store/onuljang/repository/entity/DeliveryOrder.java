@@ -130,7 +130,9 @@ public class DeliveryOrder extends BaseEntity {
         }
         this.estimatedMinutes = estimatedMinutes;
         this.acceptedAt = TimeUtil.nowDateTime();
-        this.status = DeliveryStatus.OUT_FOR_DELIVERY;
+        if (!isScheduled()) {
+            this.status = DeliveryStatus.OUT_FOR_DELIVERY;
+        }
     }
 
     public LocalDateTime getEstimatedArrivalTime() {

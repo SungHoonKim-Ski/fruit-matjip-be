@@ -15,8 +15,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * 사용자 정보 API 통합 테스트
  *
  * API Spec: - PATCH /api/auth/name/{name} - 닉네임 변경 - GET /api/auth/name/{name}
- * - 닉네임 존재 확인 - GET /api/auth/reservation/self-pick - 셀프 픽업 가능 여부 확인 - GET
- * /api/auth/message - 메시지 조회 - PATCH /api/auth/message/{messageId} - 메시지 수신 확인
+ * - 닉네임 존재 확인 - GET /api/auth/message - 메시지 조회
+ * - PATCH /api/auth/message/{messageId} - 메시지 수신 확인
  */
 class UserIntegrationTest extends IntegrationTestBase {
 
@@ -134,52 +134,6 @@ class UserIntegrationTest extends IntegrationTestBase {
             // then
             assertThat(response.isOk()).isTrue();
             assertThat(response.body()).isFalse();
-        }
-    }
-
-    @Nested
-    @DisplayName("GET /api/auth/reservation/self-pick - 셀프 픽업 가능 여부")
-    class CanSelfPick {
-
-        @Test
-        @DisplayName("경고 없는 사용자는 셀프 픽업 가능")
-        void canSelfPick_NoWarnings() throws Exception {
-            // when
-            var response = getAction("/api/auth/reservation/self-pick", accessToken, Boolean.class);
-
-            // then
-            assertThat(response.isOk()).isTrue();
-            assertThat(response.body()).isTrue();
-        }
-
-        @Test
-        @DisplayName("경고 2회 이상 사용자는 셀프 픽업 불가")
-        void canSelfPick_TooManyWarnings() throws Exception {
-            // given
-            Users warnedUser = testFixture.createUserWithWarns("경고유저", 2);
-            String warnedUserToken = testFixture.createAccessToken(warnedUser);
-
-            // when
-            var response = getAction("/api/auth/reservation/self-pick", warnedUserToken, Boolean.class);
-
-            // then
-            assertThat(response.isOk()).isTrue();
-            assertThat(response.body()).isFalse();
-        }
-
-        @Test
-        @DisplayName("경고 1회 사용자는 셀프 픽업 가능")
-        void canSelfPick_OneWarning() throws Exception {
-            // given
-            Users warnedUser = testFixture.createUserWithWarns("경고유저", 1);
-            String warnedUserToken = testFixture.createAccessToken(warnedUser);
-
-            // when
-            var response = getAction("/api/auth/reservation/self-pick", warnedUserToken, Boolean.class);
-
-            // then
-            assertThat(response.isOk()).isTrue();
-            assertThat(response.body()).isTrue();
         }
     }
 
