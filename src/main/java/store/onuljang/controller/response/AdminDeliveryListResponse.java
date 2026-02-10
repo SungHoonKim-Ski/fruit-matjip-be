@@ -27,7 +27,11 @@ public record AdminDeliveryListResponse(
         String address1,
         String address2,
         BigDecimal distanceKm,
-        BigDecimal deliveryFee
+        BigDecimal deliveryFee,
+        int deliveryHour, // 영수증 출력용 배달 시간
+        int deliveryMinute, // 영수증 출력용 배달 분
+        LocalDateTime paidAt, // 영수증 출력용 결제 시각
+        Integer scheduledDeliveryHour
     ) {
         public static AdminDeliveryResponse from(DeliveryOrder order) {
             List<Reservation> reservations = order.getReservations();
@@ -53,6 +57,10 @@ public record AdminDeliveryListResponse(
                 .address2(order.getAddress2())
                 .distanceKm(order.getDistanceKm())
                 .deliveryFee(order.getDeliveryFee())
+                .deliveryHour(order.getDeliveryHour())
+                .deliveryMinute(order.getDeliveryMinute())
+                .paidAt(order.getPaidAt())
+                .scheduledDeliveryHour(order.getScheduledDeliveryHour())
                 .build();
         }
     }

@@ -27,10 +27,17 @@ public record AdminDeliverySseResponse(
     String address1,
     String address2,
     BigDecimal distanceKm,
-    BigDecimal deliveryFee
+    BigDecimal deliveryFee,
+    LocalDateTime paidAt, // 영수증 출력용 결제 시각
+    Integer scheduledDeliveryHour
 ) {
     @Builder
-    public record ReservationItem(long id, String productName, int quantity) {}
+    public record ReservationItem(
+        long id,
+        String productName,
+        int quantity,
+        BigDecimal amount // 영수증 출력용 개별 상품 금액
+    ) {}
 
     public static AdminDeliverySseResponse from(DeliveryOrder order) {
         List<Reservation> reservations = order.getReservations();
@@ -50,6 +57,7 @@ public record AdminDeliverySseResponse(
                     .id(r.getId())
                     .productName(r.getReservationProductName())
                     .quantity(r.getQuantity())
+                    .amount(r.getAmount())
                     .build())
                 .toList())
             .totalAmount(order.getTotalAmount())
@@ -58,6 +66,8 @@ public record AdminDeliverySseResponse(
             .address2(order.getAddress2())
             .distanceKm(order.getDistanceKm())
             .deliveryFee(order.getDeliveryFee())
+            .paidAt(order.getPaidAt())
+            .scheduledDeliveryHour(order.getScheduledDeliveryHour())
             .build();
     }
 }
