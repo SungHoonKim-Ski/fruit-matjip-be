@@ -194,12 +194,12 @@ public class AdminReservationAppService {
     }
 
     private void applyRestriction(Users user, LocalDate today) {
-        int warnCount = user.getWarnCount();
-        if (warnCount < 2) {
+        int monthlyWarnCount = user.getMonthlyWarnCount();
+        if (monthlyWarnCount < 2) {
             return;
         }
 
-        LocalDate restrictedUntil = (warnCount == 2)
+        LocalDate restrictedUntil = (monthlyWarnCount == 2)
                 ? today.plusDays(2)
                 : today.plusDays(5);
 

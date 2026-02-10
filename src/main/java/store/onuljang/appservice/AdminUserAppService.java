@@ -57,7 +57,7 @@ public class AdminUserAppService {
             BigDecimal sortValue = switch (request.sortKey()) {
                 case TOTAL_REVENUE -> last.getTotalRevenue();
                 case TOTAL_WARN_COUNT -> BigDecimal.valueOf(last.getTotalWarnCount());
-                case WARN_COUNT -> BigDecimal.valueOf(last.getWarnCount());
+                case WARN_COUNT -> BigDecimal.valueOf(last.getMonthlyWarnCount());
             };
             String nextCursor = CursorUtil.encode(last.getId(), sortValue);
             users = users.subList(0, request.limit());
@@ -104,7 +104,7 @@ public class AdminUserAppService {
     }
 
     private void applyRestriction(Users user, LocalDate today) {
-        int warnCount = user.getWarnCount();
+        int warnCount = user.getMonthlyWarnCount();
         if (warnCount < 2) {
             return;
         }

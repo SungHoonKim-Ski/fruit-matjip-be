@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static store.onuljang.controller.request.AdminCustomerSortKey.*;
 import static store.onuljang.repository.entity.QUsers.users;
 
 @Repository

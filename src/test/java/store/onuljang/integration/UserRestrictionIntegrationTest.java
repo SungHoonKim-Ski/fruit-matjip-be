@@ -78,7 +78,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
 
             // Assert
             Users updatedUser = userRepository.findByUid(user.getUid()).orElseThrow();
-            assertThat(updatedUser.getWarnCount()).isEqualTo(1);
+            assertThat(updatedUser.getMonthlyWarnCount()).isEqualTo(1);
             assertThat(updatedUser.getRestrictedUntil()).isNull();
         }
 
@@ -98,7 +98,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
 
             // Assert
             Users updatedUser = userRepository.findByUid(user.getUid()).orElseThrow();
-            assertThat(updatedUser.getWarnCount()).isEqualTo(2);
+            assertThat(updatedUser.getMonthlyWarnCount()).isEqualTo(2);
             assertThat(updatedUser.getRestrictedUntil()).isEqualTo(today.plusDays(2));
         }
 
@@ -118,7 +118,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
 
             // Assert
             Users updatedUser = userRepository.findByUid(user.getUid()).orElseThrow();
-            assertThat(updatedUser.getWarnCount()).isEqualTo(3);
+            assertThat(updatedUser.getMonthlyWarnCount()).isEqualTo(3);
             assertThat(updatedUser.getRestrictedUntil()).isEqualTo(today.plusDays(5));
         }
 
@@ -276,7 +276,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
 
             // Assert
             Users updatedUser = userRepository.findByUid(user.getUid()).orElseThrow();
-            assertThat(updatedUser.getWarnCount()).isEqualTo(2);
+            assertThat(updatedUser.getMonthlyWarnCount()).isEqualTo(2);
             assertThat(updatedUser.getRestrictedUntil()).isEqualTo(today.plusDays(2));
         }
 
@@ -302,7 +302,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
 
             // Assert
             Users updatedUser = userRepository.findByUid(user.getUid()).orElseThrow();
-            assertThat(updatedUser.getWarnCount()).isEqualTo(3);
+            assertThat(updatedUser.getMonthlyWarnCount()).isEqualTo(3);
             assertThat(updatedUser.getRestrictedUntil()).isEqualTo(today.plusDays(5));
 
             // 미래 예약 취소 확인

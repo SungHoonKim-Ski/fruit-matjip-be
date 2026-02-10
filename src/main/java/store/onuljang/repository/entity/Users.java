@@ -52,7 +52,7 @@ public class Users extends BaseEntity {
 
     @Getter
     @Column(name = "monthly_warn_count")
-    private Integer warnCount = 0;
+    private Integer monthlyWarnCount = 0;
 
     @Getter
     @Column
@@ -69,7 +69,7 @@ public class Users extends BaseEntity {
         this.name = name;
         this.totalRevenue = BigDecimal.ZERO;
         this.totalOrders = 0L;
-        this.warnCount = 0;
+        this.monthlyWarnCount = 0;
         this.totalWarnCount = 0;
         this.changeName = false;
     }
@@ -131,17 +131,17 @@ public class Users extends BaseEntity {
     }
 
     public void resetWarn() {
-        warnCount = 0;
+        monthlyWarnCount = 0;
     }
 
     public void warn() {
         totalWarnCount++;
-        warnCount++;
+        monthlyWarnCount++;
     }
 
     public void warn(int time) {
         totalWarnCount += time;
-        warnCount += time;
+        monthlyWarnCount += time;
     }
 
     private void assertNicknameChanged() {

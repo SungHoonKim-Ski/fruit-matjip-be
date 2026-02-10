@@ -29,7 +29,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(
         "update Users u " +
-        "set u.warnCount = 0"
+        "set u.monthlyWarnCount = 0"
     )
     int resetAllUsersWarnCounts();
 

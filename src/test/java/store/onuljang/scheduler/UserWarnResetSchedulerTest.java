@@ -42,9 +42,9 @@ class UserWarnResetSchedulerTest {
         Users user2 = testFixture.createUserWithWarns("유저2", 3);
         Users user3 = testFixture.createUser("유저3"); // 경고 없음
 
-        assertThat(user1.getWarnCount()).isEqualTo(2);
-        assertThat(user2.getWarnCount()).isEqualTo(3);
-        assertThat(user3.getWarnCount()).isEqualTo(0);
+        assertThat(user1.getMonthlyWarnCount()).isEqualTo(2);
+        assertThat(user2.getMonthlyWarnCount()).isEqualTo(3);
+        assertThat(user3.getMonthlyWarnCount()).isEqualTo(0);
 
         // when
         userWarnResetScheduler.resetMonthlyWarnCount();
@@ -54,9 +54,9 @@ class UserWarnResetSchedulerTest {
         Users updatedUser2 = userRepository.findById(user2.getId()).orElseThrow();
         Users updatedUser3 = userRepository.findById(user3.getId()).orElseThrow();
 
-        assertThat(updatedUser1.getWarnCount()).isEqualTo(0);
-        assertThat(updatedUser2.getWarnCount()).isEqualTo(0);
-        assertThat(updatedUser3.getWarnCount()).isEqualTo(0);
+        assertThat(updatedUser1.getMonthlyWarnCount()).isEqualTo(0);
+        assertThat(updatedUser2.getMonthlyWarnCount()).isEqualTo(0);
+        assertThat(updatedUser3.getMonthlyWarnCount()).isEqualTo(0);
     }
 
     @Test

@@ -21,7 +21,7 @@ public record AdminCustomerScrollResponse(
                 user.getUid(),
                 user.getName(),
                 user.getTotalRevenue(),
-                user.getWarnCount(),
+                user.getMonthlyWarnCount(),
                 user.getTotalWarnCount(),
                 user.getLastOrderDate() == null,
                 user.getRestrictedUntil()
