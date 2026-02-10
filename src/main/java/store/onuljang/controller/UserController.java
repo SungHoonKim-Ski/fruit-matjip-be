@@ -9,6 +9,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.appservice.UserAppService;
+import store.onuljang.controller.response.UserMeResponse;
 import store.onuljang.controller.response.UserMessageResponse;
 
 @RequestMapping("/api/auth")
@@ -45,14 +46,6 @@ public class UserController {
         return ResponseEntity.ok(userAppService.existName(name));
     }
 
-    @Deprecated
-    @GetMapping("/reservation/self-pick")
-    public ResponseEntity<Boolean> canSelfPick(Authentication auth) {
-        String uid = auth.getName();
-
-        return ResponseEntity.ok(userAppService.canSelfPick(uid));
-    }
-
     @GetMapping("/message")
     public ResponseEntity<UserMessageResponse> getMessage(Authentication auth) {
         String uid = auth.getName();
@@ -65,5 +58,12 @@ public class UserController {
         userAppService.messageReceived(messageId);
 
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users/me")
+    public ResponseEntity<UserMeResponse> getUserMe(Authentication auth) {
+        String uid = auth.getName();
+
+        return ResponseEntity.ok(userAppService.getUserMe(uid));
     }
 }

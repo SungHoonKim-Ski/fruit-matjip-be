@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.controller.response.UserMeResponse;
 import store.onuljang.controller.response.UserMessageResponse;
 import store.onuljang.exception.ExistUserNameException;
 import store.onuljang.exception.UserNoContentException;
@@ -48,14 +49,6 @@ public class UserAppService {
         return !userService.existUserByName(name);
     }
 
-    @Transactional(readOnly = true)
-    @Deprecated
-    public boolean canSelfPick(String uid) {
-        Users user = userService.findByUId(uid);
-
-        return !user.exceedMaxWarnCount();
-    }
-
     @Transactional
     public UserMessageResponse getMessage(String uid) {
         UserMessageQueue message = userMessageQueueService.findFirstPendingByUid(uid)
@@ -64,5 +57,12 @@ public class UserAppService {
         message.markSent(TimeUtil.nowDateTime());
 
         return UserMessageResponse.from(message);
+    }
+
+    @Transactional(readOnly = true)
+    public UserMeResponse getUserMe(String uid) {
+        Users user = userService.findByUId(uid);
+
+        return UserMeResponse.from(user);
     }
 }
