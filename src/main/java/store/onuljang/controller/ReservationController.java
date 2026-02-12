@@ -3,7 +3,6 @@ package store.onuljang.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,29 +26,29 @@ public class ReservationController {
     ReservationAppService reservationAppService;
 
     @PostMapping("/")
-    public ResponseEntity<Long> create(Authentication auth, @RequestBody @Valid ReservationRequest request) {
+    public ResponseEntity<String> create(Authentication auth, @RequestBody @Valid ReservationRequest request) {
         String uid = auth.getName();
 
         return ResponseEntity.ok(reservationAppService.reserve(uid, request));
     }
 
-    @PatchMapping("/cancel/{id}")
+    @PatchMapping("/cancel/{displayCode}")
     public ResponseEntity<Void> cancel(Authentication auth,
-            @Valid @PositiveOrZero @PathVariable("id") Long reservationId) {
+            @PathVariable("displayCode") String displayCode) {
         String uid = auth.getName();
 
-        reservationAppService.cancel(uid, reservationId);
+        reservationAppService.cancel(uid, displayCode);
 
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{id}/quantity")
+    @PatchMapping("/{displayCode}/quantity")
     public ResponseEntity<Void> removeMinusQuantity(Authentication auth,
-            @Valid @PositiveOrZero @PathVariable("id") Long reservationId,
+            @PathVariable("displayCode") String displayCode,
             @Valid @Positive @RequestParam Integer minus) {
         String uid = auth.getName();
 
-        reservationAppService.minusQuantity(uid, reservationId, minus);
+        reservationAppService.minusQuantity(uid, displayCode, minus);
 
         return ResponseEntity.ok().build();
     }

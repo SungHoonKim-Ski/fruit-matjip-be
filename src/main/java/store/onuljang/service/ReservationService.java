@@ -15,6 +15,7 @@ import store.onuljang.repository.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +33,17 @@ public class ReservationService {
     public Reservation findByIdWithLock(long id) {
         return reservationQueryRepository.findByIdWithLock(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+    }
+
+    @Transactional
+    public Reservation findByDisplayCodeWithLock(String displayCode) {
+        return reservationRepository.findByDisplayCodeWithLock(displayCode)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Reservation> findAllByDisplayCodeInWithUser(Collection<String> displayCodes) {
+        return reservationRepository.findAllByDisplayCodeIn(displayCodes);
     }
 
     @Transactional
@@ -95,6 +107,10 @@ public class ReservationService {
     public List<Reservation> findFutureReservationsByUserAndPeriod(
             String uid, ReservationStatus status, LocalDate from, LocalDate to) {
         return reservationRepository.findByUserUidAndStatusAndPickupDateBetween(uid, status, from, to);
+    }
+
+    public boolean existsByDisplayCode(String displayCode) {
+        return reservationRepository.existsByDisplayCode(displayCode);
     }
 
     @Transactional(readOnly = true)

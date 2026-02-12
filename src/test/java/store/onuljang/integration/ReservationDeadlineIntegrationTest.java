@@ -60,7 +60,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("10000"));
 
         // when
-        var response = postAction("/api/auth/reservations/", request, accessToken, Long.class);
+        var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -101,7 +101,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         Product after = testFixture.createProductAtDateTime("게시후", 10, new BigDecimal("1000"), now.minusMinutes(1),
                 admin);
         var resAfter = postAction("/api/auth/reservations/",
-                new ReservationRequest(after.getId(), 1, new BigDecimal("1000")), accessToken, Long.class);
+                new ReservationRequest(after.getId(), 1, new BigDecimal("1000")), accessToken, Void.class);
         assertThat(resAfter.isOk()).isTrue();
     }
 
@@ -112,7 +112,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         fixedTodayTime(19, 29);
         Product todayBefore = testFixture.createTodayProduct("오늘마감전", 10, new BigDecimal("1000"), admin);
         var resBefore = postAction("/api/auth/reservations/",
-                new ReservationRequest(todayBefore.getId(), 1, new BigDecimal("1000")), accessToken, Long.class);
+                new ReservationRequest(todayBefore.getId(), 1, new BigDecimal("1000")), accessToken, Void.class);
         assertThat(resBefore.isOk()).isTrue();
 
         // 2. 19:31분 (마감 후) -> 실패

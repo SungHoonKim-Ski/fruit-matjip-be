@@ -22,6 +22,7 @@ class DeliveryOrderTest {
     private DeliveryOrder createOrder(DeliveryStatus status) {
         return DeliveryOrder.builder()
             .status(status)
+            .displayCode("D-1")
             .build();
     }
 

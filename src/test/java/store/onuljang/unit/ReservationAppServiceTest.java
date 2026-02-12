@@ -137,15 +137,15 @@ class ReservationAppServiceTest {
 
             Reservation reservation = Reservation.builder().user(testUser).product(testProduct).quantity(quantity)
                     .amount(new BigDecimal("30000")).sellPrice(new BigDecimal("10000"))
-                    .pickupDate(LocalDate.now().plusDays(1)).build();
+                    .pickupDate(LocalDate.now().plusDays(1)).displayCode("R-1").build();
             ReflectionTestUtils.setField(reservation, "id", 1L);
 
-            given(reservationService.findByIdWithLock(1L)).willReturn(reservation);
+            given(reservationService.findByDisplayCodeWithLock("R-1")).willReturn(reservation);
             given(productsService.findByIdWithLock(1L)).willReturn(testProduct);
             given(userService.findByUidWithLock(testUser.getUid())).willReturn(testUser);
 
             // when
-            reservationAppService.cancel(testUser.getUid(), 1L);
+            reservationAppService.cancel(testUser.getUid(), "R-1");
 
             // then
             assertThat(testProduct.getStock()).isEqualTo(stockAfterReserve + quantity);
@@ -162,14 +162,14 @@ class ReservationAppServiceTest {
 
             Reservation reservation = Reservation.builder().user(otherUser).product(testProduct).quantity(2)
                     .amount(new BigDecimal("20000")).sellPrice(new BigDecimal("10000")).pickupDate(LocalDate.now())
-                    .build();
+                    .displayCode("R-2").build();
             ReflectionTestUtils.setField(reservation, "id", 1L);
 
-            given(reservationService.findByIdWithLock(1L)).willReturn(reservation);
+            given(reservationService.findByDisplayCodeWithLock("R-2")).willReturn(reservation);
             given(userService.findByUidWithLock(testUser.getUid())).willReturn(testUser);
 
             // when & then
-            assertThatThrownBy(() -> reservationAppService.cancel(testUser.getUid(), 1L))
+            assertThatThrownBy(() -> reservationAppService.cancel(testUser.getUid(), "R-2"))
                     .isInstanceOf(UserValidateException.class).hasMessageContaining("다른 유저가 예약한 상품");
         }
     }
@@ -187,7 +187,7 @@ class ReservationAppServiceTest {
 
             Reservation reservation = Reservation.builder().user(testUser).product(testProduct).quantity(2)
                     .amount(new BigDecimal("20000")).sellPrice(new BigDecimal("10000")).pickupDate(LocalDate.now())
-                    .build();
+                    .displayCode("R-3").build();
             ReflectionTestUtils.setField(reservation, "id", 1L);
 
             given(userService.findByUId(testUser.getUid())).willReturn(testUser);

@@ -41,7 +41,7 @@ class UserDeliveryOrderResponseTest {
         when(reservation.getDeliveryOrder()).thenReturn(order);
         when(reservation.getId()).thenReturn(1L);
         when(order.getStatus()).thenReturn(status);
-        when(order.getId()).thenReturn(100L);
+        when(order.getDisplayCode()).thenReturn("D-1");
         when(order.getDeliveryFee()).thenReturn(java.math.BigDecimal.valueOf(2900));
         when(order.getDeliveryHour()).thenReturn(12);
         when(order.getDeliveryMinute()).thenReturn(0);
@@ -52,8 +52,7 @@ class UserDeliveryOrderResponseTest {
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.status()).isEqualTo(status);
-        assertThat(result.orderId()).isEqualTo(100L);
-        assertThat(result.reservationId()).isEqualTo(1L);
+        assertThat(result.displayCode()).isEqualTo("D-1");
     }
 
     @DisplayName("deliveryOrder가 null이면 null 반환")

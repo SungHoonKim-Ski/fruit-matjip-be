@@ -14,7 +14,7 @@ public record ReservationListResponse(
 ) {
     @Builder
     public record ReservationResponse(
-        long id,
+        String displayCode,
         BigDecimal amount,
         String productImage,
         String productName,
@@ -27,7 +27,7 @@ public record ReservationListResponse(
 
         public static ReservationResponse from(Reservation entity) {
             return ReservationResponse.builder()
-                .id(entity.getId())
+                .displayCode(entity.getDisplayCode())
                 .amount(entity.getAmount())
                 .productImage(entity.getReservationProductUrl())
                 .productName(entity.getReservationProductName())

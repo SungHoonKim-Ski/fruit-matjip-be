@@ -18,12 +18,12 @@ import store.onuljang.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.repository.entity.*;
 import store.onuljang.repository.entity.enums.DeliveryStatus;
 import store.onuljang.service.*;
+import store.onuljang.util.DisplayCodeGenerator;
+import store.onuljang.util.TimeUtil;
 import store.onuljang.validator.DeliveryValidator;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Service
 @Transactional(readOnly = true)
@@ -79,7 +79,7 @@ public class DeliveryAppService {
                 );
             }
             return DeliveryReadyResponse.builder()
-                .orderId(existingOrder.getId())
+                .orderCode(existingOrder.getDisplayCode())
                 .redirectUrl("/me/orders?tab=delivery")
                 .build();
         }
@@ -113,26 +113,28 @@ public class DeliveryAppService {
      * PG 호출 중 DB 커넥션을 점유하지 않아 커넥션 풀 고갈을 방지한다.
      */
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void approve(String uid, long orderId, String pgToken) {
+    public void approve(String uid, String orderIdentifier, String pgToken) {
         // Step 1: 검증 (각 Service 메서드의 읽기 트랜잭션)
         Users user = userService.findByUId(uid);
-        DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
+        String displayCode = DisplayCodeGenerator.resolveCode("D", orderIdentifier);
+        DeliveryOrder order = deliveryOrderService.findByDisplayCodeAndUser(displayCode, user);
         if (!order.canMarkPaid()) {
             throw new UserValidateException("결제 진행 상태가 아닙니다.");
         }
 
         // Step 2: 카카오페이 승인 (트랜잭션 밖 - DB 커넥션 미점유, @Retryable로 재시도)
         KakaoPayApproveResponse pgResponse = kakaoPayService.approve(
-            new KakaoPayApproveRequest(null, order.getKakaoTid(), String.valueOf(orderId), user.getUid(), pgToken));
+            new KakaoPayApproveRequest(null, order.getKakaoTid(), order.getDisplayCode(), user.getUid(), pgToken));
 
         // Step 3: DB 반영 (Service 쓰기 트랜잭션)
-        deliveryOrderService.completePaid(orderId, pgResponse.aid());
+        deliveryOrderService.completePaid(order.getId(), pgResponse.aid());
     }
 
     @Transactional
-    public void cancel(String uid, long orderId) {
+    public void cancel(String uid, String orderIdentifier) {
         Users user = userService.findByUId(uid);
-        DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
+        String displayCode = DisplayCodeGenerator.resolveCode("D", orderIdentifier);
+        DeliveryOrder order = deliveryOrderService.findByDisplayCodeAndUser(displayCode, user);
         if (!order.canCancelByUser()) {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");
         }
@@ -141,9 +143,10 @@ public class DeliveryAppService {
     }
 
     @Transactional
-    public void fail(String uid, long orderId) {
+    public void fail(String uid, String orderIdentifier) {
         Users user = userService.findByUId(uid);
-        DeliveryOrder order = deliveryOrderService.findByIdAndUser(orderId, user);
+        String displayCode = DisplayCodeGenerator.resolveCode("D", orderIdentifier);
+        DeliveryOrder order = deliveryOrderService.findByDisplayCodeAndUser(displayCode, user);
         if (!order.canFailByUser()) {
             throw new UserValidateException("이미 결제 완료된 주문입니다.");
         }
@@ -160,9 +163,11 @@ public class DeliveryAppService {
 
     // 예약 목록 로드 및 존재 여부 검증
     private List<Reservation> loadReservations(DeliveryReadyRequest request) {
-        Set<Long> reservationIdSet = new HashSet<>(request.reservationIds());
-        List<Reservation> reservations = reservationService.findAllUserIdInWithUser(reservationIdSet);
-        if (reservations.size() != request.reservationIds().size()) {
+        List<String> resolvedCodes = request.reservationCodes().stream()
+            .map(code -> DisplayCodeGenerator.resolveCode("R", code))
+            .toList();
+        List<Reservation> reservations = reservationService.findAllByDisplayCodeInWithUser(resolvedCodes);
+        if (reservations.size() != request.reservationCodes().size()) {
             throw new UserValidateException("존재하지 않는 예약이 포함되어 있습니다.");
         }
         return reservations;
@@ -196,10 +201,13 @@ public class DeliveryAppService {
     // 배달 주문 생성 및 저장
     private DeliveryOrder createDeliveryOrder(Users user, DeliveryReadyRequest request, List<Reservation> reservations,
                   DeliveryFeeCalculator.FeeResult feeResult) {
+        String displayCode = DisplayCodeGenerator.generateUnique("D", TimeUtil.nowDateTime(),
+                deliveryOrderService::existsByDisplayCode);
 
         return deliveryOrderService.save(DeliveryOrder.builder()
                 .user(user)
                 .status(DeliveryStatus.PENDING_PAYMENT)
+                .displayCode(displayCode)
                 .deliveryDate(reservations.get(0).getPickupDate())
                 .deliveryHour(request.deliveryHour())
                 .deliveryMinute(request.deliveryMinute())
@@ -239,4 +247,5 @@ public class DeliveryAppService {
         deliveryOrderService.saveLinks(links);
         order.getDeliveryOrderReservations().addAll(links);
     }
+
 }

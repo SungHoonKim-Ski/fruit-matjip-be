@@ -79,7 +79,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             .willReturn(new KakaoLocalService.Coordinate(37.556904, 126.8372613));
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            List.of(reservation.getId()),
+            List.of(reservation.getDisplayCode()),
             12,
             0,
             "01012345678",
@@ -93,8 +93,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "test-key-1"
         );
 
-        long orderId = deliveryAppService.ready(user.getUid(), request).orderId();
-        DeliveryOrder order = deliveryOrderService.findById(orderId);
+        var response = deliveryAppService.ready(user.getUid(), request);
+        DeliveryOrder order = deliveryOrderService.findByDisplayCodeAndUser(response.orderCode(), user);
 
         BigDecimal expectedFee = calculateFee(storeLat, storeLng, 37.556904, 126.8372613);
         assertThat(order.getDeliveryFee()).isEqualByComparingTo(expectedFee);
@@ -116,7 +116,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             .willReturn(new KakaoLocalService.Coordinate(otherLat, otherLat));
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            List.of(reservation.getId()),
+            List.of(reservation.getDisplayCode()),
             13,
             0,
             "01012345678",
@@ -130,8 +130,8 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             "test-key-2"
         );
 
-        long orderId = deliveryAppService.ready(user.getUid(), request).orderId();
-        DeliveryOrder order = deliveryOrderService.findById(orderId);
+        var response = deliveryAppService.ready(user.getUid(), request);
+        DeliveryOrder order = deliveryOrderService.findByDisplayCodeAndUser(response.orderCode(), user);
 
         BigDecimal expectedFee = calculateFee(storeLat, storeLng, otherLat, otherLng);
         assertThat(order.getDeliveryFee()).isEqualByComparingTo(expectedFee);
@@ -150,7 +150,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
             .willReturn(new KakaoLocalService.Coordinate(37.586504, 126.8372613));
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            List.of(reservation.getId()),
+            List.of(reservation.getDisplayCode()),
             14,
             0,
             "01012345678",
@@ -204,7 +204,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         Reservation newReservation = testFixture.createReservation(user, newProduct, 1);
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            List.of(newReservation.getId()),
+            List.of(newReservation.getDisplayCode()),
             12, 0,
             "01012345678", "12345", ADDRESS, "101호",
             storeLat, storeLng,
@@ -235,7 +235,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         Reservation newReservation = testFixture.createReservation(user, newProduct, 1);
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            List.of(newReservation.getId()),
+            List.of(newReservation.getDisplayCode()),
             12, 0,
             "01012345678", "12345", ADDRESS, "101호",
             storeLat, storeLng,
@@ -261,7 +261,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PENDING_PAYMENT);
 
         // Act
-        deliveryAppService.cancel(user.getUid(), order.getId());
+        deliveryAppService.cancel(user.getUid(), order.getDisplayCode());
 
         // Assert
         DeliveryOrder updated = deliveryOrderService.findById(order.getId());
@@ -278,7 +278,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PAID);
 
         // Act & Assert
-        assertThatThrownBy(() -> deliveryAppService.cancel(user.getUid(), order.getId()))
+        assertThatThrownBy(() -> deliveryAppService.cancel(user.getUid(), order.getDisplayCode()))
             .isInstanceOf(UserValidateException.class)
             .hasMessageContaining("이미 결제 완료된 주문입니다.");
     }
@@ -293,7 +293,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PENDING_PAYMENT);
 
         // Act
-        deliveryAppService.fail(user.getUid(), order.getId());
+        deliveryAppService.fail(user.getUid(), order.getDisplayCode());
 
         // Assert
         DeliveryOrder updated = deliveryOrderService.findById(order.getId());
@@ -310,7 +310,7 @@ class DeliveryAppServiceTest extends IntegrationTestBase {
         DeliveryOrder order = testFixture.createDeliveryOrder(user, reservation, DeliveryStatus.PAID);
 
         // Act & Assert
-        assertThatThrownBy(() -> deliveryAppService.fail(user.getUid(), order.getId()))
+        assertThatThrownBy(() -> deliveryAppService.fail(user.getUid(), order.getDisplayCode()))
             .isInstanceOf(UserValidateException.class)
             .hasMessageContaining("이미 결제 완료된 주문입니다.");
     }

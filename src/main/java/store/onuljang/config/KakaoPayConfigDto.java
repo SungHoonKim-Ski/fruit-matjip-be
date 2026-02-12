@@ -28,11 +28,11 @@ public class KakaoPayConfigDto {
     @Value("${KAKAOPAY.HOST:https://open-api.kakaopay.com}")
     String host;
 
-    public KakaoPayRedirectUrls buildRedirectUrls(long orderId) {
+    public KakaoPayRedirectUrls buildRedirectUrls(String displayCode) {
         return new KakaoPayRedirectUrls(
-            approvalUrl + "?order_id=" + orderId,
-            cancelUrl + "?order_id=" + orderId,
-            failUrl + "?order_id=" + orderId
+            approvalUrl + "?order_id=" + displayCode,
+            cancelUrl + "?order_id=" + displayCode,
+            failUrl + "?order_id=" + displayCode
         );
     }
 

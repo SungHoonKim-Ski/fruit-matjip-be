@@ -19,6 +19,7 @@ import store.onuljang.service.ProductsService;
 import store.onuljang.service.ReservationService;
 import store.onuljang.service.UserService;
 import store.onuljang.service.DeliveryOrderService;
+import store.onuljang.util.DisplayCodeGenerator;
 import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
@@ -42,7 +43,7 @@ public class ReservationAppService {
     ApplicationEventPublisher eventPublisher;
 
     @Transactional
-    public long reserve(String uId, ReservationRequest request) {
+    public String reserve(String uId, ReservationRequest request) {
         Product product = productsService.findByIdWithLock(request.productId());
         validateReserveTime(product.getSellDate(), product.getSellTime());
 
@@ -57,18 +58,22 @@ public class ReservationAppService {
             .sellPrice(product.getPrice())
             .build();
 
+        reservation.setDisplayCode(
+                DisplayCodeGenerator.generateUnique("R", TimeUtil.nowDateTime(), reservationService::existsByDisplayCode));
+
         product.reserve(request.quantity());
         reservationService.save(reservation);
         user.reserve(request.quantity(), reservation.getAmount(), TimeUtil.nowDate());
 
         saveReservationLog(user.getUid(), reservation.getId(), UserProductAction.CREATE);
 
-        return reservation.getId();
+        return reservation.getDisplayCode();
     }
 
     @Transactional
-    public void minusQuantity(String uId, long reservationId, int minusQuantity) {
-        Reservation reservation = reservationService.findByIdWithLock(reservationId);
+    public void minusQuantity(String uId, String displayCode, int minusQuantity) {
+        Reservation reservation = reservationService
+                .findByDisplayCodeWithLock(DisplayCodeGenerator.resolveCode("R", displayCode));
         Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
         Users user = userService.findByUidWithLock(uId);
 
@@ -84,8 +89,9 @@ public class ReservationAppService {
     }
 
     @Transactional
-    public void cancel(String uId, long reservationId) {
-        Reservation reservation = reservationService.findByIdWithLock(reservationId);
+    public void cancel(String uId, String displayCode) {
+        Reservation reservation = reservationService
+                .findByDisplayCodeWithLock(DisplayCodeGenerator.resolveCode("R", displayCode));
         Product product = productsService.findByIdWithLock(reservation.getProduct().getId());
         Users user = userService.findByUidWithLock(uId);
 

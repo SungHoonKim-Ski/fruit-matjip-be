@@ -2,8 +2,6 @@ package store.onuljang.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -65,26 +63,26 @@ public class DeliveryController {
 
     @GetMapping("/approve")
     public ResponseEntity<Void> approve(Authentication auth,
-            @RequestParam @NotNull @Positive Long orderId,
+            @RequestParam("order_id") @NotBlank String orderIdentifier,
             @RequestParam("pg_token") @NotBlank String pgToken) {
         String uid = auth.getName();
-        deliveryAppService.approve(uid, orderId, pgToken);
+        deliveryAppService.approve(uid, orderIdentifier, pgToken);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/cancel")
     public ResponseEntity<Void> cancel(Authentication auth,
-            @RequestParam @NotNull @Positive Long orderId) {
+            @RequestParam("order_id") @NotBlank String orderIdentifier) {
         String uid = auth.getName();
-        deliveryAppService.cancel(uid, orderId);
+        deliveryAppService.cancel(uid, orderIdentifier);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/fail")
     public ResponseEntity<Void> fail(Authentication auth,
-            @RequestParam @NotNull @Positive Long orderId) {
+            @RequestParam("order_id") @NotBlank String orderIdentifier) {
         String uid = auth.getName();
-        deliveryAppService.fail(uid, orderId);
+        deliveryAppService.fail(uid, orderIdentifier);
         return ResponseEntity.ok().build();
     }
 }

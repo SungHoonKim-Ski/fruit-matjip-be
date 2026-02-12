@@ -16,6 +16,7 @@ public record AdminReservationListResponse(
     @Builder
     public record AdminReservationResponse(
         long id,
+        String displayCode,
         LocalDate orderDate,
         String productName,
         String userName,
@@ -27,6 +28,7 @@ public record AdminReservationListResponse(
         public static AdminReservationResponse from(Reservation entity) {
             return AdminReservationResponse.builder()
                 .id(entity.getId())
+                .displayCode(entity.getDisplayCode())
                 .orderDate(entity.getPickupDate())
                 .productName(entity.getReservationProductName())
                 .userName(entity.getReservationUserName())

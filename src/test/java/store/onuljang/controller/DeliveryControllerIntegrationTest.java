@@ -77,7 +77,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
         Reservation reservation = testFixture.createReservation(user, product, 1);
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            List.of(reservation.getId()),
+            List.of(reservation.getDisplayCode()),
             12, 0,
             "01012345678", "12345", "서울 강서구 테스트로", "101호",
             STORE_LAT, STORE_LNG,
@@ -92,7 +92,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
         // then
         assertThat(response.isOk()).isTrue();
         assertThat(response.body()).isNotNull();
-        assertThat(response.body().orderId()).isPositive();
+        assertThat(response.body().orderCode()).isNotBlank();
     }
 
     @Test
@@ -109,7 +109,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = getAction(
-            "/api/auth/deliveries/cancel?orderId=" + order.getId(), accessToken, Void.class);
+            "/api/auth/deliveries/cancel?order_id=" + order.getDisplayCode(), accessToken, Void.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -131,7 +131,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = getAction(
-            "/api/auth/deliveries/cancel?orderId=" + order.getId(), accessToken, Void.class);
+            "/api/auth/deliveries/cancel?order_id=" + order.getDisplayCode(), accessToken, Void.class);
 
         // then
         assertThat(response.isBadRequest()).isTrue();
@@ -151,7 +151,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = getAction(
-            "/api/auth/deliveries/fail?orderId=" + order.getId(), accessToken, Void.class);
+            "/api/auth/deliveries/fail?order_id=" + order.getDisplayCode(), accessToken, Void.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -175,7 +175,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
         String accessToken = testFixture.createAccessToken(user);
 
         DeliveryReadyRequest request = new DeliveryReadyRequest(
-            List.of(999999L),
+            List.of("R-INVALID-999999"),
             12, 0,
             "01012345678", "12345", "서울 강서구 테스트로", "101호",
             STORE_LAT, STORE_LNG,

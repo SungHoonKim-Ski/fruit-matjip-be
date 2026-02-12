@@ -62,6 +62,11 @@ public class DeliveryOrderService {
             .orElseThrow(() -> new NotFoundException("존재하지 않는 배달 주문입니다."));
     }
 
+    public DeliveryOrder findByDisplayCodeAndUser(String displayCode, Users user) {
+        return deliveryOrderRepository.findByDisplayCodeAndUser(displayCode, user)
+            .orElseThrow(() -> new NotFoundException("존재하지 않는 배달 주문입니다."));
+    }
+
     public DeliveryOrder findById(long id) {
         return deliveryOrderRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("존재하지 않는 배달 주문입니다."));
@@ -87,6 +92,10 @@ public class DeliveryOrderService {
 
     public List<DeliveryOrder> findPendingPaymentsByUser(Users user) {
         return deliveryOrderRepository.findByUserAndStatus(user, DeliveryStatus.PENDING_PAYMENT);
+    }
+
+    public boolean existsByDisplayCode(String displayCode) {
+        return deliveryOrderRepository.existsByDisplayCode(displayCode);
     }
 
     public List<DeliveryOrder> findOutForDeliveryBefore(LocalDateTime cutoff) {

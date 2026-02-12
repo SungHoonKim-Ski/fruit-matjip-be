@@ -16,6 +16,7 @@ public record AdminDeliveryListResponse(
     @Builder
     public record AdminDeliveryResponse(
         long id,
+        String displayCode,
         String buyerName,
         List<ReservationItem> reservationItems,
         BigDecimal totalAmount,
@@ -39,6 +40,7 @@ public record AdminDeliveryListResponse(
             BigDecimal totalAmount = order.getTotalAmount();
             return AdminDeliveryResponse.builder()
                 .id(order.getId())
+                .displayCode(order.getDisplayCode())
                 .buyerName(order.getUser().getName())
                 .reservationItems(reservations.stream()
                     .map(reservation -> ReservationItem.builder()

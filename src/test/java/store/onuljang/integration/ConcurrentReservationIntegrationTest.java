@@ -215,7 +215,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
 
         // 예약 생성
         ReservationRequest request = new ReservationRequest(product.getId(), 3, new BigDecimal("30000"));
-        long reservationId = reservationAppService.reserve(user.getUid(), request);
+        String displayCode = reservationAppService.reserve(user.getUid(), request);
 
         int originalStock = productsRepository.findById(product.getId()).orElseThrow().getStock();
 
@@ -232,7 +232,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
             executor.submit(() -> {
                 try {
                     startLatch.await();
-                    reservationAppService.cancel(user.getUid(), reservationId);
+                    reservationAppService.cancel(user.getUid(), displayCode);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -268,7 +268,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
 
         // 10개 예약
         ReservationRequest request = new ReservationRequest(product.getId(), 10, new BigDecimal("100000"));
-        long reservationId = reservationAppService.reserve(user.getUid(), request);
+        String displayCode = reservationAppService.reserve(user.getUid(), request);
 
         int threadCount = 5;
         ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -282,7 +282,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
             executor.submit(() -> {
                 try {
                     startLatch.await();
-                    reservationAppService.minusQuantity(user.getUid(), reservationId, 1);
+                    reservationAppService.minusQuantity(user.getUid(), displayCode, 1);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     // 수량이 1 미만이 되면 예외 발생

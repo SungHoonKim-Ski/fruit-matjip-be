@@ -10,8 +10,7 @@ import java.time.LocalDateTime;
 
 @Builder
 public record UserDeliveryOrderResponse(
-    long reservationId,
-    long orderId,
+    String displayCode,
     DeliveryStatus status,
     BigDecimal deliveryFee,
     int deliveryHour,
@@ -23,8 +22,7 @@ public record UserDeliveryOrderResponse(
 ) {
     public static UserDeliveryOrderResponse from(DeliveryOrder order, Reservation reservation) {
         return UserDeliveryOrderResponse.builder()
-            .reservationId(reservation.getId())
-            .orderId(order.getId())
+            .displayCode(order.getDisplayCode())
             .status(order.getStatus())
             .deliveryFee(order.getDeliveryFee())
             .deliveryHour(order.getDeliveryHour())

@@ -73,15 +73,21 @@ public class Reservation extends BaseEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
+    @Getter
+    @Setter
+    @Column(name = "display_code", nullable = false, length = 18)
+    private String displayCode;
+
     @Builder
     public Reservation(Users user, Product product, Integer quantity, BigDecimal amount, BigDecimal sellPrice,
-            LocalDate pickupDate) {
+            LocalDate pickupDate, String displayCode) {
         this.user = user;
         this.product = product;
         this.quantity = quantity;
         this.amount = amount;
         this.pickupDate = pickupDate;
         this.sellPrice = sellPrice;
+        this.displayCode = displayCode;
         this.status = ReservationStatus.PENDING;
         this.statusChangedAt = TimeUtil.nowDateTime();
     }

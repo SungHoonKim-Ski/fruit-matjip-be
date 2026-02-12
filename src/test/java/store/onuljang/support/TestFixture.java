@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static store.onuljang.util.TimeUtil.nowDate;
 
@@ -56,6 +57,8 @@ public class TestFixture {
 
     @Autowired
     private EntityManager entityManager;
+
+    private final AtomicInteger displayCodeSeq = new AtomicInteger(0);
 
     /**
      * 기본 사용자 생성 (닉네임 변경 완료 상태)
@@ -189,7 +192,8 @@ public class TestFixture {
     public Reservation createReservation(Users user, Product product, int quantity) {
         BigDecimal amount = product.getPrice().multiply(BigDecimal.valueOf(quantity));
         Reservation reservation = Reservation.builder().user(user).product(product).quantity(quantity).amount(amount)
-                .sellPrice(product.getPrice()).pickupDate(product.getSellDate()).build();
+                .sellPrice(product.getPrice()).pickupDate(product.getSellDate())
+                .displayCode("R-" + displayCodeSeq.incrementAndGet()).build();
         return reservationRepository.save(reservation);
     }
 
@@ -274,6 +278,7 @@ public class TestFixture {
             .latitude(37.556504)
             .longitude(126.8372613)
             .idempotencyKey(UUID.randomUUID().toString())
+            .displayCode("D-" + displayCodeSeq.incrementAndGet())
             .build());
     }
 

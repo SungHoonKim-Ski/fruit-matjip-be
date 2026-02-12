@@ -206,7 +206,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
 
             // 배달 주문 요청
             var request = new store.onuljang.controller.request.DeliveryReadyRequest(
-                    java.util.List.of(reservation.getId()),
+                    java.util.List.of(reservation.getDisplayCode()),
                     12,
                     0,
                     "01012345678",

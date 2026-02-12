@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public record AdminDeliverySseResponse(
     long orderId,
+    String displayCode,
     List<Long> reservationIds,
     int reservationCount,
     String buyerName,
@@ -44,6 +45,7 @@ public record AdminDeliverySseResponse(
         List<Reservation> reservations = order.getReservations();
         return AdminDeliverySseResponse.builder()
             .orderId(order.getId())
+            .displayCode(order.getDisplayCode())
             .reservationIds(order.getReservationIds())
             .reservationCount(reservations.size())
             .buyerName(order.getUser().getName())

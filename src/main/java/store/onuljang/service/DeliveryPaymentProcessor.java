@@ -41,14 +41,14 @@ public class DeliveryPaymentProcessor {
 
         // 결제 준비에 필요한 데이터 구성
         int totalAmount = toTotalAmount(totalProductAmount, deliveryFee);
-        KakaoPayConfigDto.KakaoPayRedirectUrls redirectUrls = kakaoPayConfigDto.buildRedirectUrls(order.getId());
+        KakaoPayConfigDto.KakaoPayRedirectUrls redirectUrls = kakaoPayConfigDto.buildRedirectUrls(order.getDisplayCode());
 
         // 카카오페이 ready 호출 및 결제 정보 저장
         KakaoPayReadyResponse ready = requestReady(order, user, reservations, totalAmount, redirectUrls);
         savePaymentReady(order, totalAmount, ready);
 
         return DeliveryReadyResponse.builder()
-            .orderId(order.getId())
+            .orderCode(order.getDisplayCode())
             .redirectUrl(ready.nextRedirectPcUrl())
             .mobileRedirectUrl(ready.nextRedirectMobileUrl())
             .build();
@@ -59,7 +59,7 @@ public class DeliveryPaymentProcessor {
         order.markPaid();
         eventPublisher.publishEvent(new DeliveryPaidEvent(order.getId()));
         return DeliveryReadyResponse.builder()
-            .orderId(order.getId())
+            .orderCode(order.getDisplayCode())
             .redirectUrl("/me/orders?tab=delivery")
             .build();
     }
@@ -75,7 +75,7 @@ public class DeliveryPaymentProcessor {
         return kakaoPayService.ready(
             new KakaoPayReadyRequest(
                 null,
-                String.valueOf(order.getId()),
+                order.getDisplayCode(),
                 user.getUid(),
                 Reservation.buildSummary(reservations),
                 reservations.stream().mapToInt(Reservation::getQuantity).sum(),

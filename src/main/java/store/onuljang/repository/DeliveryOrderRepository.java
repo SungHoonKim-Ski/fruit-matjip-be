@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Long> {
     Optional<DeliveryOrder> findByIdAndUser(Long id, Users user);
 
+    Optional<DeliveryOrder> findByDisplayCodeAndUser(String displayCode, Users user);
+
     Optional<DeliveryOrder> findByUserAndIdempotencyKey(Users user, String idempotencyKey);
 
     List<DeliveryOrder> findByStatusAndCreatedAtBefore(DeliveryStatus status, LocalDateTime before);
@@ -22,4 +24,6 @@ public interface DeliveryOrderRepository extends JpaRepository<DeliveryOrder, Lo
 
     List<DeliveryOrder> findByStatusAndKakaoTidIsNotNullAndCreatedAtBefore(
         DeliveryStatus status, LocalDateTime before);
+
+    boolean existsByDisplayCode(String displayCode);
 }

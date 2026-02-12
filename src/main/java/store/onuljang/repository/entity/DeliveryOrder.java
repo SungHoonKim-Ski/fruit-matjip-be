@@ -116,6 +116,11 @@ public class DeliveryOrder extends BaseEntity {
     @Column(name = "scheduled_delivery_minute")
     private Integer scheduledDeliveryMinute;
 
+    @Getter
+    @Setter
+    @Column(name = "display_code", nullable = false, length = 18)
+    private String displayCode;
+
     public void setKakaoTid(String kakaoTid) {
         this.kakaoTid = kakaoTid;
     }
