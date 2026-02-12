@@ -168,15 +168,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleRuntime(RuntimeException ex) {
-        log.error("RuntimeException: {}", ex.getMessage());
+        log.error("RuntimeException: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("SERVER_ERROR", ex.getMessage()));
+                .body(new ErrorResponse("SERVER_ERROR", "서버 내부 오류가 발생했습니다."));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception ex) {
-        log.error("Exception: {}", ex.getMessage());
+        log.error("Exception: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("SERVER_ERROR", ex.getMessage()));
+                .body(new ErrorResponse("SERVER_ERROR", "서버 내부 오류가 발생했습니다."));
     }
 }

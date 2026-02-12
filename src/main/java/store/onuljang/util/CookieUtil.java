@@ -14,7 +14,7 @@ public class CookieUtil {
     private ResponseCookie generate(String refreshToken, long refreshTtl) {
         return ResponseCookie.from("REFRESH_TOKEN", refreshToken)
             .httpOnly(true)
-            .secure(false)
+            .secure(true)
             .path("/")
             .sameSite("Strict")
             .maxAge(Duration.ofDays(refreshTtl))
