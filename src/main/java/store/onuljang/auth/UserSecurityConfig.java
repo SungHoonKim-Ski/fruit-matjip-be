@@ -28,10 +28,10 @@ public class UserSecurityConfig {
     @Order(2)
     SecurityFilterChain apiChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/api/auth/**")
+            .securityMatcher("/api/auth/**", "/api/login", "/api/logout", "/api/refresh", "/api/health", "/api/time")
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/health", "/api/login", "/api/logout", "/api/refresh"
+                    "/api/health", "/api/login", "/api/logout", "/api/refresh", "/api/time"
                 ).permitAll()
                 .anyRequest().authenticated()
             )
