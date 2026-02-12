@@ -1,5 +1,6 @@
 package store.onuljang.service;
 
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -21,7 +22,25 @@ public class AdminDeliverySseService {
         emitters.add(emitter);
         emitter.onCompletion(() -> emitters.remove(emitter));
         emitter.onTimeout(() -> emitters.remove(emitter));
+
+        try {
+            emitter.send(SseEmitter.event().name("connect").data("connected"));
+        } catch (IOException e) {
+            emitters.remove(emitter);
+        }
+
         return emitter;
+    }
+
+    @Scheduled(fixedRate = 30_000)
+    public void heartbeat() {
+        for (SseEmitter emitter : emitters) {
+            try {
+                emitter.send(SseEmitter.event().comment("heartbeat"));
+            } catch (IOException e) {
+                emitters.remove(emitter);
+            }
+        }
     }
 
     public void notifyPaid(DeliveryOrder order) {
