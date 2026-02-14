@@ -29,7 +29,10 @@ public record AdminCreateProductRequest (
     String sellDate,
 
     @NotNull(message = "상품 상태는 필수입니다")
-    Boolean visible
+    Boolean visible,
+
+    @NotNull(message = "배달 여부는 필수입니다")
+    Boolean deliveryAvailable
 ) {
     public static Product toEntity(AdminCreateProductRequest request, Admin admin) {
         return Product.builder()
@@ -40,7 +43,7 @@ public record AdminCreateProductRequest (
             .sellDate(LocalDate.parse(request.sellDate))
             .visible(request.visible)
             .selfPick(true)
-            .deliveryAvailable(true)
+            .deliveryAvailable(request.deliveryAvailable)
             .registeredAdmin(admin)
             .build();
     }
