@@ -110,7 +110,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
         void createProduct_Success() throws Exception {
             // given
             AdminCreateProductRequest request = new AdminCreateProductRequest("새상품", new BigDecimal("25000"), 10,
-                    "https://example.com/image.jpg", nowDate().plusDays(1).toString(), true);
+                    "https://example.com/image.jpg", nowDate().plusDays(1).toString(), true, false);
 
             // when
             var response = postAction("/api/admin/products", request, Long.class);
