@@ -39,6 +39,10 @@ public class TimeUtil {
         return ZonedDateTime.now(clock);
     }
 
+    public static LocalDate dateFromEpochDay(long epochDay) {
+        return LocalDate.ofEpochDay(epochDay);
+    }
+
     public boolean isPastDate(LocalDate date) {
         return date.isBefore(nowDate());
     }

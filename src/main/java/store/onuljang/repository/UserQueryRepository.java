@@ -9,8 +9,10 @@ import org.springframework.stereotype.Repository;
 import store.onuljang.controller.request.AdminCustomerSortKey;
 import store.onuljang.controller.request.SortOrder;
 import store.onuljang.repository.entity.Users;
+import store.onuljang.util.TimeUtil;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,7 +32,7 @@ public class UserQueryRepository {
         Long cursorId,
         int limit
     ) {
-        BooleanBuilder where = buildBaseWhere(name);
+        BooleanBuilder where = buildBaseWhere(name, sortKey == AdminCustomerSortKey.RESTRICTED_UNTIL);
 
         applyCursorCondition(where, sortKey, sortOrder, cursorValue, cursorId);
 
@@ -44,10 +46,15 @@ public class UserQueryRepository {
             .fetch();
     }
 
-    private BooleanBuilder buildBaseWhere(String name) {
+    private BooleanBuilder buildBaseWhere(String name, boolean filterRestricted) {
         BooleanBuilder where = new BooleanBuilder();
         if (name != null && !name.isBlank()) {
             where.and(users.name.contains(name));
+        }
+        if (filterRestricted) {
+            LocalDate today = TimeUtil.nowDate();
+            where.and(users.restrictedUntil.isNotNull());
+            where.and(users.restrictedUntil.goe(today));
         }
         return where;
     }
@@ -68,6 +75,7 @@ public class UserQueryRepository {
             case TOTAL_REVENUE -> applyTotalRevenueCursor(where, sortOrder, cursorValue, cursorId);
             case TOTAL_WARN_COUNT -> applyIntegerCursor(where, users.totalWarnCount, sortOrder, cursorValue, cursorId);
             case WARN_COUNT -> applyIntegerCursor(where, users.monthlyWarnCount, sortOrder, cursorValue, cursorId);
+            case RESTRICTED_UNTIL -> applyRestrictedUntilCursor(where, sortOrder, cursorValue, cursorId);
         }
     }
 
@@ -109,6 +117,26 @@ public class UserQueryRepository {
         }
     }
 
+    private void applyRestrictedUntilCursor(
+        BooleanBuilder where,
+        SortOrder sortOrder,
+        BigDecimal cursorValue,
+        Long cursorId
+    ) {
+        LocalDate cursorDate = TimeUtil.dateFromEpochDay(cursorValue.longValue());
+        if (sortOrder == SortOrder.DESC) {
+            where.and(
+                users.restrictedUntil.lt(cursorDate)
+                    .or(users.restrictedUntil.eq(cursorDate).and(users.id.lt(cursorId)))
+            );
+        } else {
+            where.and(
+                users.restrictedUntil.gt(cursorDate)
+                    .or(users.restrictedUntil.eq(cursorDate).and(users.id.gt(cursorId)))
+            );
+        }
+    }
+
     private List<OrderSpecifier<?>> buildOrderSpecifiers(
         AdminCustomerSortKey sortKey,
         SortOrder sortOrder
@@ -121,6 +149,8 @@ public class UserQueryRepository {
                 orders.add(sortOrder == SortOrder.DESC ? users.totalWarnCount.desc() : users.totalWarnCount.asc());
             case WARN_COUNT ->
                 orders.add(sortOrder == SortOrder.DESC ? users.monthlyWarnCount.desc() : users.monthlyWarnCount.asc());
+            case RESTRICTED_UNTIL ->
+                orders.add(sortOrder == SortOrder.DESC ? users.restrictedUntil.desc() : users.restrictedUntil.asc());
         }
         // 항상 id를 tie-breaker 로 사용
         orders.add(sortOrder == SortOrder.DESC ? users.id.desc() : users.id.asc());

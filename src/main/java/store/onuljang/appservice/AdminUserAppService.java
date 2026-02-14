@@ -58,6 +58,7 @@ public class AdminUserAppService {
                 case TOTAL_REVENUE -> last.getTotalRevenue();
                 case TOTAL_WARN_COUNT -> BigDecimal.valueOf(last.getTotalWarnCount());
                 case WARN_COUNT -> BigDecimal.valueOf(last.getMonthlyWarnCount());
+                case RESTRICTED_UNTIL -> BigDecimal.valueOf(last.getRestrictedUntil().toEpochDay());
             };
             String nextCursor = CursorUtil.encode(last.getId(), sortValue);
             users = users.subList(0, request.limit());
