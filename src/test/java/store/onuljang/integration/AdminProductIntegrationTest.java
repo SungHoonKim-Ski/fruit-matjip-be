@@ -10,13 +10,16 @@ import store.onuljang.controller.response.AdminProductDetailResponse;
 import store.onuljang.controller.response.AdminProductListItems;
 import store.onuljang.controller.response.ProductCategoryResponse;
 import store.onuljang.repository.ProductsRepository;
+import store.onuljang.repository.ProductCategoryRepository;
 import store.onuljang.repository.entity.Admin;
 import store.onuljang.repository.entity.Product;
+import store.onuljang.repository.entity.ProductCategory;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -37,6 +40,9 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
 
     @Autowired
     private ProductsRepository productsRepository;
+
+    @Autowired
+    private ProductCategoryRepository productCategoryRepository;
 
     @Autowired
     private jakarta.persistence.EntityManager entityManager;
@@ -341,6 +347,163 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             entityManager.clear();
             List<Product> products = productsRepository.findAllByCategoryId(category.getId());
             assertThat(products).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("POST /api/admin/products/category - 중복 카테고리명 생성 시 실패")
+        void saveProductCategory_DuplicateName_Fail() throws Exception {
+            // given
+            testFixture.createProductCategory("과일");
+            AdminCreateCategoryRequest request = new AdminCreateCategoryRequest("과일",
+                    "https://example.com/image.jpg");
+
+            // when
+            var response = postAction("/api/admin/products/category", request, Void.class);
+
+            // then
+            assertThat(response.isOk()).isFalse();
+        }
+
+        @Test
+        @DisplayName("POST /api/admin/products/category - 카테고리명 5자 초과 시 실패")
+        void saveProductCategory_NameTooLong_Fail() throws Exception {
+            // given
+            AdminCreateCategoryRequest request = new AdminCreateCategoryRequest("여섯글자카테",
+                    "https://example.com/image.jpg");
+
+            // when
+            var response = postAction("/api/admin/products/category", request, Void.class);
+
+            // then
+            assertThat(response.isBadRequest()).isTrue();
+        }
+
+        @Test
+        @DisplayName("PATCH /api/admin/products/category/{categoryId} - 카테고리 수정 성공")
+        void updateProductCategory_Success() throws Exception {
+            // given
+            var category = testFixture.createProductCategory("기존이름");
+            AdminUpdateCategoryRequest request = new AdminUpdateCategoryRequest("수정이름",
+                    "https://example.com/new-image.jpg");
+
+            // when
+            var response = patchAction("/api/admin/products/category/" + category.getId(), request, Void.class);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify
+            entityManager.flush();
+            entityManager.clear();
+            ProductCategory updated = productCategoryRepository.findById(category.getId()).orElseThrow();
+            assertThat(updated.getName()).isEqualTo("수정이름");
+            assertThat(updated.getImageUrl()).isEqualTo("https://example.com/new-image.jpg");
+        }
+
+        @Test
+        @DisplayName("PATCH /api/admin/products/category/{categoryId} - 존재하지 않는 카테고리 수정 시 실패")
+        void updateProductCategory_NotFound_Fail() throws Exception {
+            // given
+            AdminUpdateCategoryRequest request = new AdminUpdateCategoryRequest("수정", null);
+
+            // when
+            var response = patchAction("/api/admin/products/category/99999", request, Void.class);
+
+            // then
+            assertThat(response.isOk()).isFalse();
+        }
+
+        @Test
+        @DisplayName("PATCH /api/admin/products/categories/order - 카테고리 순서 변경 성공")
+        void updateCategorySortOrders_Success() throws Exception {
+            // given
+            var cat1 = testFixture.createProductCategory("과일");
+            var cat2 = testFixture.createProductCategory("채소");
+            var cat3 = testFixture.createProductCategory("육류");
+
+            AdminUpdateCategoryListRequest request = new AdminUpdateCategoryListRequest(List.of(
+                    new AdminUpdateCategoryListRequest.CategoryItemRequest(cat3.getId(), null, null),
+                    new AdminUpdateCategoryListRequest.CategoryItemRequest(cat1.getId(), null, null),
+                    new AdminUpdateCategoryListRequest.CategoryItemRequest(cat2.getId(), null, null)));
+
+            // when
+            var response = patchAction("/api/admin/products/categories/order", request, Void.class);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify - sortOrder 순으로 조회하면 cat3, cat1, cat2 순
+            entityManager.flush();
+            entityManager.clear();
+            var categories = productCategoryRepository.findAllByOrderBySortOrderAsc();
+            assertThat(categories).extracting("name").containsExactly("육류", "과일", "채소");
+        }
+
+        @Test
+        @DisplayName("POST /api/admin/products/{productId}/categories/{categoryId} - 상품에 카테고리 추가")
+        void addCategoryToProduct_Success() throws Exception {
+            // given
+            Product product = testFixture.createTodayProduct("상품", 10, new BigDecimal("10000"), admin);
+            var category = testFixture.createProductCategory("과일");
+
+            // when
+            var response = postAction("/api/admin/products/" + product.getId() + "/categories/" + category.getId(),
+                    "", Void.class);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify
+            entityManager.flush();
+            entityManager.clear();
+            List<Product> products = productsRepository.findAllByCategoryId(category.getId());
+            assertThat(products).hasSize(1);
+            assertThat(products.get(0).getName()).isEqualTo("상품");
+        }
+
+        @Test
+        @DisplayName("DELETE /api/admin/products/{productId}/categories/{categoryId} - 상품에서 카테고리 제거")
+        void removeCategoryFromProduct_Success() throws Exception {
+            // given
+            var category = testFixture.createProductCategory("과일");
+            Product product = testFixture.createTodayProduct("상품", 10, new BigDecimal("10000"), admin);
+            testFixture.addCategoryToProduct(product, category);
+
+            // when
+            var response = deleteAction(
+                    "/api/admin/products/" + product.getId() + "/categories/" + category.getId());
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify
+            entityManager.flush();
+            entityManager.clear();
+            List<Product> products = productsRepository.findAllByCategoryId(category.getId());
+            assertThat(products).isEmpty();
+        }
+
+        @Test
+        @DisplayName("PUT /api/admin/products/categories/{categoryId}/products - 빈 목록으로 수정하면 상품 전체 해제")
+        void updateCategoryProducts_EmptyList_ClearsAll() throws Exception {
+            // given
+            var category = testFixture.createProductCategory("테스트");
+            Product p1 = testFixture.createTodayProduct("상품1", 10, new BigDecimal("10000"), admin);
+            testFixture.addCategoryToProduct(p1, category);
+
+            AdminCategoryProductsRequest request = new AdminCategoryProductsRequest(Collections.emptyList());
+
+            // when
+            var response = putAction("/api/admin/products/categories/" + category.getId() + "/products", request);
+
+            // then
+            assertThat(response.isOk()).isTrue();
+
+            // verify
+            entityManager.flush();
+            entityManager.clear();
+            List<Product> products = productsRepository.findAllByCategoryId(category.getId());
+            assertThat(products).isEmpty();
         }
     }
 }
