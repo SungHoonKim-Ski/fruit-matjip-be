@@ -18,7 +18,7 @@ import store.onuljang.service.UserService;
 @Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-@Profile("!PROD")
+@Profile({"DEV", "test"})
 public class DevAuthAppServiceImpl implements AuthAppService {
     UserService userService;
     TokenService tokenService;
