@@ -19,6 +19,7 @@ import store.onuljang.service.dto.AdminUserDetails;
 public class AdminAuthenticationProvider implements AuthenticationProvider {
     AdminUserDetailService adminUserDetailService;
     PasswordEncoder passwordEncoder;
+    LoginAttemptService loginAttemptService;
 
     @Override
     public Authentication authenticate(Authentication auth) throws AuthenticationException {
@@ -29,12 +30,24 @@ public class AdminAuthenticationProvider implements AuthenticationProvider {
         String email = String.valueOf(auth.getName()).trim().toLowerCase();
         String rawPw = String.valueOf(auth.getCredentials());
 
-        AdminUserDetails user = adminUserDetailService.loadUserByUsername(email);
+        if (loginAttemptService.isBlocked(email)) {
+            throw new BadCredentialsException("계정이 일시적으로 잠겼습니다. 15분 후 다시 시도해주세요.");
+        }
 
-        if (!passwordEncoder.matches(rawPw, user.getPassword())) {
+        AdminUserDetails user;
+        try {
+            user = adminUserDetailService.loadUserByUsername(email);
+        } catch (AuthenticationException e) {
+            loginAttemptService.loginFailed(email);
             throw new BadCredentialsException("Invalid admin credentials");
         }
 
+        if (!passwordEncoder.matches(rawPw, user.getPassword())) {
+            loginAttemptService.loginFailed(email);
+            throw new BadCredentialsException("Invalid admin credentials");
+        }
+
+        loginAttemptService.loginSucceeded(email);
         return new AdminAuthenticationToken(user, null, user.getAuthorities(), user.getAdminId());
     }
 
