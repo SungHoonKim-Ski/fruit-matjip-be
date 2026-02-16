@@ -54,8 +54,9 @@ public class UserController {
     }
 
     @PatchMapping("/message/{messageId}")
-    public ResponseEntity<Void> messageReceived(@NotNull @Positive @PathVariable long messageId) {
-        userAppService.messageReceived(messageId);
+    public ResponseEntity<Void> messageReceived(Authentication auth, @NotNull @Positive @PathVariable long messageId) {
+        String uid = auth.getName();
+        userAppService.messageReceived(uid, messageId);
 
         return ResponseEntity.ok().build();
     }

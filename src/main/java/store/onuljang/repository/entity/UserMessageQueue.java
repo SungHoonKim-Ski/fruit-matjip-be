@@ -26,6 +26,7 @@ public class UserMessageQueue extends BaseLogEntity {
     )
     private Users user;
 
+    @Getter
     @Column(name = "user_uid", nullable = false)
     private String userUid;
 

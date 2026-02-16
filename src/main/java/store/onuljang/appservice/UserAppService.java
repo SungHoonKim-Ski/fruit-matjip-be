@@ -9,6 +9,7 @@ import store.onuljang.controller.response.UserMeResponse;
 import store.onuljang.controller.response.UserMessageResponse;
 import store.onuljang.exception.ExistUserNameException;
 import store.onuljang.exception.UserNoContentException;
+import store.onuljang.exception.UserValidateException;
 import store.onuljang.repository.entity.UserMessageQueue;
 import store.onuljang.repository.entity.Users;
 import store.onuljang.service.UserMessageQueueService;
@@ -38,8 +39,12 @@ public class UserAppService {
     }
 
     @Transactional
-    public void messageReceived(long messageId) {
+    public void messageReceived(String uid, long messageId) {
         UserMessageQueue message = userMessageQueueService.findById(messageId);
+
+        if (!message.getUserUid().equals(uid)) {
+            throw new UserValidateException("해당 메시지에 대한 권한이 없습니다.");
+        }
 
         message.markReceived(TimeUtil.nowDateTime());
     }
