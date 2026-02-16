@@ -96,8 +96,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
                 try {
                     startLatch.await(); // 모든 스레드가 동시에 시작하도록 대기
 
-                    ReservationRequest request = new ReservationRequest(product.getId(), 3, // 3개씩 예약
-                            new BigDecimal("30000"));
+                    ReservationRequest request = new ReservationRequest(product.getId(), 3);
 
                     reservationAppService.reserve(users.get(index).getUid(), request);
                     successCount.incrementAndGet();
@@ -167,7 +166,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
                 try {
                     startLatch.await();
 
-                    ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("50000"));
+                    ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
                     reservationAppService.reserve(users.get(index).getUid(), request);
                     successCount.incrementAndGet();
@@ -214,7 +213,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
         testUsers.add(user);
 
         // 예약 생성
-        ReservationRequest request = new ReservationRequest(product.getId(), 3, new BigDecimal("30000"));
+        ReservationRequest request = new ReservationRequest(product.getId(), 3);
         String displayCode = reservationAppService.reserve(user.getUid(), request);
 
         int originalStock = productsRepository.findById(product.getId()).orElseThrow().getStock();
@@ -267,7 +266,7 @@ class ConcurrentReservationIntegrationTest extends IntegrationTestBase {
         testUsers.add(user);
 
         // 10개 예약
-        ReservationRequest request = new ReservationRequest(product.getId(), 10, new BigDecimal("100000"));
+        ReservationRequest request = new ReservationRequest(product.getId(), 10);
         String displayCode = reservationAppService.reserve(user.getUid(), request);
 
         int threadCount = 5;

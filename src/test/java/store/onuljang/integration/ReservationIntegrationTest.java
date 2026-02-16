@@ -51,7 +51,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         void createReservation_Success() throws Exception {
             // given
             Product product = testFixture.createFutureProduct("테스트상품", 10, new BigDecimal("10000"), 1, admin);
-            ReservationRequest request = new ReservationRequest(product.getId(), 2, new BigDecimal("20000"));
+            ReservationRequest request = new ReservationRequest(product.getId(), 2);
 
             // when
             var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
@@ -66,8 +66,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             // given
             // 재고 부족 테스트 - 내일 상품으로 시간 무관하게 동작
             Product product = testFixture.createTomorrowProduct("테스트상품", 1, new BigDecimal("10000"), admin);
-            ReservationRequest request = new ReservationRequest(product.getId(), 5, // 재고보다 많은 수량
-                    new BigDecimal("50000"));
+            ReservationRequest request = new ReservationRequest(product.getId(), 5); // 재고보다 많은 수량
 
             // when
             var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
@@ -82,7 +81,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             // given
             Product product = testFixture.createInvisibleProduct("비공개상품", 10, new BigDecimal("10000"), nowDate(),
                     admin);
-            ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("10000"));
+            ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
             // when
             var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
@@ -99,7 +98,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             String newUserToken = testFixture.createAccessToken(newUser);
             Product product = testFixture.createFutureProduct("테스트상품", 10, new BigDecimal("10000"), 1, admin);
 
-            ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("10000"));
+            ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
             // when
             var response = postAction("/api/auth/reservations/", request, newUserToken, Void.class);
@@ -112,7 +111,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
         @DisplayName("존재하지 않는 상품 예약 시 실패")
         void createReservation_ProductNotFound() throws Exception {
             // given
-            ReservationRequest request = new ReservationRequest(99999L, 1, new BigDecimal("10000"));
+            ReservationRequest request = new ReservationRequest(99999L, 1);
 
             // when
             var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);

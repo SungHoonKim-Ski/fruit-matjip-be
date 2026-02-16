@@ -88,7 +88,7 @@ class ReservationAppServiceTest {
             int initialStock = testProduct.getStock();
             int quantity = 3;
             String uid = testUser.getUid();
-            ReservationRequest request = new ReservationRequest(1L, quantity, new BigDecimal("30000"));
+            ReservationRequest request = new ReservationRequest(1L, quantity);
 
             given(productsService.findByIdWithLock(1L)).willReturn(testProduct);
             given(userService.findByUidWithLock(uid)).willReturn(testUser);
@@ -113,7 +113,7 @@ class ReservationAppServiceTest {
             Users newUser = Users.builder().socialId("social-new").uid(UUID.randomUUID()).name("신규고객").build();
             ReflectionTestUtils.setField(newUser, "id", 2L);
 
-            ReservationRequest request = new ReservationRequest(1L, 1, new BigDecimal("10000"));
+            ReservationRequest request = new ReservationRequest(1L, 1);
             given(productsService.findByIdWithLock(1L)).willReturn(testProduct);
             given(userService.findByUidWithLock(newUser.getUid())).willReturn(newUser);
 

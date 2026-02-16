@@ -178,7 +178,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
 
             String accessToken = testFixture.createAccessToken(user);
             Product product = testFixture.createFutureProduct("테스트상품", 10, new BigDecimal("10000"), 1, admin);
-            ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("10000"));
+            ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
             // Act
             var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);

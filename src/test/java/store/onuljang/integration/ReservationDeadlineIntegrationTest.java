@@ -57,7 +57,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
     void reserve_FutureProduct_Success() throws Exception {
         // given
         Product product = testFixture.createTomorrowProduct("내일상품", 10, new BigDecimal("10000"), admin);
-        ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("10000"));
+        ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
         // when
         var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
@@ -71,7 +71,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
     void reserve_PastProduct_Fail() throws Exception {
         // given
         Product product = testFixture.createPastProduct("어제상품", 10, new BigDecimal("10000"), 1, admin);
-        ReservationRequest request = new ReservationRequest(product.getId(), 1, new BigDecimal("10000"));
+        ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
         // when
         var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
@@ -91,7 +91,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         Product before = testFixture.createProductAtDateTime("게시전", 10, new BigDecimal("1000"), now.plusMinutes(1),
                 admin);
         var resBefore = postAction("/api/auth/reservations/",
-                new ReservationRequest(before.getId(), 1, new BigDecimal("1000")), accessToken, Object.class);
+                new ReservationRequest(before.getId(), 1), accessToken, Object.class);
 
         assertThat(resBefore.status()).isEqualTo(400);
         ErrorResponse error = objectMapper.convertValue(resBefore.body(), ErrorResponse.class);
@@ -101,7 +101,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         Product after = testFixture.createProductAtDateTime("게시후", 10, new BigDecimal("1000"), now.minusMinutes(1),
                 admin);
         var resAfter = postAction("/api/auth/reservations/",
-                new ReservationRequest(after.getId(), 1, new BigDecimal("1000")), accessToken, Void.class);
+                new ReservationRequest(after.getId(), 1), accessToken, Void.class);
         assertThat(resAfter.isOk()).isTrue();
     }
 
@@ -112,14 +112,14 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         fixedTodayTime(19, 29);
         Product todayBefore = testFixture.createTodayProduct("오늘마감전", 10, new BigDecimal("1000"), admin);
         var resBefore = postAction("/api/auth/reservations/",
-                new ReservationRequest(todayBefore.getId(), 1, new BigDecimal("1000")), accessToken, Void.class);
+                new ReservationRequest(todayBefore.getId(), 1), accessToken, Void.class);
         assertThat(resBefore.isOk()).isTrue();
 
         // 2. 19:31분 (마감 후) -> 실패
         fixedTodayTime(19, 31);
         Product todayAfter = testFixture.createTodayProduct("오늘마감후", 10, new BigDecimal("1000"), admin);
         var resAfter = postAction("/api/auth/reservations/",
-                new ReservationRequest(todayAfter.getId(), 1, new BigDecimal("1000")), accessToken, Object.class);
+                new ReservationRequest(todayAfter.getId(), 1), accessToken, Object.class);
 
         assertThat(resAfter.status()).isEqualTo(400);
         ErrorResponse error = objectMapper.convertValue(resAfter.body(), ErrorResponse.class);
