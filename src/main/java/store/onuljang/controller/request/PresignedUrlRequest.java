@@ -5,5 +5,5 @@ import jakarta.validation.constraints.Pattern;
 
 public record PresignedUrlRequest(
     @NotBlank String fileName,
-    @Pattern(regexp = "image/[-+.\\w]+") @NotBlank String contentType
+    @Pattern(regexp = "image/(jpeg|png|webp)") @NotBlank String contentType
 ) {}
