@@ -30,6 +30,9 @@ class AdminControllerIntegrationTest extends IntegrationTestBase {
         @DisplayName("관리자 회원가입 성공")
         void adminSignup_Success() throws Exception {
             // given
+            Admin owner = testFixture.createAdmin("소유자", "owner@test.com", "password123");
+            setAdminAuthentication(owner);
+
             AdminSignupRequest request = new AdminSignupRequest("새관리자", "newadmin123", "password123");
 
             // when
@@ -46,6 +49,9 @@ class AdminControllerIntegrationTest extends IntegrationTestBase {
         @DisplayName("이미 존재하는 이메일로 회원가입 시 실패")
         void adminSignup_DuplicateEmail() throws Exception {
             // given
+            Admin owner = testFixture.createAdmin("소유자", "owner@test.com", "password123");
+            setAdminAuthentication(owner);
+
             Admin existingAdmin = testFixture.createAdmin("기존자", "existadmin", "password123");
 
             AdminSignupRequest request = new AdminSignupRequest("새관리자", "existadmin", "password123");
@@ -61,6 +67,9 @@ class AdminControllerIntegrationTest extends IntegrationTestBase {
         @DisplayName("빈 이메일로 회원가입 시 실패")
         void adminSignup_EmptyEmail() throws Exception {
             // given
+            Admin owner = testFixture.createAdmin("소유자", "owner@test.com", "password123");
+            setAdminAuthentication(owner);
+
             AdminSignupRequest request = new AdminSignupRequest("새관리자", "", "password123");
 
             // when

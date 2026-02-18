@@ -20,6 +20,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfFilter;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import store.onuljang.event.admin.AdminLogFilter;
 import store.onuljang.service.dto.AdminUserDetails;
 
@@ -39,10 +42,15 @@ public class AdminSecurityConfig {
 
         http.securityMatcher("/api/admin/**")
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/api/admin/login", "/api/admin/signup", "/api/admin/logout").permitAll()
+                .requestMatchers("/api/admin/login", "/api/admin/logout").permitAll()
+                .requestMatchers("/api/admin/signup").hasRole("OWNER")
                 .requestMatchers("/api/admin/**").hasAnyRole("MANAGER", "OWNER")
             )
-            .csrf(csrf -> csrf.disable())
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                .ignoringRequestMatchers("/api/admin/login")
+            )
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authenticationProvider(adminAuthProvider)
                 .exceptionHandling(e -> e
@@ -58,7 +66,19 @@ public class AdminSecurityConfig {
                     })
                 )
             .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
+            .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
             .addFilterAfter(new AdminLogFilter(eventPublisher), SecurityContextHolderFilter.class)
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .contentTypeOptions(contentType -> {})
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000)
+                )
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'none'; frame-ancestors 'none'")
+                )
+            )
             .cors(cors -> {});
         return http.build();
     }

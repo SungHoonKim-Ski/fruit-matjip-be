@@ -41,6 +41,17 @@ public class UserSecurityConfig {
             )
             .addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new UserLogFilter(eventPublisher, jwtUtil), JwtFilter.class)
+            .headers(headers -> headers
+                .frameOptions(frame -> frame.deny())
+                .contentTypeOptions(contentType -> {})
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000)
+                )
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'none'; frame-ancestors 'none'")
+                )
+            )
             .cors(cors -> {});
         return http.build();
     }
