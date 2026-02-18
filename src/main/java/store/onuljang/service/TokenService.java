@@ -20,6 +20,7 @@ import store.onuljang.util.HashUtil;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Optional;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -73,18 +74,31 @@ public class TokenService {
         return jwtToken.access();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public RefreshToken validate(String userUid, String refreshToken) {
         String tokenHash = HashUtil.sha256Hex(refreshToken);
 
-        RefreshToken token = refreshTokenRepository
-                .findByUserUidAndTokenHashAndRevokedIsFalseAndExpiresAtAfter(userUid, tokenHash, Instant.now())
-                .orElseThrow(() -> new InvalidRefreshTokenException("refresh token not found or expired"));
+        Optional<RefreshToken> validToken = refreshTokenRepository
+                .findByUserUidAndTokenHashAndRevokedIsFalseAndExpiresAtAfter(userUid, tokenHash, Instant.now());
 
-        if (!HashUtil.constantTimeEqualsHex(tokenHash, token.getTokenHash())) {
-            throw new InvalidRefreshTokenException("refresh token hash mismatch");
+        if (validToken.isPresent()) {
+            RefreshToken token = validToken.get();
+            if (!HashUtil.constantTimeEqualsHex(tokenHash, token.getTokenHash())) {
+                throw new InvalidRefreshTokenException("refresh token hash mismatch");
+            }
+            return token;
         }
-        return token;
+
+        Optional<RefreshToken> revokedToken = refreshTokenRepository
+                .findByUserUidAndTokenHash(userUid, tokenHash);
+
+        if (revokedToken.isPresent() && revokedToken.get().isRevoked()) {
+            log.warn("Refresh token reuse detected for user: {}", userUid);
+            refreshTokenRepository.revokeAllByUserUid(userUid);
+            throw new InvalidRefreshTokenException("refresh token reuse detected");
+        }
+
+        throw new InvalidRefreshTokenException("refresh token not found or expired");
     }
 
 }
