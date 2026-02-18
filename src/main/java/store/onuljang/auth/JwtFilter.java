@@ -34,6 +34,12 @@ public class JwtFilter extends OncePerRequestFilter {
         String token = header.substring(7);
         try {
             var jws = jwtUtil.parseAndValidate(token);
+            String typ = jws.getBody().get("typ", String.class);
+            if (!"access".equals(typ)) {
+                res.setStatus(HttpStatus.UNAUTHORIZED.value());
+                res.getWriter().write("Invalid token type");
+                return;
+            }
             var auth = new UsernamePasswordAuthenticationToken(jws.getBody().getSubject(), null, List.of());
             SecurityContextHolder.getContext().setAuthentication(auth);
             chain.doFilter(req, res);
