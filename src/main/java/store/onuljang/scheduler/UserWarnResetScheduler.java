@@ -15,7 +15,7 @@ public class UserWarnResetScheduler {
     private final UserRepository usersRepository;
 
     /**
-     * 매달 1일 00:05 KST에 warn_count를 0으로 초기화
+     * 매달 1일 00:00 KST에 warn_count를 0으로 초기화
      */
     @Transactional
     @Scheduled(cron = "0 0 0 1 * *", zone = "Asia/Seoul")
