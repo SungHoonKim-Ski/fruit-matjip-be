@@ -87,7 +87,7 @@ public class AdminSecurityConfig {
 
         if (csrfEnabled) {
             CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
-            repo.setCookieCustomizer(c -> c.domain(csrfCookieDomain));
+            repo.setCookieCustomizer(c -> c.domain(csrfCookieDomain).secure(true).sameSite("Lax"));
             http.csrf(csrf -> csrf
                 .csrfTokenRepository(repo)
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
