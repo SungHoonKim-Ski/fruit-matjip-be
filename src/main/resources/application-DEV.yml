@@ -3,4 +3,4 @@ cors:
 
 csrf:
   enabled: true
-  cookie-domain: .dev.fruit-matjip.store
+  cookie-domain: dev.fruit-matjip.store
