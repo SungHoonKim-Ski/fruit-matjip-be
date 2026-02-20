@@ -6,6 +6,8 @@ import jakarta.validation.Validator;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,6 +37,14 @@ public class AdminSecurityConfig {
     AuthenticationManager authManager;
     ApplicationEventPublisher eventPublisher;
 
+    @NonFinal
+    @Value("${csrf.enabled:false}")
+    boolean csrfEnabled;
+
+    @NonFinal
+    @Value("${csrf.cookie-domain:}")
+    String csrfCookieDomain;
+
     @Bean
     @Order(1)
     SecurityFilterChain adminChain(HttpSecurity http, Validator validator) throws Exception {
@@ -45,11 +55,6 @@ public class AdminSecurityConfig {
                 .requestMatchers("/api/admin/login", "/api/admin/logout").permitAll()
                 .requestMatchers("/api/admin/signup").hasRole("OWNER")
                 .requestMatchers("/api/admin/**").hasAnyRole("MANAGER", "OWNER")
-            )
-            .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                .ignoringRequestMatchers("/api/admin/login")
             )
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
             .authenticationProvider(adminAuthProvider)
@@ -66,7 +71,6 @@ public class AdminSecurityConfig {
                     })
                 )
             .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
-            .addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class)
             .addFilterAfter(new AdminLogFilter(eventPublisher), SecurityContextHolderFilter.class)
             .headers(headers -> headers
                 .frameOptions(frame -> frame.deny())
@@ -80,6 +84,19 @@ public class AdminSecurityConfig {
                 )
             )
             .cors(cors -> {});
+
+        if (csrfEnabled) {
+            CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
+            repo.setCookieCustomizer(c -> c.domain(csrfCookieDomain));
+            http.csrf(csrf -> csrf
+                .csrfTokenRepository(repo)
+                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                .ignoringRequestMatchers("/api/admin/login")
+            ).addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
+        } else {
+            http.csrf(csrf -> csrf.disable());
+        }
+
         return http.build();
     }
 
