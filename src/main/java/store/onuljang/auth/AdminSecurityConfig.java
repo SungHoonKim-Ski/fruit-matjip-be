@@ -6,8 +6,6 @@ import jakarta.validation.Validator;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,9 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
-import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
-import org.springframework.security.web.csrf.CsrfFilter;
-import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import store.onuljang.event.admin.AdminLogFilter;
 import store.onuljang.service.dto.AdminUserDetails;
 
@@ -37,13 +32,6 @@ public class AdminSecurityConfig {
     AuthenticationManager authManager;
     ApplicationEventPublisher eventPublisher;
 
-    @NonFinal
-    @Value("${csrf.enabled:false}")
-    boolean csrfEnabled;
-
-    @NonFinal
-    @Value("${csrf.cookie-domain:}")
-    String csrfCookieDomain;
 
     @Bean
     @Order(1)
@@ -83,20 +71,8 @@ public class AdminSecurityConfig {
                     .policyDirectives("default-src 'none'; frame-ancestors 'none'")
                 )
             )
-            .cors(cors -> {});
-
-        if (csrfEnabled) {
-            CookieCsrfTokenRepository repo = CookieCsrfTokenRepository.withHttpOnlyFalse();
-            repo.setCookieCustomizer(c -> c.domain(csrfCookieDomain).secure(true).sameSite("Lax"));
-            http.csrf(csrf -> csrf
-                .csrfTokenRepository(repo)
-                .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
-                .ignoringRequestMatchers("/api/admin/login")
-            ).addFilterAfter(new CsrfCookieFilter(), CsrfFilter.class);
-        } else {
-            http.csrf(csrf -> csrf.disable());
-        }
-
+            .cors(cors -> {})
+            .csrf(csrf -> csrf.disable());
         return http.build();
     }
 

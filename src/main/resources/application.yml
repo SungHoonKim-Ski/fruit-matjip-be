@@ -65,9 +65,6 @@ cloud:
       access-key: ${AWS_ACCESS_KEY}
       secret-key: ${AWS_SECRET_KEY}
 
-csrf:
-  enabled: false
-
 cors:
   allowed-origins: http://localhost:3000
 

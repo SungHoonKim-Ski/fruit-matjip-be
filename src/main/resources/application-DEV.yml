@@ -1,6 +1,2 @@
 cors:
   allowed-origins: https://dev.fruit-matjip.store
-
-csrf:
-  enabled: true
-  cookie-domain: dev.fruit-matjip.store
