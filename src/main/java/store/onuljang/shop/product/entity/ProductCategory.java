@@ -5,6 +5,7 @@ import lombok.*;
 import store.onuljang.shared.entity.base.BaseLogEntity;
 
 import java.util.*;
+import store.onuljang.courier.entity.CourierProduct;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -30,6 +31,10 @@ public class ProductCategory extends BaseLogEntity {
             inverseJoinColumns = @JoinColumn(name = "product_id"))
     @Builder.Default
     private Set<Product> products = new HashSet<>();
+
+    @ManyToMany(mappedBy = "productCategories")
+    @Builder.Default
+    private Set<CourierProduct> courierProducts = new HashSet<>();
 
     public void setName(String name) {
         this.name = name;

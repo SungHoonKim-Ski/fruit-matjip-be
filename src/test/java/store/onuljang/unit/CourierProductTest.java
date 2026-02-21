@@ -1,0 +1,376 @@
+package store.onuljang.unit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+
+import java.math.BigDecimal;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
+import store.onuljang.courier.appservice.CourierProductsAppService;
+import store.onuljang.courier.dto.CourierProductListResponse;
+import store.onuljang.courier.dto.CourierProductResponse;
+import store.onuljang.courier.entity.CourierProduct;
+import store.onuljang.courier.service.CourierProductService;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.dto.ProductCategoryResponse;
+import store.onuljang.shop.product.entity.ProductCategory;
+import store.onuljang.shop.product.service.ProductCategoryService;
+
+@ExtendWith(MockitoExtension.class)
+class CourierProductTest {
+
+    private Admin testAdmin;
+
+    @BeforeEach
+    void setUp() {
+        testAdmin =
+                Admin.builder()
+                        .name("테스트관리자")
+                        .email("admin@test.com")
+                        .password("password")
+                        .build();
+    }
+
+    private CourierProduct createProduct(
+            String name, int stock, BigDecimal price, boolean visible) {
+        return CourierProduct.builder()
+                .name(name)
+                .productUrl("https://example.com/img.jpg")
+                .price(price)
+                .stock(stock)
+                .visible(visible)
+                .registeredAdmin(testAdmin)
+                .build();
+    }
+
+    // ===== 1. CourierProduct 도메인 메서드 테스트 =====
+
+    @Nested
+    @DisplayName("assertPurchasable - 구매 가능 검증")
+    class AssertPurchasable {
+
+        @Test
+        @DisplayName("정상 구매 가능 상품")
+        void purchasable_Success() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act & assert
+            product.assertPurchasable(5);
+        }
+
+        @Test
+        @DisplayName("재고 부족 시 예외")
+        void purchasable_InsufficientStock() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 3, new BigDecimal("10000"), true);
+
+            // act & assert
+            assertThatThrownBy(() -> product.assertPurchasable(5))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("재고가 부족합니다");
+        }
+
+        @Test
+        @DisplayName("비공개 상품 구매 불가")
+        void purchasable_NotVisible() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), false);
+
+            // act & assert
+            assertThatThrownBy(() -> product.assertPurchasable(1))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("판매가 중단된 상품");
+        }
+
+        @Test
+        @DisplayName("삭제된 상품 구매 불가")
+        void purchasable_Deleted() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            product.softDelete();
+
+            // act & assert
+            assertThatThrownBy(() -> product.assertPurchasable(1))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("삭제된 상품");
+        }
+
+        @Test
+        @DisplayName("수량이 0 이하일 때 예외")
+        void purchasable_ZeroQuantity() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act & assert
+            assertThatThrownBy(() -> product.assertPurchasable(0))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessageContaining("1개 이상");
+        }
+    }
+
+    @Nested
+    @DisplayName("purchase - 구매 처리")
+    class Purchase {
+
+        @Test
+        @DisplayName("구매 시 재고 차감 및 판매량 증가")
+        void purchase_Success() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act
+            product.purchase(3);
+
+            // assert
+            assertThat(product.getStock()).isEqualTo(7);
+            assertThat(product.getTotalSold()).isEqualTo(3L);
+        }
+
+        @Test
+        @DisplayName("연속 구매 시 누적 반영")
+        void purchase_Multiple() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act
+            product.purchase(3);
+            product.purchase(2);
+
+            // assert
+            assertThat(product.getStock()).isEqualTo(5);
+            assertThat(product.getTotalSold()).isEqualTo(5L);
+        }
+    }
+
+    @Nested
+    @DisplayName("restoreStock - 재고 복원")
+    class RestoreStock {
+
+        @Test
+        @DisplayName("재고 복원 성공")
+        void restoreStock_Success() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            product.purchase(5);
+
+            // act
+            product.restoreStock(3);
+
+            // assert
+            assertThat(product.getStock()).isEqualTo(8);
+        }
+    }
+
+    @Nested
+    @DisplayName("softDelete - 소프트 삭제")
+    class SoftDelete {
+
+        @Test
+        @DisplayName("삭제 후 isAvailable false")
+        void softDelete_NotAvailable() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act
+            product.softDelete();
+
+            // assert
+            assertThat(product.isAvailable()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("toggleVisible - 노출 토글")
+    class ToggleVisible {
+
+        @Test
+        @DisplayName("visible 토글 동작")
+        void toggleVisible_Success() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act
+            product.toggleVisible();
+
+            // assert
+            assertThat(product.getVisible()).isFalse();
+
+            // act
+            product.toggleVisible();
+
+            // assert
+            assertThat(product.getVisible()).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("replaceDetailImages - 상세 이미지 교체")
+    class ReplaceDetailImages {
+
+        @Test
+        @DisplayName("상세 이미지 교체 성공")
+        void replaceDetailImages_Success() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act
+            product.replaceDetailImages(List.of("img1.jpg", "img2.jpg"));
+
+            // assert
+            assertThat(product.getDetailImages()).hasSize(2);
+            assertThat(product.getDetailImages().get(0).getImageUrl()).isEqualTo("img1.jpg");
+            assertThat(product.getDetailImages().get(1).getImageUrl()).isEqualTo("img2.jpg");
+            assertThat(product.getDetailImages().get(0).getSortOrder()).isEqualTo(0);
+            assertThat(product.getDetailImages().get(1).getSortOrder()).isEqualTo(1);
+        }
+
+        @Test
+        @DisplayName("빈 리스트로 교체 시 이미지 전부 삭제")
+        void replaceDetailImages_Empty() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            product.replaceDetailImages(List.of("img1.jpg"));
+
+            // act
+            product.replaceDetailImages(List.of());
+
+            // assert
+            assertThat(product.getDetailImages()).isEmpty();
+        }
+    }
+
+    // ===== 2. CourierProductsAppService 테스트 =====
+
+    @Nested
+    @DisplayName("CourierProductsAppService")
+    @ExtendWith(MockitoExtension.class)
+    class CourierProductsAppServiceTest {
+
+        @InjectMocks
+        private CourierProductsAppService courierProductsAppService;
+
+        @Mock
+        private CourierProductService courierProductService;
+
+        @Mock
+        private ProductCategoryService productCategoryService;
+
+        @Test
+        @DisplayName("전체 상품 목록 조회")
+        void getProducts_All() {
+            // arrange
+            CourierProduct product1 =
+                    createProduct("상품1", 10, new BigDecimal("10000"), true);
+            CourierProduct product2 =
+                    createProduct("상품2", 5, new BigDecimal("5000"), true);
+            ReflectionTestUtils.setField(product1, "id", 1L);
+            ReflectionTestUtils.setField(product2, "id", 2L);
+
+            given(courierProductService.findAllVisible())
+                    .willReturn(List.of(product1, product2));
+
+            // act
+            CourierProductListResponse result = courierProductsAppService.getProducts(null);
+
+            // assert
+            assertThat(result.response()).hasSize(2);
+            assertThat(result.response().get(0).name()).isEqualTo("상품1");
+            assertThat(result.response().get(1).name()).isEqualTo("상품2");
+        }
+
+        @Test
+        @DisplayName("카테고리별 상품 목록 조회")
+        void getProducts_ByCategory() {
+            // arrange
+            Long categoryId = 1L;
+            CourierProduct product1 =
+                    createProduct("상품1", 10, new BigDecimal("10000"), true);
+            ReflectionTestUtils.setField(product1, "id", 1L);
+
+            given(courierProductService.findAllVisibleByCategory(categoryId))
+                    .willReturn(List.of(product1));
+
+            // act
+            CourierProductListResponse result =
+                    courierProductsAppService.getProducts(categoryId);
+
+            // assert
+            assertThat(result.response()).hasSize(1);
+            assertThat(result.response().get(0).name()).isEqualTo("상품1");
+        }
+
+        @Test
+        @DisplayName("상품 목록이 비어있을 때 빈 리스트 반환")
+        void getProducts_Empty() {
+            // arrange
+            given(courierProductService.findAllVisible()).willReturn(List.of());
+
+            // act
+            CourierProductListResponse result = courierProductsAppService.getProducts(null);
+
+            // assert
+            assertThat(result.response()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("상품 상세 조회")
+        void getDetail_Success() {
+            // arrange
+            CourierProduct product =
+                    createProduct("상세상품", 15, new BigDecimal("25000"), true);
+            ReflectionTestUtils.setField(product, "id", 1L);
+
+            given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
+
+            // act
+            CourierProductResponse result = courierProductsAppService.getDetail(1L);
+
+            // assert
+            assertThat(result.name()).isEqualTo("상세상품");
+            assertThat(result.price()).isEqualTo(new BigDecimal("25000"));
+            assertThat(result.stock()).isEqualTo(15);
+        }
+
+        @Test
+        @DisplayName("카테고리 목록 조회")
+        void getProductCategories_Success() {
+            // arrange
+            ProductCategory category1 = ProductCategory.builder().name("과일").build();
+            ProductCategory category2 = ProductCategory.builder().name("채소").build();
+
+            given(productCategoryService.findAllOrderBySortOrder())
+                    .willReturn(List.of(category1, category2));
+
+            // act
+            ProductCategoryResponse result =
+                    courierProductsAppService.getProductCategories();
+
+            // assert
+            assertThat(result.response()).hasSize(2);
+        }
+
+        @Test
+        @DisplayName("카테고리가 없는 경우 빈 목록 반환")
+        void getProductCategories_Empty() {
+            // arrange
+            given(productCategoryService.findAllOrderBySortOrder()).willReturn(List.of());
+
+            // act
+            ProductCategoryResponse result =
+                    courierProductsAppService.getProductCategories();
+
+            // assert
+            assertThat(result.response()).isEmpty();
+        }
+    }
+}

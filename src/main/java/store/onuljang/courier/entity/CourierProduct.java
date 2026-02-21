@@ -1,0 +1,164 @@
+package store.onuljang.courier.entity;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import lombok.*;
+import store.onuljang.shared.entity.base.BaseEntity;
+import store.onuljang.shared.util.TimeUtil;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.ProductCategory;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Entity
+@Table(name = "courier_products")
+public class CourierProduct extends BaseEntity {
+
+    @Getter
+    @Setter
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+
+    @Getter
+    @Setter
+    @Column(name = "product_url", nullable = false, length = 500)
+    private String productUrl;
+
+    @Getter
+    @Column(name = "price", nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
+
+    @Getter
+    @Column(name = "stock", nullable = false)
+    @Builder.Default
+    private Integer stock = 0;
+
+    @Getter
+    @Column(name = "visible", nullable = false)
+    @Builder.Default
+    private Boolean visible = true;
+
+    @Getter
+    @Setter
+    @Column(name = "weight_gram")
+    private Integer weightGram;
+
+    @Getter
+    @Setter
+    @Lob
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    @Getter
+    @Setter
+    @Column(name = "sort_order", nullable = false)
+    @Builder.Default
+    private Integer sortOrder = 0;
+
+    @Getter
+    @Column(name = "total_sold", nullable = false)
+    @Builder.Default
+    private Long totalSold = 0L;
+
+    @Getter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_id")
+    private Admin registeredAdmin;
+
+    @Builder.Default
+    @OrderBy("sortOrder ASC")
+    @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CourierProductDetailImage> detailImages = new ArrayList<>();
+
+    @Getter
+    @ManyToMany
+    @JoinTable(
+            name = "courier_product_category_mapping",
+            joinColumns = @JoinColumn(name = "courier_product_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id"))
+    @Builder.Default
+    private Set<ProductCategory> productCategories = new HashSet<>();
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    public List<CourierProductDetailImage> getDetailImages() {
+        if (this.detailImages == null) {
+            return List.of();
+        }
+        return this.detailImages;
+    }
+
+    public void assertPurchasable(int quantity) {
+        if (deletedAt != null) {
+            throw new IllegalStateException("삭제된 상품입니다.");
+        }
+        if (Boolean.FALSE.equals(visible)) {
+            throw new IllegalStateException("판매가 중단된 상품입니다.");
+        }
+        if (quantity <= 0) {
+            throw new IllegalStateException("구매 수량은 1개 이상이어야 합니다.");
+        }
+        if (this.stock < quantity) {
+            throw new IllegalStateException("상품의 재고가 부족합니다.");
+        }
+    }
+
+    public void purchase(int quantity) {
+        assertPurchasable(quantity);
+        this.stock -= quantity;
+        this.totalSold += quantity;
+    }
+
+    public void restoreStock(int quantity) {
+        this.stock += quantity;
+    }
+
+    public boolean isAvailable() {
+        return Boolean.TRUE.equals(visible) && deletedAt == null && stock > 0;
+    }
+
+    public void softDelete() {
+        this.deletedAt = TimeUtil.nowDateTime();
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public void toggleVisible() {
+        this.visible = !this.visible;
+    }
+
+    public void replaceDetailImages(List<String> imageUrls) {
+        this.detailImages.clear();
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+        for (int i = 0; i < imageUrls.size(); i++) {
+            this.detailImages.add(
+                    CourierProductDetailImage.builder()
+                            .courierProduct(this)
+                            .imageUrl(imageUrls.get(i))
+                            .sortOrder(i)
+                            .build());
+        }
+    }
+
+    public void updateCategories(Set<ProductCategory> categories) {
+        this.productCategories.clear();
+        if (categories != null) {
+            this.productCategories.addAll(categories);
+        }
+    }
+}

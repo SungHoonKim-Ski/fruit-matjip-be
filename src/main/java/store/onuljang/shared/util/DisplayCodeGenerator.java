@@ -12,8 +12,8 @@ public class DisplayCodeGenerator {
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final int MAX_RETRY = 3;
 
-    private static final Pattern CODE_PATTERN = Pattern.compile("^[RD]-\\d{8}-[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5,6}$");
-    private static final Pattern BACKFILL_PATTERN = Pattern.compile("^[RD]-\\d+$");
+    private static final Pattern CODE_PATTERN = Pattern.compile("^[RDC]-\\d{8}-[23456789ABCDEFGHJKMNPQRSTUVWXYZ]{5,6}$");
+    private static final Pattern BACKFILL_PATTERN = Pattern.compile("^[RDC]-\\d+$");
     private static final Pattern NUMERIC_PATTERN = Pattern.compile("^\\d+$");
 
     private DisplayCodeGenerator() {
