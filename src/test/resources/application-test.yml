@@ -49,6 +49,21 @@ KAKAOPAY:
   CANCEL_URL: http://localhost/cancel
   FAIL_URL: http://localhost/fail
   HOST: https://open-api.kakaopay.com
+  COURIER_APPROVAL_URL: http://localhost/shop/approve
+  COURIER_CANCEL_URL: http://localhost/shop/cancel
+  COURIER_FAIL_URL: http://localhost/shop/fail
+
+NAVERPAY:
+  ENABLED: false
+  CLIENT_ID: test-client-id
+  CLIENT_SECRET: test-client-secret
+  CHAIN_ID: test-chain-id
+  HOST: https://dev.apis.naver.com
+
+TOSSPAY:
+  ENABLED: false
+  SECRET_KEY: test-secret-key
+  HOST: https://api.tosspayments.com
 
 DELIVERY:
   STORE_LAT: 37.556504
