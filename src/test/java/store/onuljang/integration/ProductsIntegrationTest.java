@@ -4,21 +4,21 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import store.onuljang.controller.response.ProductDetailResponse;
-import store.onuljang.controller.response.ProductCategoryResponse;
-import store.onuljang.controller.response.ProductListResponse;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.shop.product.dto.ProductDetailResponse;
+import store.onuljang.shop.product.dto.ProductCategoryResponse;
+import store.onuljang.shop.product.dto.ProductListResponse;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shared.user.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
-import store.onuljang.util.TimeUtil;
+import store.onuljang.shared.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.nowDate;
+import static store.onuljang.shared.util.TimeUtil.nowDate;
 
 /**
  * 상품 조회 API 통합 테스트
@@ -55,7 +55,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             testFixture.createFutureProduct("모레상품", 3, new BigDecimal("3000"), 2, admin);
 
             // when
-            var response = getAction("/api/auth/products?from=" + tomorrow + "&to=" + tomorrowNextDay, accessToken,
+            var response = getAction("/api/store/auth/products?from=" + tomorrow + "&to=" + tomorrowNextDay, accessToken,
                     ProductListResponse.class);
 
             // then
@@ -75,7 +75,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             String toDate = today.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/auth/products?from=" + fromDate + "&to=" + toDate, accessToken,
+            var response = getAction("/api/store/auth/products?from=" + fromDate + "&to=" + toDate, accessToken,
                     ProductListResponse.class);
 
             // then
@@ -93,7 +93,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             String toDate = today.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/auth/products?from=" + fromDate + "&to=" + toDate, Void.class);
+            var response = getAction("/api/store/auth/products?from=" + fromDate + "&to=" + toDate, Void.class);
 
             // then
             System.out.println("DEBUG: Unauthorized Test Status Code: " + response.status());
@@ -109,7 +109,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             String fromDate = today.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/auth/products?from=" + fromDate, accessToken, Void.class);
+            var response = getAction("/api/store/auth/products?from=" + fromDate, accessToken, Void.class);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -132,7 +132,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
 
             // when & then - 카테고리 1로 조회
             var response1 = getAction(
-                    "/api/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=" + cat1.getId(),
+                    "/api/store/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=" + cat1.getId(),
                     accessToken, ProductListResponse.class);
             assertThat(response1.isOk()).isTrue();
             assertThat(response1.body().response()).hasSize(1);
@@ -140,7 +140,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
 
             // when & then - 카테고리 2로 조회
             var response2 = getAction(
-                    "/api/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=" + cat2.getId(),
+                    "/api/store/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=" + cat2.getId(),
                     accessToken, ProductListResponse.class);
             assertThat(response2.isOk()).isTrue();
             assertThat(response2.body().response()).hasSize(1);
@@ -158,7 +158,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             String toDate = today.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=9999",
+            var response = getAction("/api/store/auth/products?from=" + fromDate + "&to=" + toDate + "&categoryId=9999",
                     accessToken, ProductListResponse.class);
 
             // then
@@ -178,7 +178,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             Product product = testFixture.createTodayProduct("테스트상품", 10, new BigDecimal("15000"), admin);
 
             // when
-            var response = getAction("/api/auth/products/" + product.getId(), accessToken, ProductDetailResponse.class);
+            var response = getAction("/api/store/auth/products/" + product.getId(), accessToken, ProductDetailResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -190,7 +190,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
         @DisplayName("존재하지 않는 상품 조회 시 404 반환")
         void getProductDetail_NotFound() throws Exception {
             // when
-            var response = getAction("/api/auth/products/99999", accessToken, Void.class);
+            var response = getAction("/api/store/auth/products/99999", accessToken, Void.class);
 
             // then
             assertThat(response.isNotFound()).isTrue();
@@ -200,7 +200,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
         @DisplayName("잘못된 상품 ID 형식 시 400 반환")
         void getProductDetail_InvalidId() throws Exception {
             // when
-            var response = getAction("/api/auth/products/-1", accessToken, Void.class);
+            var response = getAction("/api/store/auth/products/-1", accessToken, Void.class);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -220,7 +220,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
             testFixture.createProductCategory("육류");
 
             // when
-            var response = getAction("/api/auth/products/categories", accessToken, ProductCategoryResponse.class);
+            var response = getAction("/api/store/auth/products/categories", accessToken, ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -231,7 +231,7 @@ class ProductsIntegrationTest extends IntegrationTestBase {
         @DisplayName("카테고리가 없는 경우 빈 배열 반환")
         void getProductCategories_Empty() throws Exception {
             // when
-            var response = getAction("/api/auth/products/categories", accessToken, ProductCategoryResponse.class);
+            var response = getAction("/api/store/auth/products/categories", accessToken, ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();

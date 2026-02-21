@@ -5,15 +5,18 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import store.onuljang.controller.request.*;
-import store.onuljang.controller.response.AdminProductDetailResponse;
-import store.onuljang.controller.response.AdminProductListItems;
-import store.onuljang.controller.response.ProductCategoryResponse;
-import store.onuljang.repository.ProductsRepository;
-import store.onuljang.repository.ProductCategoryRepository;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.ProductCategory;
+import store.onuljang.shop.admin.dto.*;
+import store.onuljang.shop.delivery.dto.*;
+import store.onuljang.shop.reservation.dto.*;
+import store.onuljang.shared.auth.dto.*;
+import store.onuljang.shop.admin.dto.AdminProductDetailResponse;
+import store.onuljang.shop.admin.dto.AdminProductListItems;
+import store.onuljang.shop.product.dto.ProductCategoryResponse;
+import store.onuljang.shop.product.repository.ProductsRepository;
+import store.onuljang.shop.product.repository.ProductCategoryRepository;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shop.product.entity.ProductCategory;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.math.BigDecimal;
@@ -24,7 +27,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.nowDate;
+import static store.onuljang.shared.util.TimeUtil.nowDate;
 
 /**
  * 관리자 상품 관리 API 통합 테스트
@@ -68,7 +71,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             testFixture.createInvisibleProduct("비공개상품", 3, new BigDecimal("3000"), nowDate(), admin);
 
             // when
-            var response = getAction("/api/admin/products", AdminProductListItems.class);
+            var response = getAction("/api/admin/shop/products", AdminProductListItems.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -87,7 +90,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             Product product = testFixture.createTodayProduct("테스트상품", 10, new BigDecimal("15000"), admin);
 
             // when
-            var response = getAction("/api/admin/products/" + product.getId(), AdminProductDetailResponse.class);
+            var response = getAction("/api/admin/shop/products/" + product.getId(), AdminProductDetailResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -100,7 +103,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
         @DisplayName("존재하지 않는 상품 조회 시 404 반환")
         void getProductDetail_NotFound() throws Exception {
             // when
-            var response = getAction("/api/admin/products/99999", Void.class);
+            var response = getAction("/api/admin/shop/products/99999", Void.class);
 
             // then
             assertThat(response.isNotFound()).isTrue();
@@ -119,7 +122,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     "https://example.com/image.jpg", nowDate().plusDays(1).toString(), true, false);
 
             // when
-            var response = postAction("/api/admin/products", request, Long.class);
+            var response = postAction("/api/admin/shop/products", request, Long.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -148,7 +151,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     "수정된 설명", List.of(), LocalTime.of(12, 0), true);
 
             // when
-            var response = patchAction("/api/admin/products/" + product.getId(), request, Void.class);
+            var response = patchAction("/api/admin/shop/products/" + product.getId(), request, Void.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -174,7 +177,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             Long productId = product.getId();
 
             // when
-            var response = deleteAction("/api/admin/products/" + productId);
+            var response = deleteAction("/api/admin/shop/products/" + productId);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -198,7 +201,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             boolean originalVisible = product.getVisible();
 
             // when
-            var response = patchAction("/api/admin/products/visible/" + product.getId());
+            var response = patchAction("/api/admin/shop/products/visible/" + product.getId());
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -221,7 +224,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             boolean originalSelfPick = product.getSelfPick();
 
             // when
-            var response = patchAction("/api/admin/products/self-pick/" + product.getId());
+            var response = patchAction("/api/admin/shop/products/self-pick/" + product.getId());
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -248,7 +251,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     Set.of(product1.getId(), product2.getId()));
 
             // when
-            var response = patchAction("/api/admin/products/bulk-sell-date", request, Integer.class);
+            var response = patchAction("/api/admin/shop/products/bulk-sell-date", request, Integer.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -272,7 +275,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     List.of(product3.getId(), product1.getId(), product2.getId()));
 
             // when
-            var response = patchAction("/api/admin/products/order", request, Integer.class);
+            var response = patchAction("/api/admin/shop/products/order", request, Integer.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -292,7 +295,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             testFixture.createProductCategory("채소");
 
             // when
-            var response = getAction("/api/admin/products/categories", ProductCategoryResponse.class);
+            var response = getAction("/api/admin/shop/products/categories", ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -307,7 +310,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     "https://example.com/image.jpg");
 
             // when
-            var response = postAction("/api/admin/products/category", request, Void.class);
+            var response = postAction("/api/admin/shop/products/category", request, Void.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -320,7 +323,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             testFixture.createProductCategory("삭제할카테고리");
 
             // when
-            var response = deleteAction("/api/admin/products/category?keyword=삭제할카테고리");
+            var response = deleteAction("/api/admin/shop/products/category?keyword=삭제할카테고리");
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -337,7 +340,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             AdminCategoryProductsRequest request = new AdminCategoryProductsRequest(List.of(p1.getId(), p2.getId()));
 
             // when
-            var response = putAction("/api/admin/products/categories/" + category.getId() + "/products", request);
+            var response = putAction("/api/admin/shop/products/categories/" + category.getId() + "/products", request);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -358,7 +361,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     "https://example.com/image.jpg");
 
             // when
-            var response = postAction("/api/admin/products/category", request, Void.class);
+            var response = postAction("/api/admin/shop/products/category", request, Void.class);
 
             // then
             assertThat(response.isOk()).isFalse();
@@ -372,7 +375,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     "https://example.com/image.jpg");
 
             // when
-            var response = postAction("/api/admin/products/category", request, Void.class);
+            var response = postAction("/api/admin/shop/products/category", request, Void.class);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -387,7 +390,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     "https://example.com/new-image.jpg");
 
             // when
-            var response = patchAction("/api/admin/products/category/" + category.getId(), request, Void.class);
+            var response = patchAction("/api/admin/shop/products/category/" + category.getId(), request, Void.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -407,7 +410,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             AdminUpdateCategoryRequest request = new AdminUpdateCategoryRequest("수정", null);
 
             // when
-            var response = patchAction("/api/admin/products/category/99999", request, Void.class);
+            var response = patchAction("/api/admin/shop/products/category/99999", request, Void.class);
 
             // then
             assertThat(response.isOk()).isFalse();
@@ -427,7 +430,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
                     new AdminUpdateCategoryListRequest.CategoryItemRequest(cat2.getId(), null, null)));
 
             // when
-            var response = patchAction("/api/admin/products/categories/order", request, Void.class);
+            var response = patchAction("/api/admin/shop/products/categories/order", request, Void.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -447,7 +450,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             var category = testFixture.createProductCategory("과일");
 
             // when
-            var response = postAction("/api/admin/products/" + product.getId() + "/categories/" + category.getId(),
+            var response = postAction("/api/admin/shop/products/" + product.getId() + "/categories/" + category.getId(),
                     "", Void.class);
 
             // then
@@ -471,7 +474,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
 
             // when
             var response = deleteAction(
-                    "/api/admin/products/" + product.getId() + "/categories/" + category.getId());
+                    "/api/admin/shop/products/" + product.getId() + "/categories/" + category.getId());
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -494,7 +497,7 @@ class AdminProductIntegrationTest extends IntegrationTestBase {
             AdminCategoryProductsRequest request = new AdminCategoryProductsRequest(Collections.emptyList());
 
             // when
-            var response = putAction("/api/admin/products/categories/" + category.getId() + "/products", request);
+            var response = putAction("/api/admin/shop/products/categories/" + category.getId() + "/products", request);
 
             // then
             assertThat(response.isOk()).isTrue();

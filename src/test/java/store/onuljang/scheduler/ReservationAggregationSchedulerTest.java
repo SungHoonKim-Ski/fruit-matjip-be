@@ -9,10 +9,11 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Users;
-import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.shop.reservation.scheduler.ReservationAggregationScheduler;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.entity.enums.ReservationStatus;
 import store.onuljang.support.TestFixture;
 
 import java.math.BigDecimal;

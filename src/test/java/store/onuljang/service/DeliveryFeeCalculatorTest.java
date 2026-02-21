@@ -8,7 +8,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
-import store.onuljang.exception.UserValidateException;
+import store.onuljang.shop.delivery.service.DeliveryFeeCalculator;
+import store.onuljang.shared.exception.UserValidateException;
 
 import java.math.BigDecimal;
 

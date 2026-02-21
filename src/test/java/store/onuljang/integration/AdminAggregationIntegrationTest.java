@@ -4,12 +4,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import store.onuljang.controller.response.AdminReservationSummaryResponse;
-import store.onuljang.controller.response.AdminReservationDetailsResponse;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Users;
-import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.shop.admin.dto.AdminReservationSummaryResponse;
+import store.onuljang.shop.admin.dto.AdminReservationDetailsResponse;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.entity.enums.ReservationStatus;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.math.BigDecimal;
@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.nowDate;
+import static store.onuljang.shared.util.TimeUtil.nowDate;
 
 /**
  * 관리자 집계 API 통합 테스트
@@ -57,7 +57,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
             String toDate = yesterday.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/admin/agg/summary?from=" + fromDate + "&to=" + toDate,
+            var response = getAction("/api/admin/shop/agg/summary?from=" + fromDate + "&to=" + toDate,
                     AdminReservationSummaryResponse.class);
 
             // then
@@ -74,7 +74,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
             String toDate = pastDate.plusDays(1).format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/admin/agg/summary?from=" + fromDate + "&to=" + toDate,
+            var response = getAction("/api/admin/shop/agg/summary?from=" + fromDate + "&to=" + toDate,
                     AdminReservationSummaryResponse.class);
 
             // then
@@ -100,7 +100,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
             String date = pastDate.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/admin/agg/sales?date=" + date, AdminReservationDetailsResponse.class);
+            var response = getAction("/api/admin/shop/agg/sales?date=" + date, AdminReservationDetailsResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -115,7 +115,7 @@ class AdminAggregationIntegrationTest extends IntegrationTestBase {
             String date = pastDate.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/admin/agg/sales?date=" + date, AdminReservationDetailsResponse.class);
+            var response = getAction("/api/admin/shop/agg/sales?date=" + date, AdminReservationDetailsResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();

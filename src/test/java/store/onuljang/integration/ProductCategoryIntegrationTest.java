@@ -4,14 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import store.onuljang.controller.response.ProductCategoryResponse;
-import store.onuljang.controller.response.ProductListResponse;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.ProductCategory;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.shop.product.dto.ProductCategoryResponse;
+import store.onuljang.shop.product.dto.ProductListResponse;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shop.product.entity.ProductCategory;
+import store.onuljang.shared.user.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
-import store.onuljang.util.TimeUtil;
+import store.onuljang.shared.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -50,7 +50,7 @@ class ProductCategoryIntegrationTest extends IntegrationTestBase {
             testFixture.createProductCategory("육류");
 
             // when
-            var response = getAction("/api/auth/products/categories", accessToken, ProductCategoryResponse.class);
+            var response = getAction("/api/store/auth/products/categories", accessToken, ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -61,7 +61,7 @@ class ProductCategoryIntegrationTest extends IntegrationTestBase {
         @DisplayName("카테고리가 없는 경우 빈 배열 반환")
         void getProductCategories_Empty() throws Exception {
             // when
-            var response = getAction("/api/auth/products/categories", accessToken, ProductCategoryResponse.class);
+            var response = getAction("/api/store/auth/products/categories", accessToken, ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -75,7 +75,7 @@ class ProductCategoryIntegrationTest extends IntegrationTestBase {
             testFixture.createProductCategory("과일", "https://example.com/fruit.jpg");
 
             // when
-            var response = getAction("/api/auth/products/categories", accessToken, ProductCategoryResponse.class);
+            var response = getAction("/api/store/auth/products/categories", accessToken, ProductCategoryResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -109,7 +109,7 @@ class ProductCategoryIntegrationTest extends IntegrationTestBase {
             testFixture.createProductWithCategory("당근", 20, new BigDecimal("3000"), tomorrow, admin, vegetableCategory);
 
             // when
-            var response = getAction("/api/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow + "&categoryId="
+            var response = getAction("/api/store/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow + "&categoryId="
                     + fruitCategory.getId(), accessToken, ProductListResponse.class);
 
             // then
@@ -131,7 +131,7 @@ class ProductCategoryIntegrationTest extends IntegrationTestBase {
             testFixture.createFutureProduct("일반상품", 5, new BigDecimal("3000"), 1, admin);
 
             // when
-            var response = getAction("/api/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow, accessToken,
+            var response = getAction("/api/store/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow, accessToken,
                     ProductListResponse.class);
 
             // then
@@ -150,7 +150,7 @@ class ProductCategoryIntegrationTest extends IntegrationTestBase {
             testFixture.createFutureProduct("일반상품", 5, new BigDecimal("3000"), 1, admin);
 
             // when
-            var response = getAction("/api/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow + "&categoryId="
+            var response = getAction("/api/store/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow + "&categoryId="
                     + emptyCategory.getId(), accessToken, ProductListResponse.class);
 
             // then
@@ -174,11 +174,11 @@ class ProductCategoryIntegrationTest extends IntegrationTestBase {
             testFixture.addCategoryToProduct(apple, discountCategory);
 
             // 과일 카테고리로 조회
-            var fruitResponse = getAction("/api/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow
+            var fruitResponse = getAction("/api/store/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow
                     + "&categoryId=" + fruitCategory.getId(), accessToken, ProductListResponse.class);
 
             // 할인 카테고리로 조회
-            var discountResponse = getAction("/api/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow
+            var discountResponse = getAction("/api/store/auth/products?from=" + tomorrow + "&to=" + dayAfterTomorrow
                     + "&categoryId=" + discountCategory.getId(), accessToken, ProductListResponse.class);
 
             // then

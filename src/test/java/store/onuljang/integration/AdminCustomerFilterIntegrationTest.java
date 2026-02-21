@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.web.servlet.MvcResult;
-import store.onuljang.repository.UserRepository;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.shared.user.repository.UserRepository;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shared.user.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.nio.charset.StandardCharsets;
@@ -42,7 +42,7 @@ class AdminCustomerFilterIntegrationTest extends IntegrationTestBase {
     }
 
     private String callCustomersApi(String sortKey, String sortOrder, int limit) throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/admin/customers")
+        MvcResult result = mockMvc.perform(get("/api/admin/shop/customers")
                 .param("sortKey", sortKey)
                 .param("sortOrder", sortOrder)
                 .param("limit", String.valueOf(limit)))
@@ -51,7 +51,7 @@ class AdminCustomerFilterIntegrationTest extends IntegrationTestBase {
     }
 
     private String callCustomersApiWithCursor(String sortKey, String sortOrder, int limit, String cursor) throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/admin/customers")
+        MvcResult result = mockMvc.perform(get("/api/admin/shop/customers")
                 .param("sortKey", sortKey)
                 .param("sortOrder", sortOrder)
                 .param("limit", String.valueOf(limit))
@@ -61,7 +61,7 @@ class AdminCustomerFilterIntegrationTest extends IntegrationTestBase {
     }
 
     private String callCustomersApiWithName(String sortKey, String sortOrder, int limit, String name) throws Exception {
-        MvcResult result = mockMvc.perform(get("/api/admin/customers")
+        MvcResult result = mockMvc.perform(get("/api/admin/shop/customers")
                 .param("sortKey", sortKey)
                 .param("sortOrder", sortOrder)
                 .param("limit", String.valueOf(limit))

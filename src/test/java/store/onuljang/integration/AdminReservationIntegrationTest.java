@@ -5,15 +5,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import store.onuljang.controller.request.AdminUpdateReservationsRequest;
-import store.onuljang.controller.response.AdminReservationListResponse;
-import store.onuljang.controller.response.AdminReservationsTodayResponse;
-import store.onuljang.repository.ReservationRepository;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.Users;
-import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.shop.admin.dto.AdminUpdateReservationsRequest;
+import store.onuljang.shop.admin.dto.AdminReservationListResponse;
+import store.onuljang.shop.admin.dto.AdminReservationsTodayResponse;
+import store.onuljang.shop.reservation.repository.ReservationRepository;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shop.reservation.entity.Reservation;
+import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.entity.enums.ReservationStatus;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.math.BigDecimal;
@@ -21,7 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.nowDate;
+import static store.onuljang.shared.util.TimeUtil.nowDate;
 
 /**
  * 관리자 예약 관리 API 통합 테스트
@@ -67,7 +67,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
             String today = nowDate().format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/admin/reservations?date=" + today, AdminReservationListResponse.class);
+            var response = getAction("/api/admin/shop/reservations?date=" + today, AdminReservationListResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -81,7 +81,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
             String tomorrow = nowDate().plusDays(1).format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/admin/reservations?date=" + tomorrow, AdminReservationListResponse.class);
+            var response = getAction("/api/admin/shop/reservations?date=" + tomorrow, AdminReservationListResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -101,7 +101,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
             Reservation reservation = testFixture.createReservation(user1, product, 2);
 
             // when
-            var response = patchAction("/api/admin/reservations/" + reservation.getId() + "/PICKED");
+            var response = patchAction("/api/admin/shop/reservations/" + reservation.getId() + "/PICKED");
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -119,7 +119,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
             Reservation reservation = testFixture.createReservation(user1, product, 2);
 
             // when
-            var response = patchAction("/api/admin/reservations/" + reservation.getId() + "/CANCELED");
+            var response = patchAction("/api/admin/shop/reservations/" + reservation.getId() + "/CANCELED");
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -142,7 +142,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
             Reservation reservation = testFixture.createReservation(user1, product, 2);
 
             // when
-            var response = patchAction("/api/admin/reservations/" + reservation.getId() + "/no-show");
+            var response = patchAction("/api/admin/shop/reservations/" + reservation.getId() + "/no-show");
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -169,7 +169,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
                     Set.of(reservation1.getId(), reservation2.getId()), ReservationStatus.PICKED);
 
             // when
-            var response = patchAction("/api/admin/reservations/status", request, Long.class);
+            var response = patchAction("/api/admin/shop/reservations/status", request, Long.class);
 
             // then
             assertThat(response.status()).withFailMessage("BulkUpdate: Expected 200 but got " + response.status())
@@ -198,7 +198,7 @@ class AdminReservationIntegrationTest extends IntegrationTestBase {
             testFixture.createReservationWithStatus(user2, product, 3, ReservationStatus.PICKED);
 
             // when
-            var response = getAction("/api/admin/reservations/sales/today", AdminReservationsTodayResponse.class);
+            var response = getAction("/api/admin/shop/reservations/sales/today", AdminReservationsTodayResponse.class);
 
             // then
             assertThat(response.isOk()).isTrue();

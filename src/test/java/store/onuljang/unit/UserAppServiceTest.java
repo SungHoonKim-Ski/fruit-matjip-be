@@ -8,12 +8,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import store.onuljang.appservice.UserAppService;
-import store.onuljang.exception.ExistUserNameException;
-import store.onuljang.repository.entity.Users;
-import store.onuljang.service.UserMessageQueueService;
-import store.onuljang.service.UserNameLogService;
-import store.onuljang.service.UserService;
+import store.onuljang.shared.user.appservice.UserAppService;
+import store.onuljang.shared.user.exception.ExistUserNameException;
+import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.user.service.UserMessageQueueService;
+import store.onuljang.shared.user.service.UserNameLogService;
+import store.onuljang.shared.user.service.UserService;
 
 import java.util.UUID;
 

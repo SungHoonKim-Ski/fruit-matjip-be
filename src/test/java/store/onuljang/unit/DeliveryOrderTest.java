@@ -5,9 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import store.onuljang.repository.entity.DeliveryOrder;
-import store.onuljang.repository.entity.enums.DeliveryStatus;
-import store.onuljang.util.TimeUtil;
+import store.onuljang.shop.delivery.entity.DeliveryOrder;
+import store.onuljang.shared.entity.enums.DeliveryStatus;
+import store.onuljang.shared.util.TimeUtil;
 
 import java.time.Clock;
 import java.time.LocalDate;

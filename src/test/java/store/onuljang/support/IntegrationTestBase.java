@@ -200,10 +200,10 @@ public abstract class IntegrationTestBase {
     /**
      * 관리자 인증 설정
      */
-    protected void setAdminAuthentication(store.onuljang.repository.entity.Admin admin) {
-        store.onuljang.service.dto.AdminUserDetails adminUserDetails = new store.onuljang.service.dto.AdminUserDetails(
+    protected void setAdminAuthentication(store.onuljang.shop.admin.entity.Admin admin) {
+        store.onuljang.shared.auth.dto.AdminUserDetails adminUserDetails = new store.onuljang.shared.auth.dto.AdminUserDetails(
                 admin);
-        store.onuljang.auth.AdminAuthenticationToken token = new store.onuljang.auth.AdminAuthenticationToken(
+        store.onuljang.shared.auth.security.AdminAuthenticationToken token = new store.onuljang.shared.auth.security.AdminAuthenticationToken(
                 adminUserDetails, null, adminUserDetails.getAuthorities(), admin.getId());
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(token);
     }

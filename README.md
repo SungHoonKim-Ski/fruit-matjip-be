@@ -131,6 +131,9 @@ Refresh Token 기반 인증 개선:
 | Refresh Token 관리 | DB에 해시 형태로 저장되고 `replaced_by` 컬럼으로 linked-list 형식 추적 가능 | [`RefreshToken.java`](./src/main/java/store/onuljang/repository/entity/RefreshToken.java) |
 | 관리자 권한 검증 강화 | Spring Security 필터, `hasRole`, validate API 추가로 미검증 방지 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/auth/AdminSecurityConfig.java) |
 | 관리자 인증 커스터마이징 | 세션에 관리자 ID 저장 위해 `AdminUserDetail`, `AdminAuthenticationToken` 구현 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/auth/AdminSecurityConfig.java)<br>[`AdminUserDetail.java`](./src/main/java/store/onuljang/service/dto/AdminUserDetails.java)<br>[`AdminAuthenticationToken.java`](./src/main/java/store/onuljang/auth/AdminAuthenticationToken.java) |
+| Brute Force 차단 | 관리자 로그인 5회 실패 시 15분 잠금 (인메모리) | [`LoginAttemptService.java`](./src/main/java/store/onuljang/auth/LoginAttemptService.java) |
+| CSRF 보호 | 관리자 API에 CSRF 토큰 검증 적용, 프로파일별 쿠키 도메인 분리 | [`AdminSecurityConfig.java`](./src/main/java/store/onuljang/auth/AdminSecurityConfig.java)<br>[`CsrfCookieFilter.java`](./src/main/java/store/onuljang/auth/CsrfCookieFilter.java) |
+| 배달 결제 관리 | 카카오페이 결제 연동, 미결제 자동 만료, 결제 상태 대사 | [`DeliveryPaymentExpireScheduler.java`](./src/main/java/store/onuljang/scheduler/DeliveryPaymentExpireScheduler.java)<br>[`DeliveryPaymentReconciliationScheduler.java`](./src/main/java/store/onuljang/scheduler/DeliveryPaymentReconciliationScheduler.java) |
 
 ---
 ## 🧪 향후 개선 예정 (TODO)
@@ -142,7 +145,7 @@ Refresh Token 기반 인증 개선:
 - [x] **날짜별 품목 노출 순서 기능**: 제품 수 증가로 노출 품목의 순서 지정 필요성
 - [x] **관리자 상품 조회 페이지 개선**: 검색 기능 도입
 - [x] **테스트 코드 작성**: 단위 테스트 / 통합 테스트 적용 완료
-- [ ] **배달 연계 / 결제 도입: PG사 연동** 진행중
+- [x] **배달 연계 / 결제 도입**: 카카오페이 연동 완료
 - [ ] ~~최고 관리자 권한 기능 도입: 다른 관리자의 권한 생성/수정/삭제 가능하도록 확장~~ 보류
 - [x] **상품 카테고리화**: 제품량 증가로 인해 사용자에게 보일 품목의 순서 지정 필요성
 
@@ -187,16 +190,27 @@ on:
 
 ### 주요 테스트 파일
 
+42개 테스트 파일, 330개 테스트 메서드
+
 | 테스트 파일 | 설명 | 테스트 수 |
 |------------|------|----------|
-| [`AdminReservationIntegrationTest`](./src/test/java/store/onuljang/integration/AdminReservationIntegrationTest.java) | 관리자 예약 관리 API (조회/상태변경/노쇼처리/일괄변경) | 11개 |
-| [`AdminProductIntegrationTest`](./src/test/java/store/onuljang/integration/AdminProductIntegrationTest.java) | 관리자 상품 관리 API (생성/수정/삭제/조회/이미지관리) | 19개 |
-| [`AdminAggregationIntegrationTest`](./src/test/java/store/onuljang/integration/AdminAggregationIntegrationTest.java) | 관리자 판매 집계 조회 API | 3개 |
-| [`ReservationIntegrationTest`](./src/test/java/store/onuljang/integration/ReservationIntegrationTest.java) | 사용자 예약 API (생성/취소/수량변경/셀프픽업) | 24개 |
-| [`UserIntegrationTest`](./src/test/java/store/onuljang/integration/UserIntegrationTest.java) | 사용자 정보 관리 API (닉네임/메시지) | 7개 |
+| [`AdminProductIntegrationTest`](./src/test/java/store/onuljang/integration/AdminProductIntegrationTest.java) | 관리자 상품 관리 API (CRUD/카테고리/이미지/순서) | 22개 |
+| [`ReservationIntegrationTest`](./src/test/java/store/onuljang/integration/ReservationIntegrationTest.java) | 사용자 예약 API (생성/취소/수량변경/셀프픽업) | 14개 |
 | [`ProductsIntegrationTest`](./src/test/java/store/onuljang/integration/ProductsIntegrationTest.java) | 사용자 상품 조회 API | 11개 |
-| [`ReservationAggregationSchedulerTest`](./src/test/java/store/onuljang/scheduler/ReservationAggregationSchedulerTest.java) | 예약 집계 스케줄러 (정상동작/데이터없음/다양한상태/집계후취소) | 4개 |
-| [`ReservationResetSchedulerTest`](./src/test/java/store/onuljang/scheduler/ReservationResetSchedulerTest.java) | 예약 초기화 스케줄러 (재고복원/정합성검증/재시도로직) | 23개 |
+| [`AdminCustomerFilterIntegrationTest`](./src/test/java/store/onuljang/integration/AdminCustomerFilterIntegrationTest.java) | 고객 관리 필터/정렬 API | 9개 |
+| [`UserIntegrationTest`](./src/test/java/store/onuljang/integration/UserIntegrationTest.java) | 사용자 정보 관리 API | 9개 |
+| [`UserRestrictionIntegrationTest`](./src/test/java/store/onuljang/integration/UserRestrictionIntegrationTest.java) | 이용제한/경고 API | 9개 |
+| [`AdminReservationIntegrationTest`](./src/test/java/store/onuljang/integration/AdminReservationIntegrationTest.java) | 관리자 예약 관리 API | 7개 |
+| [`ProductCategoryIntegrationTest`](./src/test/java/store/onuljang/integration/ProductCategoryIntegrationTest.java) | 상품 카테고리 API | 7개 |
+| [`DeliveryReservationStatusIntegrationTest`](./src/test/java/store/onuljang/integration/DeliveryReservationStatusIntegrationTest.java) | 배달 예약 상태 관리 | 5개 |
+| [`ConcurrentReservationIntegrationTest`](./src/test/java/store/onuljang/integration/ConcurrentReservationIntegrationTest.java) | 동시성 예약 시나리오 | 4개 |
+| [`AdminAggregationIntegrationTest`](./src/test/java/store/onuljang/integration/AdminAggregationIntegrationTest.java) | 관리자 판매 집계 조회 API | 4개 |
+| [`AdminLoginBruteForceIntegrationTest`](./src/test/java/store/onuljang/integration/AdminLoginBruteForceIntegrationTest.java) | 로그인 Brute Force 차단 | 4개 |
+| [`AdminControllerIntegrationTest`](./src/test/java/store/onuljang/integration/AdminControllerIntegrationTest.java) | 관리자 인증/권한 API | 4개 |
+| [`ReservationResetSchedulerTest`](./src/test/java/store/onuljang/scheduler/ReservationResetSchedulerTest.java) | 예약 초기화 스케줄러 | 3개 |
+| [`DeliveryPaymentReconciliationSchedulerTest`](./src/test/java/store/onuljang/scheduler/DeliveryPaymentReconciliationSchedulerTest.java) | 카카오페이 결제 대사 스케줄러 | 5개 |
+| [`DeliveryPaymentExpireSchedulerTest`](./src/test/java/store/onuljang/scheduler/DeliveryPaymentExpireSchedulerTest.java) | 미결제 주문 만료 스케줄러 | 4개 |
+| [`ReservationAggregationSchedulerTest`](./src/test/java/store/onuljang/scheduler/ReservationAggregationSchedulerTest.java) | 예약 집계 스케줄러 | 4개 |
 
 ### CI/CD 통합
 
@@ -218,8 +232,9 @@ on:
 
 - Java 17 / Spring Boot 3.4
 - Spring Security + JWT
-- Spring Data JPA (MySQL)
+- Spring Data JPA + QueryDSL (MySQL)
 - Kakao OAuth 로그인
+- KakaoPay 결제 연동
 - AWS S3 + Presigned-url 기반 이미지 업로드
 - Spring Session JDBC 기반 세션 관리
 - OpenFeign (카카오 API 연동)
@@ -235,3 +250,7 @@ on:
 
 - 사용자는 `카카오 OAuth → 자체 JWT 발급 → 쿠키 저장` 방식
 - 관리자는 세션 쿠키를 통한 상태 기반 인증 유지
+- Refresh Token 재사용 감지 시 해당 사용자의 전체 토큰 일괄 revoke
+- 관리자 로그인 Brute Force 차단 (5회 실패 → 15분 잠금)
+- 관리자 API CSRF 보호 (CookieCsrfTokenRepository, 프로파일별 쿠키 도메인 분리)
+- 보안 헤더 적용 (X-Frame-Options, HSTS, CSP, X-Content-Type-Options)

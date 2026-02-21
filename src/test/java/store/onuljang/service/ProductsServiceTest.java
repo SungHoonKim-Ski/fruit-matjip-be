@@ -7,9 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import store.onuljang.exception.NotFoundException;
-import store.onuljang.repository.ProductsRepository;
-import store.onuljang.repository.entity.Product;
+import store.onuljang.shared.exception.NotFoundException;
+import store.onuljang.shop.product.service.ProductsService;
+import store.onuljang.shop.product.repository.ProductsRepository;
+import store.onuljang.shop.product.entity.Product;
 
 import java.time.LocalDate;
 import java.util.Collection;

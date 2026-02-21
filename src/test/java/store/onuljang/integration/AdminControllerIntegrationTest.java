@@ -4,9 +4,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import store.onuljang.controller.request.AdminSignupRequest;
-import store.onuljang.repository.AdminRepository;
-import store.onuljang.repository.entity.Admin;
+import store.onuljang.shop.admin.dto.AdminSignupRequest;
+import store.onuljang.shop.admin.repository.AdminRepository;
+import store.onuljang.shop.admin.entity.Admin;
 import store.onuljang.support.IntegrationTestBase;
 
 import static org.assertj.core.api.Assertions.assertThat;

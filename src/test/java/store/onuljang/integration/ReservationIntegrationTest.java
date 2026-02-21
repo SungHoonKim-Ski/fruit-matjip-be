@@ -4,13 +4,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import store.onuljang.controller.request.ReservationRequest;
-import store.onuljang.controller.response.ReservationListResponse;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.Users;
-import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.shop.reservation.dto.ReservationRequest;
+import store.onuljang.shop.reservation.dto.ReservationListResponse;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shop.reservation.entity.Reservation;
+import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.entity.enums.ReservationStatus;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.math.BigDecimal;
@@ -18,7 +18,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.nowDate;
+import static store.onuljang.shared.util.TimeUtil.nowDate;
 
 /**
  * 예약 API 통합 테스트
@@ -54,7 +54,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             ReservationRequest request = new ReservationRequest(product.getId(), 2);
 
             // when
-            var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
+            var response = postAction("/api/store/auth/reservations/", request, accessToken, Void.class);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -69,7 +69,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             ReservationRequest request = new ReservationRequest(product.getId(), 5); // 재고보다 많은 수량
 
             // when
-            var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
+            var response = postAction("/api/store/auth/reservations/", request, accessToken, Void.class);
 
             // then
             assertThat(response.status()).isEqualTo(409);
@@ -84,7 +84,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
             // when
-            var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
+            var response = postAction("/api/store/auth/reservations/", request, accessToken, Void.class);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -101,7 +101,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
             // when
-            var response = postAction("/api/auth/reservations/", request, newUserToken, Void.class);
+            var response = postAction("/api/store/auth/reservations/", request, newUserToken, Void.class);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -114,7 +114,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             ReservationRequest request = new ReservationRequest(99999L, 1);
 
             // when
-            var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
+            var response = postAction("/api/store/auth/reservations/", request, accessToken, Void.class);
 
             // then
             assertThat(response.isNotFound()).isTrue();
@@ -133,7 +133,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             Reservation reservation = testFixture.createReservation(user, product, 2);
 
             // when
-            var response = patchAction("/api/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
+            var response = patchAction("/api/store/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -148,7 +148,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             Reservation reservation = testFixture.createReservation(otherUser, product, 2);
 
             // when
-            var response = patchAction("/api/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
+            var response = patchAction("/api/store/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -163,7 +163,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
                     ReservationStatus.CANCELED);
 
             // when
-            var response = patchAction("/api/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
+            var response = patchAction("/api/store/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -178,7 +178,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
                     ReservationStatus.PICKED);
 
             // when
-            var response = patchAction("/api/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
+            var response = patchAction("/api/store/auth/reservations/cancel/" + reservation.getDisplayCode(), accessToken);
 
             // then
             assertThat(response.isBadRequest()).isTrue();
@@ -198,7 +198,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
 
             // when
             var response = patchAction(
-                    "/api/auth/reservations/" + reservation.getDisplayCode() + "/quantity?minus=2", accessToken);
+                    "/api/store/auth/reservations/" + reservation.getDisplayCode() + "/quantity?minus=2", accessToken);
 
             // then
             assertThat(response.isOk()).isTrue();
@@ -213,7 +213,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
 
             // when
             var response = patchAction(
-                    "/api/auth/reservations/" + reservation.getDisplayCode() + "/quantity?minus=2",
+                    "/api/store/auth/reservations/" + reservation.getDisplayCode() + "/quantity?minus=2",
                     accessToken);
 
             // then
@@ -240,7 +240,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             String toDate = today.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/auth/reservations/?from=" + fromDate + "&to=" + toDate, accessToken,
+            var response = getAction("/api/store/auth/reservations/?from=" + fromDate + "&to=" + toDate, accessToken,
                     ReservationListResponse.class);
 
             // then
@@ -263,7 +263,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             String toDate = tomorrow.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/auth/reservations/?from=" + fromDate + "&to=" + toDate, accessToken,
+            var response = getAction("/api/store/auth/reservations/?from=" + fromDate + "&to=" + toDate, accessToken,
                     ReservationListResponse.class);
 
             // then
@@ -280,7 +280,7 @@ class ReservationIntegrationTest extends IntegrationTestBase {
             String toDate = today.format(DateTimeFormatter.ISO_DATE);
 
             // when
-            var response = getAction("/api/auth/reservations/?from=" + fromDate + "&to=" + toDate, accessToken,
+            var response = getAction("/api/store/auth/reservations/?from=" + fromDate + "&to=" + toDate, accessToken,
                     ReservationListResponse.class);
 
             // then
