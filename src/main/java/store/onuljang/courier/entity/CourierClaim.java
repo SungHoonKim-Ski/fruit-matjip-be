@@ -8,6 +8,7 @@ import store.onuljang.shared.entity.base.BaseEntity;
 import store.onuljang.shared.entity.enums.CourierClaimStatus;
 import store.onuljang.shared.entity.enums.CourierClaimType;
 import store.onuljang.shared.entity.enums.ShippingFeeBearer;
+import store.onuljang.shared.util.TimeUtil;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -62,4 +63,30 @@ public class CourierClaim extends BaseEntity {
     @Getter
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
+
+    public void markInReview() {
+        this.claimStatus = CourierClaimStatus.IN_REVIEW;
+    }
+
+    public void approve(String adminNote, BigDecimal refundAmount, ShippingFeeBearer bearer) {
+        this.claimStatus = CourierClaimStatus.APPROVED;
+        this.adminNote = adminNote;
+        this.refundAmount = refundAmount;
+        this.returnShippingFeeBearer = bearer;
+    }
+
+    public void reject(String adminNote) {
+        this.claimStatus = CourierClaimStatus.REJECTED;
+        this.adminNote = adminNote;
+        this.resolvedAt = TimeUtil.nowDateTime();
+    }
+
+    public void resolve() {
+        this.claimStatus = CourierClaimStatus.RESOLVED;
+        this.resolvedAt = TimeUtil.nowDateTime();
+    }
+
+    public void setReshipOrderId(Long reshipOrderId) {
+        this.reshipOrderId = reshipOrderId;
+    }
 }

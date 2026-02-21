@@ -28,11 +28,28 @@ public class KakaoPayConfigDto {
     @Value("${KAKAOPAY.HOST:https://open-api.kakaopay.com}")
     String host;
 
+    @Value("${KAKAOPAY.COURIER_APPROVAL_URL:}")
+    String courierApprovalUrl;
+
+    @Value("${KAKAOPAY.COURIER_CANCEL_URL:}")
+    String courierCancelUrl;
+
+    @Value("${KAKAOPAY.COURIER_FAIL_URL:}")
+    String courierFailUrl;
+
     public KakaoPayRedirectUrls buildRedirectUrls(String displayCode) {
         return new KakaoPayRedirectUrls(
             approvalUrl + "?order_id=" + displayCode,
             cancelUrl + "?order_id=" + displayCode,
             failUrl + "?order_id=" + displayCode
+        );
+    }
+
+    public KakaoPayRedirectUrls buildCourierRedirectUrls(String displayCode) {
+        return new KakaoPayRedirectUrls(
+            courierApprovalUrl + "?order_id=" + displayCode,
+            courierCancelUrl + "?order_id=" + displayCode,
+            courierFailUrl + "?order_id=" + displayCode
         );
     }
 
