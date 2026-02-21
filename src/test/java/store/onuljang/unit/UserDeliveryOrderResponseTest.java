@@ -3,10 +3,10 @@ package store.onuljang.unit;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import store.onuljang.controller.response.UserDeliveryOrderResponse;
-import store.onuljang.repository.entity.DeliveryOrder;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.enums.DeliveryStatus;
+import store.onuljang.shared.user.dto.UserDeliveryOrderResponse;
+import store.onuljang.shop.delivery.entity.DeliveryOrder;
+import store.onuljang.shop.reservation.entity.Reservation;
+import store.onuljang.shared.entity.enums.DeliveryStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

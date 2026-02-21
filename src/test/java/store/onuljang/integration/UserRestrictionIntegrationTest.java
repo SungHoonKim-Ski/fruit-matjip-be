@@ -5,16 +5,16 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import store.onuljang.appservice.AdminReservationAppService;
-import store.onuljang.appservice.AdminUserAppService;
-import store.onuljang.controller.request.ReservationRequest;
-import store.onuljang.repository.ReservationRepository;
-import store.onuljang.repository.UserRepository;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Reservation;
-import store.onuljang.repository.entity.Users;
-import store.onuljang.repository.entity.enums.ReservationStatus;
+import store.onuljang.shop.admin.appservice.AdminReservationAppService;
+import store.onuljang.shop.admin.appservice.AdminUserAppService;
+import store.onuljang.shop.reservation.dto.ReservationRequest;
+import store.onuljang.shop.reservation.repository.ReservationRepository;
+import store.onuljang.shared.user.repository.UserRepository;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shop.reservation.entity.Reservation;
+import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.entity.enums.ReservationStatus;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.math.BigDecimal;
@@ -181,7 +181,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
             ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
             // Act
-            var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
+            var response = postAction("/api/store/auth/reservations/", request, accessToken, Void.class);
 
             // Assert
             assertThat(response.isBadRequest()).isTrue();
@@ -205,7 +205,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
             Reservation reservation = testFixture.createReservation(user, product, 2);
 
             // 배달 주문 요청
-            var request = new store.onuljang.controller.request.DeliveryReadyRequest(
+            var request = new store.onuljang.shop.delivery.dto.DeliveryReadyRequest(
                     java.util.List.of(reservation.getDisplayCode()),
                     12,
                     0,
@@ -221,7 +221,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
             );
 
             // Act
-            var response = postAction("/api/auth/deliveries/ready", request, accessToken, Void.class);
+            var response = postAction("/api/store/auth/deliveries/ready", request, accessToken, Void.class);
 
             // Assert
             assertThat(response.isBadRequest()).isTrue();
@@ -243,7 +243,7 @@ class UserRestrictionIntegrationTest extends IntegrationTestBase {
             entityManager.clear();
 
             // Act
-            var response = patchAction("/api/admin/users/" + user.getUid() + "/lift-restriction");
+            var response = patchAction("/api/admin/shop/users/" + user.getUid() + "/lift-restriction");
 
             // Assert
             assertThat(response.isOk()).isTrue();

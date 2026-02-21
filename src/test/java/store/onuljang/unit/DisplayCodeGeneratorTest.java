@@ -2,7 +2,7 @@ package store.onuljang.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import store.onuljang.util.DisplayCodeGenerator;
+import store.onuljang.shared.util.DisplayCodeGenerator;
 
 import java.time.LocalDateTime;
 

@@ -7,11 +7,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import store.onuljang.exception.KakaoPayException;
-import store.onuljang.feign.KakaoPayFeignClient;
-import store.onuljang.feign.dto.request.KakaoPayApproveRequest;
-import store.onuljang.feign.dto.reseponse.KakaoPayApproveResponse;
+import store.onuljang.shared.exception.KakaoPayException;
+import store.onuljang.shared.feign.KakaoPayFeignClient;
+import store.onuljang.shared.feign.dto.request.KakaoPayApproveRequest;
+import store.onuljang.shared.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.support.IntegrationTestBase;
+import store.onuljang.shared.service.KakaoPayService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;

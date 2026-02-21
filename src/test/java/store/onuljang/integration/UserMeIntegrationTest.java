@@ -5,9 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import store.onuljang.controller.response.UserMeResponse;
-import store.onuljang.repository.UserRepository;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.shared.user.dto.UserMeResponse;
+import store.onuljang.shared.user.repository.UserRepository;
+import store.onuljang.shared.user.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
 
 import java.time.LocalDate;

@@ -8,8 +8,9 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
-import store.onuljang.repository.UserRepository;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.shop.reservation.scheduler.UserWarnResetScheduler;
+import store.onuljang.shared.user.repository.UserRepository;
+import store.onuljang.shared.user.entity.Users;
 import store.onuljang.support.TestFixture;
 
 import static org.assertj.core.api.Assertions.assertThat;

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import store.onuljang.auth.LoginAttemptService;
+import store.onuljang.shared.auth.security.LoginAttemptService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

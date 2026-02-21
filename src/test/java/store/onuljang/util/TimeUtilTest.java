@@ -6,7 +6,8 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.*;
+import store.onuljang.shared.util.TimeUtil;
+import static store.onuljang.shared.util.TimeUtil.*;
 
 /**
  * TimeUtil 단위 테스트

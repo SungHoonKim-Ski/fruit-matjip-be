@@ -8,6 +8,7 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import store.onuljang.shared.config.S3Config;
 
 /**
  * 테스트 환경용 S3 Configuration

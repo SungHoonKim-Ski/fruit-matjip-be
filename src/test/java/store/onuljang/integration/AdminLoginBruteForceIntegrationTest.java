@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import store.onuljang.auth.LoginAttemptService;
-import store.onuljang.repository.AdminRepository;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.enums.AdminRole;
+import store.onuljang.shared.auth.security.LoginAttemptService;
+import store.onuljang.shop.admin.repository.AdminRepository;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.admin.entity.AdminRole;
 import store.onuljang.support.IntegrationTestBase;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;

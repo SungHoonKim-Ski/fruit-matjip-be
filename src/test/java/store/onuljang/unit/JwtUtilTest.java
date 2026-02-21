@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import store.onuljang.auth.JwtUtil;
+import store.onuljang.shared.auth.security.JwtUtil;
 import store.onuljang.config.TestS3Config;
-import store.onuljang.exception.AccessTokenParseException;
-import store.onuljang.repository.entity.Users;
-import store.onuljang.service.dto.JwtToken;
+import store.onuljang.shared.exception.AccessTokenParseException;
+import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.auth.dto.JwtToken;
 
 import java.util.UUID;
 

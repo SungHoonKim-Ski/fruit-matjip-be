@@ -3,19 +3,27 @@ package store.onuljang.support;
 import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import store.onuljang.auth.JwtUtil;
-import store.onuljang.repository.AdminRepository;
-import store.onuljang.repository.DeliveryOrderRepository;
-import store.onuljang.repository.DeliveryOrderReservationRepository;
-import store.onuljang.repository.ProductCategoryRepository;
-import store.onuljang.repository.ProductsRepository;
-import store.onuljang.repository.ReservationRepository;
-import store.onuljang.repository.UserRepository;
-import store.onuljang.repository.entity.*;
-import store.onuljang.repository.entity.enums.AdminRole;
-import store.onuljang.repository.entity.enums.DeliveryStatus;
-import store.onuljang.repository.entity.enums.ReservationStatus;
-import store.onuljang.service.dto.JwtToken;
+import store.onuljang.shared.auth.security.JwtUtil;
+import store.onuljang.shop.admin.repository.AdminRepository;
+import store.onuljang.shop.delivery.repository.DeliveryOrderRepository;
+import store.onuljang.shop.delivery.repository.DeliveryOrderReservationRepository;
+import store.onuljang.shop.product.repository.ProductCategoryRepository;
+import store.onuljang.shop.product.repository.ProductsRepository;
+import store.onuljang.shop.reservation.repository.ReservationRepository;
+import store.onuljang.shared.user.repository.UserRepository;
+import store.onuljang.shared.user.entity.*;
+import store.onuljang.shop.product.entity.*;
+import store.onuljang.shop.reservation.entity.*;
+import store.onuljang.shop.delivery.entity.*;
+import store.onuljang.shop.admin.entity.*;
+import store.onuljang.shared.auth.entity.*;
+import store.onuljang.shared.repository.entity.*;
+import store.onuljang.shared.entity.enums.*;
+import store.onuljang.shared.entity.base.*;
+import store.onuljang.shop.admin.entity.AdminRole;
+import store.onuljang.shared.entity.enums.DeliveryStatus;
+import store.onuljang.shared.entity.enums.ReservationStatus;
+import store.onuljang.shared.auth.dto.JwtToken;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -23,7 +31,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static store.onuljang.util.TimeUtil.nowDate;
+import static store.onuljang.shared.util.TimeUtil.nowDate;
 
 /**
  * 테스트 데이터 생성 헬퍼 클래스

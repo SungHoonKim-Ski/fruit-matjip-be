@@ -4,12 +4,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import store.onuljang.controller.request.ReservationRequest;
-import store.onuljang.repository.entity.Admin;
-import store.onuljang.repository.entity.Product;
-import store.onuljang.repository.entity.Users;
+import store.onuljang.shop.reservation.dto.ReservationRequest;
+import store.onuljang.shop.admin.entity.Admin;
+import store.onuljang.shop.product.entity.Product;
+import store.onuljang.shared.user.entity.Users;
 import store.onuljang.support.IntegrationTestBase;
-import store.onuljang.util.TimeUtil;
+import store.onuljang.shared.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.Clock;
@@ -19,8 +19,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static store.onuljang.util.TimeUtil.KST;
-import static store.onuljang.util.TimeUtil.nowDateTime;
+import static store.onuljang.shared.util.TimeUtil.KST;
+import static store.onuljang.shared.util.TimeUtil.nowDateTime;
 
 class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
 
@@ -49,7 +49,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
 
     @AfterEach
     void tearDown() {
-        store.onuljang.util.TimeUtil.resetClock();
+        store.onuljang.shared.util.TimeUtil.resetClock();
     }
 
     @Test
@@ -60,7 +60,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
         // when
-        var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
+        var response = postAction("/api/store/auth/reservations/", request, accessToken, Void.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -74,11 +74,11 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         ReservationRequest request = new ReservationRequest(product.getId(), 1);
 
         // when
-        var response = postAction("/api/auth/reservations/", request, accessToken, Void.class);
+        var response = postAction("/api/store/auth/reservations/", request, accessToken, Void.class);
 
         // then
         assertThat(response.isBadRequest()).isTrue();
-        var error = postAction("/api/auth/reservations/", request, accessToken, ErrorResponse.class);
+        var error = postAction("/api/store/auth/reservations/", request, accessToken, ErrorResponse.class);
         assertThat(error.body().message()).isEqualTo("예약 가능한 시간이 지났습니다.");
     }
 
@@ -90,7 +90,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         // 1. 게시 시간 1분 전 -> 실패
         Product before = testFixture.createProductAtDateTime("게시전", 10, new BigDecimal("1000"), now.plusMinutes(1),
                 admin);
-        var resBefore = postAction("/api/auth/reservations/",
+        var resBefore = postAction("/api/store/auth/reservations/",
                 new ReservationRequest(before.getId(), 1), accessToken, Object.class);
 
         assertThat(resBefore.status()).isEqualTo(400);
@@ -100,7 +100,7 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         // 2. 게시 시간 1분 후 -> 성공
         Product after = testFixture.createProductAtDateTime("게시후", 10, new BigDecimal("1000"), now.minusMinutes(1),
                 admin);
-        var resAfter = postAction("/api/auth/reservations/",
+        var resAfter = postAction("/api/store/auth/reservations/",
                 new ReservationRequest(after.getId(), 1), accessToken, Void.class);
         assertThat(resAfter.isOk()).isTrue();
     }
@@ -111,14 +111,14 @@ class ReservationDeadlineIntegrationTest extends IntegrationTestBase {
         // 1. 19:29분 (마감 전) -> 성공
         fixedTodayTime(19, 29);
         Product todayBefore = testFixture.createTodayProduct("오늘마감전", 10, new BigDecimal("1000"), admin);
-        var resBefore = postAction("/api/auth/reservations/",
+        var resBefore = postAction("/api/store/auth/reservations/",
                 new ReservationRequest(todayBefore.getId(), 1), accessToken, Void.class);
         assertThat(resBefore.isOk()).isTrue();
 
         // 2. 19:31분 (마감 후) -> 실패
         fixedTodayTime(19, 31);
         Product todayAfter = testFixture.createTodayProduct("오늘마감후", 10, new BigDecimal("1000"), admin);
-        var resAfter = postAction("/api/auth/reservations/",
+        var resAfter = postAction("/api/store/auth/reservations/",
                 new ReservationRequest(todayAfter.getId(), 1), accessToken, Object.class);
 
         assertThat(resAfter.status()).isEqualTo(400);

@@ -6,17 +6,25 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.TestPropertySource;
-import store.onuljang.controller.request.DeliveryReadyRequest;
-import store.onuljang.repository.entity.*;
-import store.onuljang.repository.entity.enums.DeliveryStatus;
-import store.onuljang.service.DeliveryOrderService;
+import store.onuljang.shop.delivery.dto.DeliveryReadyRequest;
+import store.onuljang.shared.user.entity.*;
+import store.onuljang.shop.product.entity.*;
+import store.onuljang.shop.reservation.entity.*;
+import store.onuljang.shop.delivery.entity.*;
+import store.onuljang.shop.admin.entity.*;
+import store.onuljang.shared.auth.entity.*;
+import store.onuljang.shared.repository.entity.*;
+import store.onuljang.shared.entity.enums.*;
+import store.onuljang.shared.entity.base.*;
+import store.onuljang.shared.entity.enums.DeliveryStatus;
+import store.onuljang.shop.delivery.service.DeliveryOrderService;
 import store.onuljang.support.IntegrationTestBase;
-import store.onuljang.util.TimeUtil;
+import store.onuljang.shared.util.TimeUtil;
 
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.List;
-import store.onuljang.controller.response.DeliveryReadyResponse;
+import store.onuljang.shop.delivery.dto.DeliveryReadyResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -60,7 +68,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = getAction(
-            "/api/auth/deliveries/config", accessToken, Void.class);
+            "/api/store/auth/deliveries/config", accessToken, Void.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -87,7 +95,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<DeliveryReadyResponse> response = postAction(
-            "/api/auth/deliveries/ready", request, accessToken, DeliveryReadyResponse.class);
+            "/api/store/auth/deliveries/ready", request, accessToken, DeliveryReadyResponse.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -109,7 +117,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = getAction(
-            "/api/auth/deliveries/cancel?order_id=" + order.getDisplayCode(), accessToken, Void.class);
+            "/api/store/auth/deliveries/cancel?order_id=" + order.getDisplayCode(), accessToken, Void.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -131,7 +139,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = getAction(
-            "/api/auth/deliveries/cancel?order_id=" + order.getDisplayCode(), accessToken, Void.class);
+            "/api/store/auth/deliveries/cancel?order_id=" + order.getDisplayCode(), accessToken, Void.class);
 
         // then
         assertThat(response.isBadRequest()).isTrue();
@@ -151,7 +159,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = getAction(
-            "/api/auth/deliveries/fail?order_id=" + order.getDisplayCode(), accessToken, Void.class);
+            "/api/store/auth/deliveries/fail?order_id=" + order.getDisplayCode(), accessToken, Void.class);
 
         // then
         assertThat(response.isOk()).isTrue();
@@ -163,7 +171,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
     @DisplayName("인증 없이 요청 시 403")
     void noAuth_returnsForbidden() throws Exception {
         // when / then
-        mockMvc.perform(get("/api/auth/deliveries/config"))
+        mockMvc.perform(get("/api/store/auth/deliveries/config"))
             .andExpect(status().isForbidden());
     }
 
@@ -185,7 +193,7 @@ class DeliveryControllerIntegrationTest extends IntegrationTestBase {
 
         // when
         ApiResponse<Void> response = postAction(
-            "/api/auth/deliveries/ready", request, accessToken, Void.class);
+            "/api/store/auth/deliveries/ready", request, accessToken, Void.class);
 
         // then
         assertThat(response.isBadRequest()).isTrue();
