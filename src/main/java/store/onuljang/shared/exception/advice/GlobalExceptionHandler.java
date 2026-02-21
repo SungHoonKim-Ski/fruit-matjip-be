@@ -171,6 +171,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getStatus()).body(new ErrorResponse("UserNoContentException", ex.getMessage()));
     }
 
+    // SSE 클라이언트 연결 끊김 — 응답 불필요
+    @ExceptionHandler(org.springframework.web.context.request.async.AsyncRequestNotUsableException.class)
+    public void handleAsyncNotUsable(
+            org.springframework.web.context.request.async.AsyncRequestNotUsableException ex) {
+        log.debug("SSE client disconnected: {}", ex.getMessage());
+    }
+
     // Runtime Exception, Exception
 
     @ExceptionHandler(RuntimeException.class)
