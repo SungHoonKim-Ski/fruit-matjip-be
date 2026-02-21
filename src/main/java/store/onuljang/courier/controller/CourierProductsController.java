@@ -13,7 +13,7 @@ import store.onuljang.courier.dto.CourierProductResponse;
 import store.onuljang.shop.product.dto.ProductCategoryResponse;
 
 @RestController
-@RequestMapping("/api/store/auth/courier/products")
+@RequestMapping("/api/auth/courier/products")
 @RequiredArgsConstructor
 @Validated
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
