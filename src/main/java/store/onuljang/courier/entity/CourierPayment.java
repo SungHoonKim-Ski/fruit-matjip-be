@@ -7,6 +7,7 @@ import lombok.*;
 import store.onuljang.shared.entity.base.BaseEntity;
 import store.onuljang.shared.entity.enums.CourierPaymentStatus;
 import store.onuljang.shared.entity.enums.PaymentProvider;
+import store.onuljang.shared.util.TimeUtil;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -60,4 +61,27 @@ public class CourierPayment extends BaseEntity {
     @Getter
     @Column(name = "failed_at")
     private LocalDateTime failedAt;
+
+    public void markApproved(String aid) {
+        this.status = CourierPaymentStatus.APPROVED;
+        this.aid = aid;
+        this.approvedAt = TimeUtil.nowDateTime();
+    }
+
+    public void markCanceled() {
+        this.status = CourierPaymentStatus.CANCELED;
+        this.canceledAt = TimeUtil.nowDateTime();
+        this.canceledAmount = this.amount;
+    }
+
+    public void markFailed() {
+        this.status = CourierPaymentStatus.FAILED;
+        this.failedAt = TimeUtil.nowDateTime();
+    }
+
+    public void markPartialCanceled(BigDecimal cancelAmount) {
+        this.status = CourierPaymentStatus.PARTIAL_CANCELED;
+        this.canceledAt = TimeUtil.nowDateTime();
+        this.canceledAmount = cancelAmount;
+    }
 }

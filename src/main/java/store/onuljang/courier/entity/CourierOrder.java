@@ -137,6 +137,10 @@ public class CourierOrder extends BaseEntity {
         this.shippedAt = TimeUtil.nowDateTime();
     }
 
+    public void markInTransit() {
+        this.status = CourierOrderStatus.IN_TRANSIT;
+    }
+
     public void markDelivered() {
         this.status = CourierOrderStatus.DELIVERED;
         this.deliveredAt = TimeUtil.nowDateTime();
@@ -144,6 +148,26 @@ public class CourierOrder extends BaseEntity {
 
     public void markCanceled() {
         this.status = CourierOrderStatus.CANCELED;
+    }
+
+    public void markFailed() {
+        this.status = CourierOrderStatus.FAILED;
+    }
+
+    public boolean canMarkPaid() {
+        return this.status == CourierOrderStatus.PENDING_PAYMENT;
+    }
+
+    public boolean canCancelByUser() {
+        return this.status == CourierOrderStatus.PENDING_PAYMENT;
+    }
+
+    public boolean canFailByUser() {
+        return this.status == CourierOrderStatus.PENDING_PAYMENT;
+    }
+
+    public void setPgTid(String pgTid) {
+        this.pgTid = pgTid;
     }
 
     public String getProductSummary() {

@@ -1,0 +1,92 @@
+package store.onuljang.courier.controller;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import java.util.List;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import store.onuljang.courier.appservice.CourierOrderAppService;
+import store.onuljang.courier.dto.*;
+import store.onuljang.courier.service.CourierConfigService;
+import store.onuljang.courier.service.CourierShippingFeeService;
+
+@RestController
+@RequestMapping("/api/auth/courier")
+@RequiredArgsConstructor
+@Validated
+@FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
+public class CourierOrderController {
+
+    CourierOrderAppService courierOrderAppService;
+    CourierShippingFeeService courierShippingFeeService;
+    CourierConfigService courierConfigService;
+
+    @PostMapping("/orders/ready")
+    public ResponseEntity<CourierOrderReadyResponse> ready(
+            Authentication auth, @RequestBody @Valid CourierOrderReadyRequest request) {
+        String uid = auth.getName();
+        return ResponseEntity.ok(courierOrderAppService.ready(uid, request));
+    }
+
+    @GetMapping("/orders/approve")
+    public ResponseEntity<Void> approve(
+            Authentication auth,
+            @RequestParam("order_id") @NotBlank String orderIdentifier,
+            @RequestParam("pg_token") @NotBlank String pgToken) {
+        String uid = auth.getName();
+        courierOrderAppService.approve(uid, orderIdentifier, pgToken);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/orders/cancel")
+    public ResponseEntity<Void> cancel(
+            Authentication auth,
+            @RequestParam("order_id") @NotBlank String orderIdentifier) {
+        String uid = auth.getName();
+        courierOrderAppService.cancel(uid, orderIdentifier);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/orders/fail")
+    public ResponseEntity<Void> fail(
+            Authentication auth,
+            @RequestParam("order_id") @NotBlank String orderIdentifier) {
+        String uid = auth.getName();
+        courierOrderAppService.fail(uid, orderIdentifier);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<List<CourierOrderResponse>> getOrders(
+            Authentication auth,
+            @RequestParam(required = false) Long cursor,
+            @RequestParam(defaultValue = "20") @Positive int size) {
+        String uid = auth.getName();
+        return ResponseEntity.ok(courierOrderAppService.getOrders(uid, cursor, size));
+    }
+
+    @GetMapping("/orders/{displayCode}")
+    public ResponseEntity<CourierOrderDetailResponse> getOrderDetail(
+            Authentication auth, @PathVariable @NotBlank String displayCode) {
+        String uid = auth.getName();
+        return ResponseEntity.ok(courierOrderAppService.getOrderDetail(uid, displayCode));
+    }
+
+    @GetMapping("/shipping-fee")
+    public ResponseEntity<ShippingFeeResponse> getShippingFee(
+            @RequestParam @Positive int quantity, @RequestParam @NotBlank String postalCode) {
+        ShippingFeeResult result = courierShippingFeeService.calculate(quantity, postalCode);
+        return ResponseEntity.ok(ShippingFeeResponse.from(result));
+    }
+
+    @GetMapping("/config")
+    public ResponseEntity<CourierConfigResponse> getConfig() {
+        return ResponseEntity.ok(CourierConfigResponse.from(courierConfigService.getConfig()));
+    }
+}

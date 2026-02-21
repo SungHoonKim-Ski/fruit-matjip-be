@@ -40,8 +40,25 @@ public class CourierOrderItem extends BaseEntity {
     private BigDecimal amount;
 
     @Getter
+    @Lob
+    @Column(name = "selected_options", columnDefinition = "TEXT")
+    private String selectedOptions;
+
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(name = "item_status", nullable = false, length = 20)
     @Builder.Default
     private CourierOrderItemStatus itemStatus = CourierOrderItemStatus.NORMAL;
+
+    public void markClaimRequested() {
+        this.itemStatus = CourierOrderItemStatus.CLAIM_REQUESTED;
+    }
+
+    public void markClaimResolved() {
+        this.itemStatus = CourierOrderItemStatus.CLAIM_RESOLVED;
+    }
+
+    public void markRefunded() {
+        this.itemStatus = CourierOrderItemStatus.REFUNDED;
+    }
 }
