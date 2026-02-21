@@ -10,6 +10,7 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.async.AsyncRequestNotUsableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -172,9 +173,8 @@ public class GlobalExceptionHandler {
     }
 
     // SSE 클라이언트 연결 끊김 — 응답 불필요
-    @ExceptionHandler(org.springframework.web.context.request.async.AsyncRequestNotUsableException.class)
-    public void handleAsyncNotUsable(
-            org.springframework.web.context.request.async.AsyncRequestNotUsableException ex) {
+    @ExceptionHandler(AsyncRequestNotUsableException.class)
+    public void handleAsyncNotUsable(AsyncRequestNotUsableException ex) {
         log.debug("SSE client disconnected: {}", ex.getMessage());
     }
 
