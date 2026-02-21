@@ -6,6 +6,7 @@ import static org.mockito.BDDMockito.given;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -20,10 +21,10 @@ import store.onuljang.courier.dto.CourierProductListResponse;
 import store.onuljang.courier.dto.CourierProductResponse;
 import store.onuljang.courier.entity.CourierProduct;
 import store.onuljang.courier.service.CourierProductService;
+import store.onuljang.courier.dto.CourierCategoryResponse;
+import store.onuljang.courier.entity.CourierProductCategory;
+import store.onuljang.courier.service.CourierProductCategoryService;
 import store.onuljang.shop.admin.entity.Admin;
-import store.onuljang.shop.product.dto.ProductCategoryResponse;
-import store.onuljang.shop.product.entity.ProductCategory;
-import store.onuljang.shop.product.service.ProductCategoryService;
 
 @ExtendWith(MockitoExtension.class)
 class CourierProductTest {
@@ -249,6 +250,96 @@ class CourierProductTest {
         }
     }
 
+    @Nested
+    @DisplayName("isAvailable - 판매 가능 여부")
+    class IsAvailable {
+
+        @Test
+        @DisplayName("visible=true, 미삭제, stock>0 이면 true")
+        void isAvailable_True() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+
+            // act & assert
+            assertThat(product.isAvailable()).isTrue();
+        }
+
+        @Test
+        @DisplayName("visible=false 이면 false")
+        void isAvailable_NotVisible() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), false);
+
+            // act & assert
+            assertThat(product.isAvailable()).isFalse();
+        }
+
+        @Test
+        @DisplayName("stock=0 이면 false")
+        void isAvailable_ZeroStock() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 0, new BigDecimal("10000"), true);
+
+            // act & assert
+            assertThat(product.isAvailable()).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("updateCategories - 카테고리 변경")
+    class UpdateCategories {
+
+        @Test
+        @DisplayName("카테고리 교체 성공")
+        void updateCategories_Success() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProductCategory cat1 =
+                    CourierProductCategory.builder().name("과일").build();
+            CourierProductCategory cat2 =
+                    CourierProductCategory.builder().name("채소").build();
+
+            // act
+            product.updateCategories(Set.of(cat1, cat2));
+
+            // assert
+            assertThat(product.getProductCategories()).hasSize(2);
+            assertThat(product.getProductCategories()).containsExactlyInAnyOrder(cat1, cat2);
+        }
+
+        @Test
+        @DisplayName("null 전달 시 카테고리 비움")
+        void updateCategories_Null() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProductCategory cat =
+                    CourierProductCategory.builder().name("과일").build();
+            product.updateCategories(Set.of(cat));
+
+            // act
+            product.updateCategories(null);
+
+            // assert
+            assertThat(product.getProductCategories()).isEmpty();
+        }
+
+        @Test
+        @DisplayName("빈 Set 전달 시 카테고리 비움")
+        void updateCategories_EmptySet() {
+            // arrange
+            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProductCategory cat =
+                    CourierProductCategory.builder().name("과일").build();
+            product.updateCategories(Set.of(cat));
+
+            // act
+            product.updateCategories(Set.of());
+
+            // assert
+            assertThat(product.getProductCategories()).isEmpty();
+        }
+    }
+
     // ===== 2. CourierProductsAppService 테스트 =====
 
     @Nested
@@ -263,7 +354,7 @@ class CourierProductTest {
         private CourierProductService courierProductService;
 
         @Mock
-        private ProductCategoryService productCategoryService;
+        private CourierProductCategoryService courierProductCategoryService;
 
         @Test
         @DisplayName("전체 상품 목록 조회")
@@ -345,14 +436,16 @@ class CourierProductTest {
         @DisplayName("카테고리 목록 조회")
         void getProductCategories_Success() {
             // arrange
-            ProductCategory category1 = ProductCategory.builder().name("과일").build();
-            ProductCategory category2 = ProductCategory.builder().name("채소").build();
+            CourierProductCategory category1 =
+                    CourierProductCategory.builder().name("과일").build();
+            CourierProductCategory category2 =
+                    CourierProductCategory.builder().name("채소").build();
 
-            given(productCategoryService.findAllOrderBySortOrder())
+            given(courierProductCategoryService.findAllOrderBySortOrder())
                     .willReturn(List.of(category1, category2));
 
             // act
-            ProductCategoryResponse result =
+            CourierCategoryResponse result =
                     courierProductsAppService.getProductCategories();
 
             // assert
@@ -363,10 +456,11 @@ class CourierProductTest {
         @DisplayName("카테고리가 없는 경우 빈 목록 반환")
         void getProductCategories_Empty() {
             // arrange
-            given(productCategoryService.findAllOrderBySortOrder()).willReturn(List.of());
+            given(courierProductCategoryService.findAllOrderBySortOrder())
+                    .willReturn(List.of());
 
             // act
-            ProductCategoryResponse result =
+            CourierCategoryResponse result =
                     courierProductsAppService.getProductCategories();
 
             // assert

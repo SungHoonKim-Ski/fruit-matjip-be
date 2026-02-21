@@ -1,18 +1,16 @@
-package store.onuljang.shop.product.entity;
+package store.onuljang.courier.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
 import store.onuljang.shared.entity.base.BaseLogEntity;
-
-import java.util.*;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @Getter
-@Table(name = "product_category")
-public class ProductCategory extends BaseLogEntity {
+@Table(name = "courier_product_category")
+public class CourierProductCategory extends BaseLogEntity {
 
     @Column(name = "name", nullable = false, unique = true)
     private String name;
@@ -23,13 +21,6 @@ public class ProductCategory extends BaseLogEntity {
     @Column(name = "sort_order")
     @Builder.Default
     private Integer sortOrder = 0;
-
-    @ManyToMany
-    @JoinTable(name = "product_category_mapping",
-            joinColumns = @JoinColumn(name = "category_id"),
-            inverseJoinColumns = @JoinColumn(name = "product_id"))
-    @Builder.Default
-    private Set<Product> products = new HashSet<>();
 
     public void setName(String name) {
         this.name = name;

@@ -4,20 +4,21 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.shared.entity.base.BaseEntity;
 import store.onuljang.shared.util.TimeUtil;
 import store.onuljang.shop.admin.entity.Admin;
-import store.onuljang.shop.product.entity.ProductCategory;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
 @Table(name = "courier_products")
+@SQLRestriction("deleted_at IS NULL")
 public class CourierProduct extends BaseEntity {
 
     @Getter
@@ -62,6 +63,18 @@ public class CourierProduct extends BaseEntity {
     private Integer sortOrder = 0;
 
     @Getter
+    @Setter
+    @Column(name = "recommended", nullable = false)
+    @Builder.Default
+    private Boolean recommended = false;
+
+    @Getter
+    @Setter
+    @Column(name = "recommend_order", nullable = false)
+    @Builder.Default
+    private Integer recommendOrder = 0;
+
+    @Getter
     @Column(name = "total_sold", nullable = false)
     @Builder.Default
     private Long totalSold = 0L;
@@ -76,14 +89,21 @@ public class CourierProduct extends BaseEntity {
     @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CourierProductDetailImage> detailImages = new ArrayList<>();
 
-    @Getter
-    @ManyToMany
-    @JoinTable(
-            name = "courier_product_category_mapping",
-            joinColumns = @JoinColumn(name = "courier_product_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id"))
     @Builder.Default
-    private Set<ProductCategory> productCategories = new HashSet<>();
+    @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<CourierProductCategoryMapping> categoryMappings = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<CourierProductOptionGroup> optionGroups = new ArrayList<>();
+
+    @Getter
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipping_fee_template_id")
+    private ShippingFeeTemplate shippingFeeTemplate;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
@@ -93,6 +113,27 @@ public class CourierProduct extends BaseEntity {
             return List.of();
         }
         return this.detailImages;
+    }
+
+    public List<CourierProductOptionGroup> getOptionGroups() {
+        if (this.optionGroups == null) {
+            return List.of();
+        }
+        return this.optionGroups;
+    }
+
+    public void replaceOptionGroups(List<CourierProductOptionGroup> newGroups) {
+        this.optionGroups.clear();
+        if (newGroups != null) {
+            this.optionGroups.addAll(newGroups);
+        }
+    }
+
+    public Set<CourierProductCategory> getProductCategories() {
+        if (categoryMappings == null) return Set.of();
+        return categoryMappings.stream()
+                .map(CourierProductCategoryMapping::getCourierProductCategory)
+                .collect(Collectors.toSet());
     }
 
     public void assertPurchasable(int quantity) {
@@ -140,6 +181,10 @@ public class CourierProduct extends BaseEntity {
         this.visible = !this.visible;
     }
 
+    public void toggleRecommended() {
+        this.recommended = !this.recommended;
+    }
+
     public void replaceDetailImages(List<String> imageUrls) {
         this.detailImages.clear();
         if (imageUrls == null || imageUrls.isEmpty()) {
@@ -155,10 +200,18 @@ public class CourierProduct extends BaseEntity {
         }
     }
 
-    public void updateCategories(Set<ProductCategory> categories) {
-        this.productCategories.clear();
+    public void updateCategories(Set<CourierProductCategory> categories) {
+        this.categoryMappings.clear();
         if (categories != null) {
-            this.productCategories.addAll(categories);
+            int idx = 0;
+            for (CourierProductCategory cat : categories) {
+                this.categoryMappings.add(
+                        CourierProductCategoryMapping.builder()
+                                .courierProduct(this)
+                                .courierProductCategory(cat)
+                                .sortOrder(idx++)
+                                .build());
+            }
         }
     }
 }

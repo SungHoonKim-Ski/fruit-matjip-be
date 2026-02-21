@@ -28,5 +28,9 @@ public record CourierProductCreateRequest(
 
     List<Long> categoryIds,
 
-    List<String> detailImageUrls
+    List<String> detailImageUrls,
+
+    Long shippingFeeTemplateId,
+
+    List<OptionGroupRequest> optionGroups
 ) {}

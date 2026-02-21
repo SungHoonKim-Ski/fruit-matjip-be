@@ -7,10 +7,12 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 import store.onuljang.courier.appservice.CourierProductsAppService;
 import store.onuljang.courier.dto.CourierProductListResponse;
 import store.onuljang.courier.dto.CourierProductResponse;
-import store.onuljang.shop.product.dto.ProductCategoryResponse;
+import store.onuljang.courier.dto.CourierProductsByCategoryResponse;
+import store.onuljang.courier.dto.CourierCategoryResponse;
 
 @RestController
 @RequestMapping("/api/auth/courier/products")
@@ -34,7 +36,25 @@ public class CourierProductsController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<ProductCategoryResponse> categories() {
+    public ResponseEntity<CourierCategoryResponse> categories() {
         return ResponseEntity.ok(courierProductsAppService.getProductCategories());
+    }
+
+    @GetMapping("/recommended")
+    public ResponseEntity<CourierProductListResponse> getRecommendedProducts(
+            @RequestParam(defaultValue = "8") int limit) {
+        return ResponseEntity.ok(courierProductsAppService.getRecommendedProducts(limit));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<CourierProductListResponse> searchProducts(
+            @RequestParam String q) {
+        return ResponseEntity.ok(courierProductsAppService.searchProducts(q));
+    }
+
+    @GetMapping("/by-category")
+    public ResponseEntity<List<CourierProductsByCategoryResponse>> getProductsByCategory(
+            @RequestParam(defaultValue = "4") int limit) {
+        return ResponseEntity.ok(courierProductsAppService.getProductsByCategory(limit));
     }
 }

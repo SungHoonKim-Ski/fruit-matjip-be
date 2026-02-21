@@ -19,9 +19,14 @@ public record CourierProductResponse(
     String description,
     int sortOrder,
     long totalSold,
+    boolean recommended,
+    int recommendOrder,
     List<String> detailImageUrls,
     List<CategoryItem> categories,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    Long shippingFeeTemplateId,
+    String shippingFeeTemplateName,
+    List<OptionGroupResponse> optionGroups
 ) {
     public record CategoryItem(Long id, String name) {}
 
@@ -45,9 +50,21 @@ public record CourierProductResponse(
                 .description(product.getDescription())
                 .sortOrder(product.getSortOrder())
                 .totalSold(product.getTotalSold())
+                .recommended(product.getRecommended())
+                .recommendOrder(product.getRecommendOrder())
                 .detailImageUrls(imageUrls)
                 .categories(categoryItems)
                 .createdAt(product.getCreatedAt())
+                .shippingFeeTemplateId(
+                        product.getShippingFeeTemplate() != null
+                                ? product.getShippingFeeTemplate().getId()
+                                : null)
+                .shippingFeeTemplateName(
+                        product.getShippingFeeTemplate() != null
+                                ? product.getShippingFeeTemplate().getName()
+                                : null)
+                .optionGroups(product.getOptionGroups().stream()
+                        .map(OptionGroupResponse::from).toList())
                 .build();
     }
 }
