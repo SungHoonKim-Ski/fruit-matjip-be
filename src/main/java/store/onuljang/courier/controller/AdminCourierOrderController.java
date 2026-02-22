@@ -25,6 +25,7 @@ import store.onuljang.courier.dto.AdminCourierOrderDetailResponse;
 import store.onuljang.courier.dto.AdminCourierOrderListResponse;
 import store.onuljang.courier.dto.CourierShipRequest;
 import store.onuljang.courier.dto.CourierWaybillBulkRequest;
+import store.onuljang.courier.dto.WaybillExcelFilterRequest;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 
 @RestController
@@ -40,7 +41,7 @@ public class AdminCourierOrderController {
     public ResponseEntity<AdminCourierOrderListResponse> getOrders(
             @RequestParam(required = false) CourierOrderStatus status,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "50") int size) {
+            @RequestParam(defaultValue = "50") @jakarta.validation.constraints.Max(200) int size) {
         return ResponseEntity.ok(courierAdminOrderAppService.getOrders(status, page, size));
     }
 
@@ -98,6 +99,24 @@ public class AdminCourierOrderController {
                 courierAdminOrderAppService.downloadWaybillExcelBulk(request.orderIds());
         String filename =
                 "waybill-bulk-"
+                        + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
+                        + ".xlsx";
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + filename + "\"")
+                .contentType(
+                        MediaType.parseMediaType(
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(excelData);
+    }
+
+    @PostMapping("/waybill/excel/filter")
+    public ResponseEntity<byte[]> downloadWaybillExcelByFilter(
+            @Valid @RequestBody WaybillExcelFilterRequest request) {
+        byte[] excelData = courierAdminOrderAppService.downloadWaybillExcelByFilter(request);
+        String filename =
+                "waybill-filter-"
                         + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"))
                         + ".xlsx";
         return ResponseEntity.ok()

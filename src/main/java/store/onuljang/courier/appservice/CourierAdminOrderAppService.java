@@ -1,5 +1,6 @@
 package store.onuljang.courier.appservice;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.courier.dto.AdminCourierOrderDetailResponse;
 import store.onuljang.courier.dto.AdminCourierOrderListResponse;
+import store.onuljang.courier.dto.WaybillExcelFilterRequest;
 import store.onuljang.courier.entity.CourierOrder;
 import store.onuljang.courier.entity.CourierOrderItem;
 import store.onuljang.courier.service.CourierOrderService;
@@ -17,6 +19,7 @@ import store.onuljang.courier.service.CourierRefundService;
 import store.onuljang.courier.service.WaybillExcelService;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 import store.onuljang.shared.exception.AdminValidateException;
+import store.onuljang.shared.exception.UserValidateException;
 
 @Slf4j
 @Service
@@ -89,6 +92,33 @@ public class CourierAdminOrderAppService {
         return waybillExcelService.generateWaybillExcel(orders);
     }
 
+    @Transactional(readOnly = true)
+    public byte[] downloadWaybillExcelByFilter(WaybillExcelFilterRequest request) {
+        request.validate();
+        LocalDateTime startDateTime = request.startDate().atStartOfDay();
+        LocalDateTime endDateTime = request.endDate().plusDays(1).atStartOfDay();
+
+        List<CourierOrderStatus> statuses = List.of(
+                CourierOrderStatus.PAID,
+                CourierOrderStatus.SHIPPED,
+                CourierOrderStatus.DELIVERED);
+
+        List<CourierOrder> orders;
+        if (request.productId() != null) {
+            orders = courierOrderService.findByDateRangeAndStatusesAndProduct(
+                    startDateTime, endDateTime, statuses, request.productId());
+        } else {
+            orders = courierOrderService.findByDateRangeAndStatuses(
+                    startDateTime, endDateTime, statuses);
+        }
+
+        if (orders.isEmpty()) {
+            throw new UserValidateException("해당 조건에 맞는 주문이 없습니다.");
+        }
+
+        return waybillExcelService.generateWaybillExcel(orders);
+    }
+
     private void validateAdminTransition(CourierOrder order, CourierOrderStatus nextStatus) {
         CourierOrderStatus current = order.getStatus();
         switch (nextStatus) {
@@ -134,6 +164,22 @@ public class CourierAdminOrderAppService {
         for (CourierOrderItem item : order.getItems()) {
             if (item.getCourierProduct() != null) {
                 item.getCourierProduct().restoreStock(item.getQuantity());
+            }
+            if (item.getSelectedOptionIds() != null
+                    && !item.getSelectedOptionIds().isBlank()
+                    && item.getCourierProduct() != null) {
+                java.util.Set<Long> optIds = java.util.Arrays.stream(item.getSelectedOptionIds().split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(Long::valueOf)
+                        .collect(java.util.stream.Collectors.toSet());
+                for (store.onuljang.courier.entity.CourierProductOptionGroup group : item.getCourierProduct().getOptionGroups()) {
+                    for (store.onuljang.courier.entity.CourierProductOption opt : group.getOptions()) {
+                        if (optIds.contains(opt.getId())) {
+                            opt.restoreStock(item.getQuantity());
+                        }
+                    }
+                }
             }
         }
     }

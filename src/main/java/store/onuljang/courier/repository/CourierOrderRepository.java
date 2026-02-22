@@ -1,6 +1,7 @@
 package store.onuljang.courier.repository;
 
 import jakarta.persistence.LockModeType;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
@@ -44,4 +45,26 @@ public interface CourierOrderRepository extends JpaRepository<CourierOrder, Long
             @Param("status") CourierOrderStatus status, Pageable pageable);
 
     List<CourierOrder> findAllByIdIn(List<Long> ids);
+
+    @Query("SELECT DISTINCT o FROM CourierOrder o " +
+           "JOIN FETCH o.items i " +
+           "WHERE o.paidAt >= :startDateTime AND o.paidAt < :endDateTime " +
+           "AND o.status IN :statuses " +
+           "ORDER BY o.id DESC")
+    List<CourierOrder> findByDateRangeAndStatuses(
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime,
+            @Param("statuses") List<CourierOrderStatus> statuses);
+
+    @Query("SELECT DISTINCT o FROM CourierOrder o " +
+           "JOIN FETCH o.items i " +
+           "WHERE o.paidAt >= :startDateTime AND o.paidAt < :endDateTime " +
+           "AND o.status IN :statuses " +
+           "AND EXISTS (SELECT 1 FROM CourierOrderItem oi WHERE oi.courierOrder = o AND oi.courierProduct.id = :productId) " +
+           "ORDER BY o.id DESC")
+    List<CourierOrder> findByDateRangeAndStatusesAndProduct(
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime,
+            @Param("statuses") List<CourierOrderStatus> statuses,
+            @Param("productId") Long productId);
 }
