@@ -2,6 +2,8 @@ package store.onuljang.courier.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.courier.dto.CourierCategoryResponse;
+import store.onuljang.courier.entity.CourierProduct;
 import store.onuljang.courier.entity.CourierProductCategory;
 import store.onuljang.courier.service.CourierProductCategoryService;
 
@@ -98,9 +101,45 @@ public class AdminCourierCategoryController {
         return ResponseEntity.ok().build();
     }
 
+    @PutMapping("/{id}/products")
+    public ResponseEntity<Void> replaceCategoryProducts(
+            @PathVariable Long id,
+            @Valid @RequestBody CourierCategoryProductsRequest request) {
+        courierProductCategoryService.replaceProducts(id, request.productIds());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{id}/products")
+    public ResponseEntity<CourierCategoryProductsResponse> getCategoryProducts(
+            @PathVariable Long id) {
+        List<CourierProduct> products = courierProductCategoryService.getProductsByCategory(id);
+        return ResponseEntity.ok(CourierCategoryProductsResponse.of(products));
+    }
+
     public record CreateCourierCategoryRequest(
             @NotBlank String name, String imageUrl, Integer sortOrder) {}
 
     public record UpdateCourierCategoryRequest(
             String name, String imageUrl, Integer sortOrder) {}
+
+    public record CourierCategoryProductsRequest(@NotNull List<Long> productIds) {}
+
+    public record CourierCategoryProductsResponse(List<CategoryProductItem> response) {
+        public record CategoryProductItem(
+                Long id, String name, BigDecimal price, String productUrl, Integer stock) {}
+
+        public static CourierCategoryProductsResponse of(List<CourierProduct> products) {
+            return new CourierCategoryProductsResponse(
+                    products.stream()
+                            .map(
+                                    p ->
+                                            new CategoryProductItem(
+                                                    p.getId(),
+                                                    p.getName(),
+                                                    p.getPrice(),
+                                                    p.getProductUrl(),
+                                                    p.getStock()))
+                            .toList());
+        }
+    }
 }

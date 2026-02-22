@@ -17,4 +17,6 @@ public interface CourierProductCategoryMappingRepository
                     + " ORDER BY m.sortOrder ASC")
     List<CourierProductCategoryMapping> findByCategoryIdOrderBySortOrder(
             @Param("categoryId") Long categoryId);
+
+    void deleteAllByCourierProductCategoryId(Long categoryId);
 }
