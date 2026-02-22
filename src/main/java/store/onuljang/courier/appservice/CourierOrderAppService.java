@@ -2,7 +2,10 @@ package store.onuljang.courier.appservice;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -33,6 +36,8 @@ import store.onuljang.shared.util.TimeUtil;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class CourierOrderAppService {
 
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
+
     UserService userService;
     CourierOrderService courierOrderService;
     CourierPaymentService courierPaymentService;
@@ -44,8 +49,12 @@ public class CourierOrderAppService {
     @Transactional
     public CourierOrderReadyResponse ready(String uid, CourierOrderReadyRequest request) {
         Users user = userService.findByUId(uid);
-        PaymentProvider provider =
-                PaymentProvider.valueOf(request.pgProvider().toUpperCase());
+        PaymentProvider provider;
+        try {
+            provider = PaymentProvider.valueOf(request.pgProvider().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new UserValidateException("존재하지 않는 결제 수단입니다: " + request.pgProvider());
+        }
 
         // 1) 멱등성 키 확인
         CourierOrder existing =
@@ -75,11 +84,14 @@ public class CourierOrderAppService {
             // 옵션 추가 가격 계산
             BigDecimal optionAdditionalPrice = BigDecimal.ZERO;
             String selectedOptionsJson = null;
+            List<Long> selectedOptIds = new ArrayList<>();
             if (itemReq.selectedOptionIds() != null && !itemReq.selectedOptionIds().isEmpty()) {
                 List<SelectedOptionSnapshot> snapshots = new ArrayList<>();
                 for (CourierProductOptionGroup group : product.getOptionGroups()) {
                     for (CourierProductOption opt : group.getOptions()) {
                         if (itemReq.selectedOptionIds().contains(opt.getId())) {
+                            opt.assertPurchasable(itemReq.quantity());
+                            selectedOptIds.add(opt.getId());
                             optionAdditionalPrice = optionAdditionalPrice.add(opt.getAdditionalPrice());
                             snapshots.add(new SelectedOptionSnapshot(
                                     group.getName(), opt.getName(), opt.getAdditionalPrice()));
@@ -88,20 +100,24 @@ public class CourierOrderAppService {
                 }
                 if (!snapshots.isEmpty()) {
                     try {
-                        selectedOptionsJson = new com.fasterxml.jackson.databind.ObjectMapper()
-                                .writeValueAsString(snapshots);
+                        selectedOptionsJson = OBJECT_MAPPER.writeValueAsString(snapshots);
                     } catch (Exception e) {
                         throw new IllegalStateException("옵션 정보 직렬화 실패", e);
                     }
                 }
             }
 
+            String selectedOptionIdsStr = selectedOptIds.isEmpty()
+                    ? null
+                    : selectedOptIds.stream().map(String::valueOf).collect(Collectors.joining(","));
+
             BigDecimal unitPrice = product.getPrice().add(optionAdditionalPrice);
             BigDecimal itemAmount = unitPrice.multiply(BigDecimal.valueOf(itemReq.quantity()));
             totalQuantity += itemReq.quantity();
             productAmount = productAmount.add(itemAmount);
 
-            itemDataList.add(new CourierOrderItemData(product, itemReq.quantity(), itemAmount, selectedOptionsJson));
+            itemDataList.add(new CourierOrderItemData(
+                    product, itemReq.quantity(), itemAmount, selectedOptionsJson, selectedOptionIdsStr));
         }
 
         // 3) 배송비 계산 (상품별 템플릿 기반)
@@ -152,6 +168,20 @@ public class CourierOrderAppService {
         // 5) 주문 항목 생성 + 재고 차감
         for (CourierOrderItemData data : itemDataList) {
             data.product.purchase(data.quantity);
+            // 옵션 재고 차감
+            if (data.selectedOptionIds() != null && !data.selectedOptionIds().isBlank()) {
+                Set<Long> optIds = Arrays.stream(data.selectedOptionIds().split(","))
+                        .map(String::trim)
+                        .map(Long::valueOf)
+                        .collect(Collectors.toSet());
+                for (CourierProductOptionGroup group : data.product.getOptionGroups()) {
+                    for (CourierProductOption opt : group.getOptions()) {
+                        if (optIds.contains(opt.getId())) {
+                            opt.purchase(data.quantity);
+                        }
+                    }
+                }
+            }
             saved.getItems()
                     .add(
                             CourierOrderItem.builder()
@@ -162,6 +192,7 @@ public class CourierOrderAppService {
                                     .quantity(data.quantity)
                                     .amount(data.amount)
                                     .selectedOptions(data.selectedOptions())
+                                    .selectedOptionIds(data.selectedOptionIds())
                                     .build());
         }
 
@@ -249,9 +280,30 @@ public class CourierOrderAppService {
             if (item.getCourierProduct() != null) {
                 item.getCourierProduct().restoreStock(item.getQuantity());
             }
+            // 옵션 재고 복원
+            if (item.getSelectedOptionIds() != null
+                    && !item.getSelectedOptionIds().isBlank()
+                    && item.getCourierProduct() != null) {
+                Set<Long> optIds = Arrays.stream(item.getSelectedOptionIds().split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(Long::valueOf)
+                        .collect(Collectors.toSet());
+                for (CourierProductOptionGroup group : item.getCourierProduct().getOptionGroups()) {
+                    for (CourierProductOption opt : group.getOptions()) {
+                        if (optIds.contains(opt.getId())) {
+                            opt.restoreStock(item.getQuantity());
+                        }
+                    }
+                }
+            }
         }
     }
 
     private record CourierOrderItemData(
-            CourierProduct product, int quantity, BigDecimal amount, String selectedOptions) {}
+            CourierProduct product,
+            int quantity,
+            BigDecimal amount,
+            String selectedOptions,
+            String selectedOptionIds) {}
 }

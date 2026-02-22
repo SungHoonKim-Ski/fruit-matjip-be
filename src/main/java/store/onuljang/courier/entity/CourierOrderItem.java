@@ -45,6 +45,10 @@ public class CourierOrderItem extends BaseEntity {
     private String selectedOptions;
 
     @Getter
+    @Column(name = "selected_option_ids", length = 500)
+    private String selectedOptionIds;
+
+    @Getter
     @Enumerated(EnumType.STRING)
     @Column(name = "item_status", nullable = false, length = 20)
     @Builder.Default

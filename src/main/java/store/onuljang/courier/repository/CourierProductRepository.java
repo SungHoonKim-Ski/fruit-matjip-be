@@ -46,4 +46,7 @@ public interface CourierProductRepository extends JpaRepository<CourierProduct, 
 
     @Query("SELECT p FROM CourierProduct p JOIN p.categoryMappings m WHERE p.visible = true AND m.courierProductCategory.id = :categoryId ORDER BY m.sortOrder ASC")
     List<CourierProduct> findVisibleByCategoryOrdered(@Param("categoryId") Long categoryId, Pageable pageable);
+
+    @Query("SELECT COALESCE(MIN(p.sortOrder), 0) FROM CourierProduct p WHERE p.deletedAt IS NULL")
+    int findMinSortOrder();
 }

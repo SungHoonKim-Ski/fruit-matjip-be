@@ -23,6 +23,7 @@ import store.onuljang.courier.entity.CourierProductCategoryMapping;
 import store.onuljang.courier.entity.CourierProductOption;
 import store.onuljang.courier.entity.CourierProductOptionGroup;
 import store.onuljang.courier.repository.CourierProductCategoryMappingRepository;
+import store.onuljang.courier.repository.CourierProductRepository;
 import store.onuljang.courier.service.CourierProductService;
 import store.onuljang.courier.service.ShippingFeeTemplateService;
 import store.onuljang.shop.admin.dto.PresignedUrlRequest;
@@ -47,6 +48,7 @@ public class CourierAdminProductAppService {
     AdminService adminService;
     CourierProductCategoryMappingRepository courierProductCategoryMappingRepository;
     ShippingFeeTemplateService shippingFeeTemplateService;
+    CourierProductRepository courierProductRepository;
 
     public CourierProductListResponse getProducts() {
         List<CourierProduct> products = courierProductService.findAll();
@@ -69,7 +71,7 @@ public class CourierAdminProductAppService {
                 .stock(request.stock())
                 .weightGram(request.weightGram())
                 .description(request.description())
-                .sortOrder(request.sortOrder() != null ? request.sortOrder() : 0)
+                .sortOrder(request.sortOrder() != null ? request.sortOrder() : courierProductRepository.findMinSortOrder() - 1)
                 .registeredAdmin(admin)
                 .build();
 
@@ -251,6 +253,7 @@ public class CourierAdminProductAppService {
                         .name(or.name())
                         .additionalPrice(or.additionalPrice() != null ? or.additionalPrice() : BigDecimal.ZERO)
                         .sortOrder(or.sortOrder() != null ? or.sortOrder() : j)
+                        .stock(or.stock())
                         .build());
             }
             groups.add(group);

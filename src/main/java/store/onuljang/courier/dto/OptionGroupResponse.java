@@ -16,10 +16,11 @@ public record OptionGroupResponse(
         Long id,
         String name,
         BigDecimal additionalPrice,
-        int sortOrder
+        int sortOrder,
+        Integer stock
     ) {
         public static OptionItemResponse from(CourierProductOption o) {
-            return new OptionItemResponse(o.getId(), o.getName(), o.getAdditionalPrice(), o.getSortOrder());
+            return new OptionItemResponse(o.getId(), o.getName(), o.getAdditionalPrice(), o.getSortOrder(), o.getStock());
         }
     }
 

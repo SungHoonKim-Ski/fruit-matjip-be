@@ -1,5 +1,6 @@
 package store.onuljang.courier.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
@@ -84,6 +85,19 @@ public class CourierOrderService {
 
     public List<CourierOrder> findAllByIds(List<Long> ids) {
         return courierOrderRepository.findAllByIdIn(ids);
+    }
+
+    public List<CourierOrder> findByDateRangeAndStatuses(
+            LocalDateTime startDateTime, LocalDateTime endDateTime,
+            List<CourierOrderStatus> statuses) {
+        return courierOrderRepository.findByDateRangeAndStatuses(startDateTime, endDateTime, statuses);
+    }
+
+    public List<CourierOrder> findByDateRangeAndStatusesAndProduct(
+            LocalDateTime startDateTime, LocalDateTime endDateTime,
+            List<CourierOrderStatus> statuses, Long productId) {
+        return courierOrderRepository.findByDateRangeAndStatusesAndProduct(
+                startDateTime, endDateTime, statuses, productId);
     }
 
     @Transactional

@@ -30,4 +30,28 @@ public class CourierProductOption extends BaseEntity {
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private Integer sortOrder = 0;
+
+    @Setter
+    @Column(name = "stock")
+    private Integer stock;
+
+    public void assertPurchasable(int quantity) {
+        if (stock != null && stock < quantity) {
+            throw new store.onuljang.shared.exception.UserValidateException(
+                    "옵션 '" + name + "'의 재고가 부족합니다. (남은 수량: " + stock + ")");
+        }
+    }
+
+    public void purchase(int quantity) {
+        if (stock != null) {
+            assertPurchasable(quantity);
+            stock -= quantity;
+        }
+    }
+
+    public void restoreStock(int quantity) {
+        if (stock != null) {
+            stock += quantity;
+        }
+    }
 }
