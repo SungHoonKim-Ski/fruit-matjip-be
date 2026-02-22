@@ -36,9 +36,8 @@ public class CourierProduct extends BaseEntity {
     private BigDecimal price;
 
     @Getter
-    @Column(name = "stock", nullable = false)
-    @Builder.Default
-    private Integer stock = 0;
+    @Column(name = "stock")
+    private Integer stock;
 
     @Getter
     @Column(name = "visible", nullable = false)
@@ -146,23 +145,27 @@ public class CourierProduct extends BaseEntity {
         if (quantity <= 0) {
             throw new IllegalStateException("구매 수량은 1개 이상이어야 합니다.");
         }
-        if (this.stock < quantity) {
+        if (stock != null && stock < quantity) {
             throw new IllegalStateException("상품의 재고가 부족합니다.");
         }
     }
 
     public void purchase(int quantity) {
         assertPurchasable(quantity);
-        this.stock -= quantity;
+        if (stock != null) {
+            stock -= quantity;
+        }
         this.totalSold += quantity;
     }
 
     public void restoreStock(int quantity) {
-        this.stock += quantity;
+        if (stock != null) {
+            stock += quantity;
+        }
     }
 
     public boolean isAvailable() {
-        return Boolean.TRUE.equals(visible) && deletedAt == null && stock > 0;
+        return Boolean.TRUE.equals(visible) && deletedAt == null && (stock == null || stock > 0);
     }
 
     public void softDelete() {
@@ -173,7 +176,7 @@ public class CourierProduct extends BaseEntity {
         this.price = price;
     }
 
-    public void setStock(int stock) {
+    public void setStock(Integer stock) {
         this.stock = stock;
     }
 

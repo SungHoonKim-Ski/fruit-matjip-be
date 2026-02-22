@@ -16,8 +16,6 @@ public record CourierProductCreateRequest(
     @Min(value = 100, message = "가격은 100원 이상이어야 합니다")
     BigDecimal price,
 
-    @NotNull(message = "재고 수량은 필수입니다")
-    @Min(value = 0, message = "재고 수량은 0 이상이어야 합니다")
     Integer stock,
 
     Integer weightGram,
