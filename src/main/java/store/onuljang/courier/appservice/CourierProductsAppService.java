@@ -86,12 +86,10 @@ public class CourierProductsAppService {
         for (CourierProductCategory cat : categories) {
             List<CourierProduct> products = courierProductService.findVisibleByCategoryLimited(
                     cat.getId(), perCategoryLimit);
-            if (!products.isEmpty()) {
-                result.add(new CourierProductsByCategoryResponse(
-                        cat.getId(),
-                        cat.getName(),
-                        products.stream().map(CourierProductResponse::from).toList()));
-            }
+            result.add(new CourierProductsByCategoryResponse(
+                    cat.getId(),
+                    cat.getName(),
+                    products.stream().map(CourierProductResponse::from).toList()));
         }
         return result;
     }
