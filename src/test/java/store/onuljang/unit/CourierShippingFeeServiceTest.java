@@ -9,7 +9,6 @@ import static org.mockito.Mockito.inOrder;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -52,7 +51,7 @@ class CourierShippingFeeServiceTest {
         void calculate_smallQuantity_returnsBaseFee() {
             // arrange
             ShippingFeePolicy policy = createPolicy(1, 3, new BigDecimal("4000"));
-            given(shippingFeePolicyRepository.findByQuantityRange(2)).willReturn(Optional.of(policy));
+            given(shippingFeePolicyRepository.findAllByQuantityRange(2)).willReturn(List.of(policy));
 
             // act
             ShippingFeeResult result = courierShippingFeeService.calculate(2, "06134");
@@ -69,7 +68,7 @@ class CourierShippingFeeServiceTest {
         void calculate_largeQuantity_returnsHigherFee() {
             // arrange
             ShippingFeePolicy policy = createPolicy(4, 6, new BigDecimal("8000"));
-            given(shippingFeePolicyRepository.findByQuantityRange(5)).willReturn(Optional.of(policy));
+            given(shippingFeePolicyRepository.findAllByQuantityRange(5)).willReturn(List.of(policy));
 
             // act
             ShippingFeeResult result = courierShippingFeeService.calculate(5, "06134");
@@ -90,7 +89,7 @@ class CourierShippingFeeServiceTest {
                             .islandSurcharge(new BigDecimal("3000"))
                             .build();
 
-            given(shippingFeePolicyRepository.findByQuantityRange(1)).willReturn(Optional.of(policy));
+            given(shippingFeePolicyRepository.findAllByQuantityRange(1)).willReturn(List.of(policy));
             given(courierConfigService.getConfig()).willReturn(config);
 
             // act
@@ -108,7 +107,7 @@ class CourierShippingFeeServiceTest {
         void calculate_seoulPostalCode_noSurcharge() {
             // arrange
             ShippingFeePolicy policy = createPolicy(1, 3, new BigDecimal("4000"));
-            given(shippingFeePolicyRepository.findByQuantityRange(1)).willReturn(Optional.of(policy));
+            given(shippingFeePolicyRepository.findAllByQuantityRange(1)).willReturn(List.of(policy));
 
             // act
             ShippingFeeResult result = courierShippingFeeService.calculate(1, "06134");
@@ -122,8 +121,8 @@ class CourierShippingFeeServiceTest {
         @DisplayName("수량에 맞는 배송비 정책이 없으면 UserValidateException")
         void calculate_noPolicyFound_throwsException() {
             // arrange
-            given(shippingFeePolicyRepository.findByQuantityRange(100))
-                    .willReturn(Optional.empty());
+            given(shippingFeePolicyRepository.findAllByQuantityRange(100))
+                    .willReturn(List.of());
 
             // act / assert
             assertThatThrownBy(() -> courierShippingFeeService.calculate(100, "06134"))

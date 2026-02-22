@@ -53,8 +53,8 @@ public class CourierShippingFeeService {
 
     public ShippingFeeResult calculate(int totalQuantity, String postalCode) {
         ShippingFeePolicy policy =
-                shippingFeePolicyRepository
-                        .findByQuantityRange(totalQuantity)
+                shippingFeePolicyRepository.findAllByQuantityRange(totalQuantity).stream()
+                        .findFirst()
                         .orElseThrow(
                                 () -> new UserValidateException("해당 수량에 대한 배송비 정책이 없습니다."));
 
@@ -116,8 +116,8 @@ public class CourierShippingFeeService {
             int policyQuantity =
                     globalPolicyItems.stream().mapToInt(ShippingFeeItemInput::quantity).sum();
             ShippingFeePolicy policy =
-                    shippingFeePolicyRepository
-                            .findByQuantityRange(policyQuantity)
+                    shippingFeePolicyRepository.findAllByQuantityRange(policyQuantity).stream()
+                            .findFirst()
                             .orElseThrow(
                                     () -> new UserValidateException("해당 수량에 대한 배송비 정책이 없습니다."));
             totalShippingFee = totalShippingFee.add(policy.getFee());
@@ -140,8 +140,30 @@ public class CourierShippingFeeService {
 
     @Transactional
     public List<ShippingFeePolicy> replaceAll(List<ShippingFeePolicy> policies) {
+        validateNoOverlap(policies);
         shippingFeePolicyRepository.deleteAllInBatch();
         return shippingFeePolicyRepository.saveAll(policies);
+    }
+
+    private void validateNoOverlap(List<ShippingFeePolicy> policies) {
+        List<ShippingFeePolicy> activePolicies =
+                policies.stream().filter(ShippingFeePolicy::getActive).toList();
+        for (int i = 0; i < activePolicies.size(); i++) {
+            for (int j = i + 1; j < activePolicies.size(); j++) {
+                ShippingFeePolicy a = activePolicies.get(i);
+                ShippingFeePolicy b = activePolicies.get(j);
+                if (a.getMinQuantity() <= b.getMaxQuantity()
+                        && b.getMinQuantity() <= a.getMaxQuantity()) {
+                    throw new UserValidateException(
+                            String.format(
+                                    "수량 범위가 겹칩니다: [%d-%d]과 [%d-%d]",
+                                    a.getMinQuantity(),
+                                    a.getMaxQuantity(),
+                                    b.getMinQuantity(),
+                                    b.getMaxQuantity()));
+                }
+            }
+        }
     }
 
     public boolean isIslandPostalCode(String postalCode) {
