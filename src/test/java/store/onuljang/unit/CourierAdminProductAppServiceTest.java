@@ -33,6 +33,7 @@ import store.onuljang.shop.admin.service.AdminService;
 import store.onuljang.shop.admin.service.AdminUploadService;
 import store.onuljang.shop.admin.util.SessionUtil;
 import store.onuljang.courier.entity.CourierProductCategory;
+import store.onuljang.courier.repository.CourierProductRepository;
 import store.onuljang.courier.service.CourierProductCategoryService;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +42,7 @@ class CourierAdminProductAppServiceTest {
     @InjectMocks private CourierAdminProductAppService courierAdminProductAppService;
 
     @Mock private CourierProductService courierProductService;
+    @Mock private CourierProductRepository courierProductRepository;
     @Mock private CourierProductCategoryService courierProductCategoryService;
     @Mock private AdminUploadService adminUploadService;
     @Mock private AdminService adminService;
@@ -195,6 +197,7 @@ class CourierAdminProductAppServiceTest {
                             null);
 
             given(adminService.findById(1L)).willReturn(testAdmin);
+            given(courierProductRepository.findMinSortOrder()).willReturn(0);
             given(courierProductService.save(any(CourierProduct.class))).willReturn(1L);
 
             // act
