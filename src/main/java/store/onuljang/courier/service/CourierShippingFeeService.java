@@ -11,7 +11,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.courier.dto.ShippingFeeItemInput;
+import store.onuljang.courier.dto.ShippingFeePreviewRequest;
 import store.onuljang.courier.dto.ShippingFeeResult;
+import store.onuljang.courier.entity.CourierProduct;
 import store.onuljang.courier.entity.ShippingFeePolicy;
 import store.onuljang.courier.entity.ShippingFeeTemplate;
 import store.onuljang.courier.repository.ShippingFeePolicyRepository;
@@ -27,6 +29,27 @@ public class CourierShippingFeeService {
     ShippingFeePolicyRepository shippingFeePolicyRepository;
     ShippingFeeTemplateRepository shippingFeeTemplateRepository;
     CourierConfigService courierConfigService;
+    CourierProductService courierProductService;
+
+    public ShippingFeeResult calculatePreview(ShippingFeePreviewRequest request) {
+        List<ShippingFeeItemInput> feeItems =
+                request.items().stream()
+                        .map(item -> {
+                            CourierProduct product =
+                                    courierProductService.findById(item.courierProductId());
+                            BigDecimal unitPrice = product.getPrice();
+                            BigDecimal itemAmount =
+                                    unitPrice.multiply(BigDecimal.valueOf(item.quantity()));
+                            Long templateId =
+                                    product.getShippingFeeTemplate() != null
+                                            ? product.getShippingFeeTemplate().getId()
+                                            : null;
+                            return new ShippingFeeItemInput(
+                                    product.getId(), item.quantity(), itemAmount, templateId);
+                        })
+                        .toList();
+        return calculateByItems(feeItems, request.postalCode());
+    }
 
     public ShippingFeeResult calculate(int totalQuantity, String postalCode) {
         ShippingFeePolicy policy =

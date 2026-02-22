@@ -78,10 +78,10 @@ public class CourierOrderController {
         return ResponseEntity.ok(courierOrderAppService.getOrderDetail(uid, displayCode));
     }
 
-    @GetMapping("/shipping-fee")
+    @PostMapping("/shipping-fee")
     public ResponseEntity<ShippingFeeResponse> getShippingFee(
-            @RequestParam @Positive int quantity, @RequestParam @NotBlank String postalCode) {
-        ShippingFeeResult result = courierShippingFeeService.calculate(quantity, postalCode);
+            @RequestBody @Valid ShippingFeePreviewRequest request) {
+        ShippingFeeResult result = courierShippingFeeService.calculatePreview(request);
         return ResponseEntity.ok(ShippingFeeResponse.from(result));
     }
 
