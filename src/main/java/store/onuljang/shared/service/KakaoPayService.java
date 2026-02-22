@@ -57,7 +57,8 @@ public class KakaoPayService {
             }
             return response;
         } catch (FeignException e) {
-            throw new KakaoPayException("카카오페이 결제 준비에 실패했습니다.");
+            log.error("카카오페이 결제 준비 실패 - status: {}, response: {}", e.status(), e.contentUTF8(), e);
+            throw new KakaoPayException(parseKakaoPayError(e, "카카오페이 결제 준비에 실패했습니다."));
         }
     }
 
@@ -97,7 +98,8 @@ public class KakaoPayService {
                 kakaoPayConfigDto.getCid(), tid);
             return kakaoPayFeignClient.order(buildAuthorizationHeader(), request);
         } catch (FeignException e) {
-            throw new KakaoPayException("카카오페이 주문 조회에 실패했습니다.");
+            log.error("카카오페이 주문 조회 실패 - status: {}, response: {}", e.status(), e.contentUTF8(), e);
+            throw new KakaoPayException(parseKakaoPayError(e, "카카오페이 주문 조회에 실패했습니다."));
         }
     }
 
@@ -122,7 +124,8 @@ public class KakaoPayService {
             }
             return response;
         } catch (FeignException e) {
-            throw new KakaoPayException("카카오페이 결제 취소에 실패했습니다.");
+            log.error("카카오페이 결제 취소 실패 - status: {}, response: {}", e.status(), e.contentUTF8(), e);
+            throw new KakaoPayException(parseKakaoPayError(e, "카카오페이 결제 취소에 실패했습니다."));
         }
     }
 
