@@ -146,12 +146,10 @@ public class CourierShippingFeeService {
     }
 
     private void validateNoOverlap(List<ShippingFeePolicy> policies) {
-        List<ShippingFeePolicy> activePolicies =
-                policies.stream().filter(ShippingFeePolicy::getActive).toList();
-        for (int i = 0; i < activePolicies.size(); i++) {
-            for (int j = i + 1; j < activePolicies.size(); j++) {
-                ShippingFeePolicy a = activePolicies.get(i);
-                ShippingFeePolicy b = activePolicies.get(j);
+        for (int i = 0; i < policies.size(); i++) {
+            for (int j = i + 1; j < policies.size(); j++) {
+                ShippingFeePolicy a = policies.get(i);
+                ShippingFeePolicy b = policies.get(j);
                 if (a.getMinQuantity() <= b.getMaxQuantity()
                         && b.getMinQuantity() <= a.getMaxQuantity()) {
                     throw new UserValidateException(

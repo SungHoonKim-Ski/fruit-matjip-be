@@ -18,6 +18,4 @@ public record ShippingFeeTemplateRequest(
         @DecimalMin(value = "0")
         BigDecimal freeShippingMinAmount,
 
-        Boolean active,
-
         Integer sortOrder) {}

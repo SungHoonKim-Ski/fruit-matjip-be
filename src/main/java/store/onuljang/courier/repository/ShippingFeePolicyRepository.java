@@ -9,8 +9,8 @@ import store.onuljang.courier.entity.ShippingFeePolicy;
 public interface ShippingFeePolicyRepository extends JpaRepository<ShippingFeePolicy, Long> {
 
     @Query(
-            "SELECT s FROM ShippingFeePolicy s WHERE s.active = true"
-                    + " AND s.minQuantity <= :qty AND s.maxQuantity >= :qty"
+            "SELECT s FROM ShippingFeePolicy s"
+                    + " WHERE s.minQuantity <= :qty AND s.maxQuantity >= :qty"
                     + " ORDER BY s.sortOrder ASC")
     List<ShippingFeePolicy> findAllByQuantityRange(@Param("qty") int qty);
 

@@ -30,11 +30,6 @@ public class ShippingFeeTemplate extends BaseEntity {
     private BigDecimal freeShippingMinAmount;
 
     @Setter
-    @Column(name = "active", nullable = false)
-    @Builder.Default
-    private Boolean active = true;
-
-    @Setter
     @Column(name = "sort_order", nullable = false)
     @Builder.Default
     private Integer sortOrder = 0;

@@ -8,8 +8,7 @@ public record ShippingFeePolicyResponse(
         Integer minQuantity,
         Integer maxQuantity,
         BigDecimal fee,
-        Integer sortOrder,
-        Boolean active) {
+        Integer sortOrder) {
 
     public static ShippingFeePolicyResponse from(ShippingFeePolicy policy) {
         return new ShippingFeePolicyResponse(
@@ -17,7 +16,6 @@ public record ShippingFeePolicyResponse(
                 policy.getMinQuantity(),
                 policy.getMaxQuantity(),
                 policy.getFee(),
-                policy.getSortOrder(),
-                policy.getActive());
+                policy.getSortOrder());
     }
 }

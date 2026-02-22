@@ -6,6 +6,4 @@ import store.onuljang.courier.entity.ShippingFeeTemplate;
 
 public interface ShippingFeeTemplateRepository extends JpaRepository<ShippingFeeTemplate, Long> {
     List<ShippingFeeTemplate> findAllByOrderBySortOrderAsc();
-
-    List<ShippingFeeTemplate> findByActiveTrueOrderBySortOrderAsc();
 }

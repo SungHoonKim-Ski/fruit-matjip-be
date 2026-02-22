@@ -6,5 +6,4 @@ public record ShippingFeePolicyRequest(
         Integer minQuantity,
         Integer maxQuantity,
         BigDecimal fee,
-        Integer sortOrder,
-        Boolean active) {}
+        Integer sortOrder) {}

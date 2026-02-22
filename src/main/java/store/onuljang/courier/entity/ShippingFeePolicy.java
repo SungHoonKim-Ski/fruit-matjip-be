@@ -26,20 +26,14 @@ public class ShippingFeePolicy extends BaseEntity {
     @Builder.Default
     private Integer sortOrder = 0;
 
-    @Column(name = "active", nullable = false)
-    @Builder.Default
-    private Boolean active = true;
-
     public void update(
             Integer minQuantity,
             Integer maxQuantity,
             BigDecimal fee,
-            Integer sortOrder,
-            Boolean active) {
+            Integer sortOrder) {
         this.minQuantity = minQuantity;
         this.maxQuantity = maxQuantity;
         this.fee = fee;
         this.sortOrder = sortOrder;
-        this.active = active;
     }
 }

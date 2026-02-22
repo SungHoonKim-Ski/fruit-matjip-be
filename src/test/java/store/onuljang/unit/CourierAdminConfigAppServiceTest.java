@@ -57,7 +57,6 @@ class CourierAdminConfigAppServiceTest {
                         .maxQuantity(maxQty)
                         .fee(fee)
                         .sortOrder(sortOrder)
-                        .active(true)
                         .build();
         ReflectionTestUtils.setField(policy, "id", id);
         return policy;
@@ -212,9 +211,9 @@ class CourierAdminConfigAppServiceTest {
             List<ShippingFeePolicyRequest> requests =
                     List.of(
                             new ShippingFeePolicyRequest(
-                                    1, 3, new BigDecimal("4000"), 0, true),
+                                    1, 3, new BigDecimal("4000"), 0),
                             new ShippingFeePolicyRequest(
-                                    4, 6, new BigDecimal("8000"), 1, true));
+                                    4, 6, new BigDecimal("8000"), 1));
 
             ShippingFeePolicy saved1 = buildPolicy(10L, 1, 3, new BigDecimal("4000"), 0);
             ShippingFeePolicy saved2 = buildPolicy(11L, 4, 6, new BigDecimal("8000"), 1);
@@ -237,13 +236,13 @@ class CourierAdminConfigAppServiceTest {
         }
 
         @Test
-        @DisplayName("sortOrder와 active 기본값 처리")
+        @DisplayName("sortOrder 기본값 처리")
         void replaceShippingFeePolicies_defaultValues() {
             // arrange
             List<ShippingFeePolicyRequest> requests =
                     List.of(
                             new ShippingFeePolicyRequest(
-                                    1, 5, new BigDecimal("5000"), null, null));
+                                    1, 5, new BigDecimal("5000"), null));
 
             ShippingFeePolicy saved = buildPolicy(20L, 1, 5, new BigDecimal("5000"), 0);
             given(courierShippingFeeService.replaceAll(anyList()))
@@ -256,7 +255,6 @@ class CourierAdminConfigAppServiceTest {
             // assert
             assertThat(result.policies()).hasSize(1);
             assertThat(result.policies().get(0).sortOrder()).isEqualTo(0);
-            assertThat(result.policies().get(0).active()).isTrue();
         }
 
         @Test

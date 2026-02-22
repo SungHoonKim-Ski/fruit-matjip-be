@@ -75,7 +75,6 @@ public class CourierAdminConfigAppService {
                                                 .fee(req.fee())
                                                 .sortOrder(
                                                         req.sortOrder() != null ? req.sortOrder() : 0)
-                                                .active(req.active() != null ? req.active() : true)
                                                 .build())
                         .toList();
         List<ShippingFeePolicy> saved = courierShippingFeeService.replaceAll(policies);
@@ -95,7 +94,6 @@ public class CourierAdminConfigAppService {
                         .baseFee(request.baseFee())
                         .perQuantityFee(request.perQuantityFee())
                         .freeShippingMinAmount(request.freeShippingMinAmount())
-                        .active(request.active() != null ? request.active() : true)
                         .sortOrder(request.sortOrder() != null ? request.sortOrder() : 0)
                         .build();
         return ShippingFeeTemplateResponse.from(shippingFeeTemplateService.save(template));
@@ -109,7 +107,6 @@ public class CourierAdminConfigAppService {
         template.setBaseFee(request.baseFee());
         template.setPerQuantityFee(request.perQuantityFee());
         template.setFreeShippingMinAmount(request.freeShippingMinAmount());
-        if (request.active() != null) template.setActive(request.active());
         if (request.sortOrder() != null) template.setSortOrder(request.sortOrder());
         return ShippingFeeTemplateResponse.from(template);
     }

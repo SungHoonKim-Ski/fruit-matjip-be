@@ -11,7 +11,6 @@ public record ShippingFeeTemplateResponse(
         BigDecimal baseFee,
         BigDecimal perQuantityFee,
         BigDecimal freeShippingMinAmount,
-        boolean active,
         int sortOrder) {
 
     public static ShippingFeeTemplateResponse from(ShippingFeeTemplate t) {
@@ -21,7 +20,6 @@ public record ShippingFeeTemplateResponse(
                 .baseFee(t.getBaseFee())
                 .perQuantityFee(t.getPerQuantityFee())
                 .freeShippingMinAmount(t.getFreeShippingMinAmount())
-                .active(t.getActive())
                 .sortOrder(t.getSortOrder())
                 .build();
     }

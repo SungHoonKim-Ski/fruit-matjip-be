@@ -22,10 +22,6 @@ public class ShippingFeeTemplateService {
         return shippingFeeTemplateRepository.findAllByOrderBySortOrderAsc();
     }
 
-    public List<ShippingFeeTemplate> findActive() {
-        return shippingFeeTemplateRepository.findByActiveTrueOrderBySortOrderAsc();
-    }
-
     public ShippingFeeTemplate findById(Long id) {
         return shippingFeeTemplateRepository
                 .findById(id)
