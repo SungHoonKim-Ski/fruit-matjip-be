@@ -39,7 +39,7 @@ public class CourierProductsAppService {
     }
 
     public CourierProductResponse getDetail(Long id) {
-        CourierProduct product = courierProductService.findByIdWithDetailImages(id);
+        CourierProduct product = courierProductService.findById(id);
         return CourierProductResponse.from(product);
     }
 

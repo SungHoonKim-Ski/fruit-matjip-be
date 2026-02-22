@@ -13,7 +13,6 @@ public record CourierProductUpdateRequest(
     Boolean visible,
     Boolean soldOut,
     List<Long> categoryIds,
-    List<String> detailImageUrls,
     Long shippingFeeTemplateId,
     List<OptionGroupRequest> optionGroups
 ) {}

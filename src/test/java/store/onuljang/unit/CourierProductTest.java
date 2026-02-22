@@ -196,42 +196,6 @@ class CourierProductTest {
     }
 
     @Nested
-    @DisplayName("replaceDetailImages - 상세 이미지 교체")
-    class ReplaceDetailImages {
-
-        @Test
-        @DisplayName("상세 이미지 교체 성공")
-        void replaceDetailImages_Success() {
-            // arrange
-            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
-
-            // act
-            product.replaceDetailImages(List.of("img1.jpg", "img2.jpg"));
-
-            // assert
-            assertThat(product.getDetailImages()).hasSize(2);
-            assertThat(product.getDetailImages().get(0).getImageUrl()).isEqualTo("img1.jpg");
-            assertThat(product.getDetailImages().get(1).getImageUrl()).isEqualTo("img2.jpg");
-            assertThat(product.getDetailImages().get(0).getSortOrder()).isEqualTo(0);
-            assertThat(product.getDetailImages().get(1).getSortOrder()).isEqualTo(1);
-        }
-
-        @Test
-        @DisplayName("빈 리스트로 교체 시 이미지 전부 삭제")
-        void replaceDetailImages_Empty() {
-            // arrange
-            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
-            product.replaceDetailImages(List.of("img1.jpg"));
-
-            // act
-            product.replaceDetailImages(List.of());
-
-            // assert
-            assertThat(product.getDetailImages()).isEmpty();
-        }
-    }
-
-    @Nested
     @DisplayName("isAvailable - 판매 가능 여부")
     class IsAvailable {
 
@@ -403,7 +367,7 @@ class CourierProductTest {
                     createProduct("상세상품", new BigDecimal("25000"), true);
             ReflectionTestUtils.setField(product, "id", 1L);
 
-            given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
+            given(courierProductService.findById(1L)).willReturn(product);
 
             // act
             CourierProductResponse result = courierProductsAppService.getDetail(1L);

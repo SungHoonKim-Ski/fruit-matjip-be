@@ -23,12 +23,6 @@ public interface CourierProductRepository extends JpaRepository<CourierProduct, 
 
     List<CourierProduct> findAllByOrderBySortOrderAsc();
 
-    @Query(
-            "SELECT p FROM CourierProduct p"
-                    + " LEFT JOIN FETCH p.detailImages"
-                    + " WHERE p.id = :id")
-    Optional<CourierProduct> findByIdWithDetailImages(@Param("id") Long id);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT p FROM CourierProduct p WHERE p.id = :id")
     Optional<CourierProduct> findByIdWithLock(@Param("id") Long id);

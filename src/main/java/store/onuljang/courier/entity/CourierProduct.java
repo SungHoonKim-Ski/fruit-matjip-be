@@ -85,11 +85,6 @@ public class CourierProduct extends BaseEntity {
     private Admin registeredAdmin;
 
     @Builder.Default
-    @OrderBy("sortOrder ASC")
-    @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CourierProductDetailImage> detailImages = new ArrayList<>();
-
-    @Builder.Default
     @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private List<CourierProductCategoryMapping> categoryMappings = new ArrayList<>();
@@ -107,13 +102,6 @@ public class CourierProduct extends BaseEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
-
-    public List<CourierProductDetailImage> getDetailImages() {
-        if (this.detailImages == null) {
-            return List.of();
-        }
-        return this.detailImages;
-    }
 
     public List<CourierProductOptionGroup> getOptionGroups() {
         if (this.optionGroups == null) {
@@ -182,21 +170,6 @@ public class CourierProduct extends BaseEntity {
 
     public void toggleRecommended() {
         this.recommended = !this.recommended;
-    }
-
-    public void replaceDetailImages(List<String> imageUrls) {
-        this.detailImages.clear();
-        if (imageUrls == null || imageUrls.isEmpty()) {
-            return;
-        }
-        for (int i = 0; i < imageUrls.size(); i++) {
-            this.detailImages.add(
-                    CourierProductDetailImage.builder()
-                            .courierProduct(this)
-                            .imageUrl(imageUrls.get(i))
-                            .sortOrder(i)
-                            .build());
-        }
     }
 
     public void updateCategories(Set<CourierProductCategory> categories) {

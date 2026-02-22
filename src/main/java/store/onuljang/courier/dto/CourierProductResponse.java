@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Builder;
 import store.onuljang.courier.entity.CourierProduct;
-import store.onuljang.courier.entity.CourierProductDetailImage;
 
 @Builder
 public record CourierProductResponse(
@@ -21,7 +20,6 @@ public record CourierProductResponse(
     long totalSold,
     boolean recommended,
     int recommendOrder,
-    List<String> detailImageUrls,
     List<CategoryItem> categories,
     LocalDateTime createdAt,
     Long shippingFeeTemplateId,
@@ -31,10 +29,6 @@ public record CourierProductResponse(
     public record CategoryItem(Long id, String name) {}
 
     public static CourierProductResponse from(CourierProduct product) {
-        List<String> imageUrls = product.getDetailImages().stream()
-                .map(CourierProductDetailImage::getImageUrl)
-                .toList();
-
         List<CategoryItem> categoryItems = product.getProductCategories().stream()
                 .map(cat -> new CategoryItem(cat.getId(), cat.getName()))
                 .toList();
@@ -52,7 +46,6 @@ public record CourierProductResponse(
                 .totalSold(product.getTotalSold())
                 .recommended(product.getRecommended())
                 .recommendOrder(product.getRecommendOrder())
-                .detailImageUrls(imageUrls)
                 .categories(categoryItems)
                 .createdAt(product.getCreatedAt())
                 .shippingFeeTemplateId(

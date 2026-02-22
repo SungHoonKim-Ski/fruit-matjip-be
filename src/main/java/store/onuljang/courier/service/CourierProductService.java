@@ -50,12 +50,6 @@ public class CourierProductService {
         return courierProductRepository.findAllById(ids);
     }
 
-    public CourierProduct findByIdWithDetailImages(long id) {
-        return courierProductRepository
-                .findByIdWithDetailImages(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 택배 상품"));
-    }
-
     public CourierProduct findByIdWithOptionGroups(Long id) {
         return courierProductRepository
                 .findByIdWithOptionGroups(id)

@@ -56,7 +56,7 @@ public class CourierAdminProductAppService {
     }
 
     public CourierProductResponse getProduct(Long id) {
-        CourierProduct product = courierProductService.findByIdWithDetailImages(id);
+        CourierProduct product = courierProductService.findById(id);
         return CourierProductResponse.from(product);
     }
 
@@ -86,10 +86,6 @@ public class CourierAdminProductAppService {
 
         courierProductService.save(product);
 
-        if (request.detailImageUrls() != null && !request.detailImageUrls().isEmpty()) {
-            product.replaceDetailImages(request.detailImageUrls());
-        }
-
         if (request.optionGroups() != null && !request.optionGroups().isEmpty()) {
             List<CourierProductOptionGroup> groups = buildOptionGroups(product, request.optionGroups());
             product.replaceOptionGroups(groups);
@@ -100,7 +96,7 @@ public class CourierAdminProductAppService {
 
     @Transactional
     public CourierProductResponse updateProduct(Long id, CourierProductUpdateRequest request) {
-        CourierProduct product = courierProductService.findByIdWithDetailImages(id);
+        CourierProduct product = courierProductService.findById(id);
 
         if (request.name() != null) {
             product.setName(request.name());
@@ -145,9 +141,6 @@ public class CourierAdminProductAppService {
         if (request.categoryIds() != null) {
             Set<CourierProductCategory> categories = resolveCategories(request.categoryIds());
             product.updateCategories(categories);
-        }
-        if (request.detailImageUrls() != null) {
-            product.replaceDetailImages(request.detailImageUrls());
         }
 
         if (request.shippingFeeTemplateId() != null) {

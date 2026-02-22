@@ -115,21 +115,18 @@ class CourierAdminProductAppServiceTest {
     class GetProduct {
 
         @Test
-        @DisplayName("상세 이미지 포함 단일 상품을 반환한다")
+        @DisplayName("단일 상품을 반환한다")
         void getProduct_success() {
             // arrange
             CourierProduct product = createProduct("감귤");
-            product.replaceDetailImages(List.of("img1.jpg", "img2.jpg"));
 
-            given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
+            given(courierProductService.findById(1L)).willReturn(product);
 
             // act
             CourierProductResponse result = courierAdminProductAppService.getProduct(1L);
 
             // assert
             assertThat(result.name()).isEqualTo("감귤");
-            assertThat(result.detailImageUrls()).hasSize(2);
-            assertThat(result.detailImageUrls().get(0)).isEqualTo("img1.jpg");
         }
     }
 
@@ -140,8 +137,8 @@ class CourierAdminProductAppServiceTest {
     class CreateProduct {
 
         @Test
-        @DisplayName("카테고리와 상세 이미지 포함 상품 생성 성공")
-        void createProduct_withCategoriesAndImages() {
+        @DisplayName("카테고리 포함 상품 생성 성공")
+        void createProduct_withCategories() {
             // arrange
             CourierProductCategory category =
                     CourierProductCategory.builder().name("과일").build();
@@ -156,7 +153,6 @@ class CourierAdminProductAppServiceTest {
                             "제주 감귤",
                             1,
                             List.of(10L),
-                            List.of("detail1.jpg", "detail2.jpg"),
                             null,
                             null);
 
@@ -171,7 +167,6 @@ class CourierAdminProductAppServiceTest {
             // assert
             assertThat(result.name()).isEqualTo("감귤");
             assertThat(result.price()).isEqualByComparingTo(new BigDecimal("15000"));
-            assertThat(result.detailImageUrls()).hasSize(2);
             verify(courierProductService).save(any(CourierProduct.class));
         }
 
@@ -189,7 +184,6 @@ class CourierAdminProductAppServiceTest {
                             null,
                             null,
                             null,
-                            null,
                             null);
 
             given(adminService.findById(1L)).willReturn(testAdmin);
@@ -202,7 +196,6 @@ class CourierAdminProductAppServiceTest {
             // assert
             assertThat(result.name()).isEqualTo("한라봉");
             assertThat(result.categories()).isEmpty();
-            assertThat(result.detailImageUrls()).isEmpty();
             verify(courierProductService).save(any(CourierProduct.class));
         }
     }
@@ -231,10 +224,9 @@ class CourierAdminProductAppServiceTest {
                             null,
                             null,
                             null,
-                            null,
                             null);
 
-            given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
+            given(courierProductService.findById(1L)).willReturn(product);
 
             // act
             CourierProductResponse result =
@@ -254,9 +246,9 @@ class CourierAdminProductAppServiceTest {
 
             CourierProductUpdateRequest request =
                     new CourierProductUpdateRequest(
-                            null, null, null, null, null, null, false, null, null, null, null, null);
+                            null, null, null, null, null, null, false, null, null, null, null);
 
-            given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
+            given(courierProductService.findById(1L)).willReturn(product);
 
             // act
             CourierProductResponse result =
@@ -279,9 +271,9 @@ class CourierAdminProductAppServiceTest {
             CourierProductUpdateRequest request =
                     new CourierProductUpdateRequest(
                             null, null, null, null, null, null, null, null, List.of(10L), null,
-                            null, null);
+                            null);
 
-            given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
+            given(courierProductService.findById(1L)).willReturn(product);
             given(courierProductCategoryService.findById(10L))
                     .willReturn(Optional.of(category));
 
