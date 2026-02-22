@@ -47,7 +47,6 @@ class CourierRepositoryIntegrationTest extends IntegrationTestBase {
                 .name(name)
                 .productUrl("https://example.com/image.jpg")
                 .price(new BigDecimal("10000"))
-                .stock(100)
                 .sortOrder(sortOrder)
                 .build();
         return courierProductRepository.save(product);

@@ -125,8 +125,7 @@ public class AdminCourierCategoryController {
     public record CourierCategoryProductsRequest(@NotNull List<Long> productIds) {}
 
     public record CourierCategoryProductsResponse(List<CategoryProductItem> response) {
-        public record CategoryProductItem(
-                Long id, String name, BigDecimal price, String productUrl, Integer stock) {}
+        public record CategoryProductItem(Long id, String name, BigDecimal price, String productUrl) {}
 
         public static CourierCategoryProductsResponse of(List<CourierProduct> products) {
             return new CourierCategoryProductsResponse(
@@ -137,8 +136,7 @@ public class AdminCourierCategoryController {
                                                     p.getId(),
                                                     p.getName(),
                                                     p.getPrice(),
-                                                    p.getProductUrl(),
-                                                    p.getStock()))
+                                                    p.getProductUrl()))
                             .toList());
         }
     }

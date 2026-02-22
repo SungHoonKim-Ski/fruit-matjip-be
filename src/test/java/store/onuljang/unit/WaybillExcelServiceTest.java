@@ -68,7 +68,6 @@ class WaybillExcelServiceTest {
                         .name("제주 감귤 5kg")
                         .productUrl("https://example.com/img.jpg")
                         .price(new BigDecimal("15000"))
-                        .stock(100)
                         .visible(true)
                         .registeredAdmin(admin)
                         .build();

@@ -13,8 +13,8 @@ public record CourierProductResponse(
     String name,
     String productUrl,
     BigDecimal price,
-    int stock,
     boolean visible,
+    boolean soldOut,
     Integer weightGram,
     String description,
     int sortOrder,
@@ -44,8 +44,8 @@ public record CourierProductResponse(
                 .name(product.getName())
                 .productUrl(product.getProductUrl())
                 .price(product.getPrice())
-                .stock(product.getStock())
                 .visible(product.getVisible())
+                .soldOut(Boolean.TRUE.equals(product.getSoldOut()))
                 .weightGram(product.getWeightGram())
                 .description(product.getDescription())
                 .sortOrder(product.getSortOrder())

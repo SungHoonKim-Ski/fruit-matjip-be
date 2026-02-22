@@ -68,7 +68,6 @@ public class CourierAdminProductAppService {
                 .name(request.name())
                 .productUrl(request.productUrl())
                 .price(request.price())
-                .stock(request.stock())
                 .weightGram(request.weightGram())
                 .description(request.description())
                 .sortOrder(request.sortOrder() != null ? request.sortOrder() : courierProductRepository.findMinSortOrder() - 1)
@@ -112,9 +111,6 @@ public class CourierAdminProductAppService {
         if (request.price() != null) {
             product.setPrice(request.price());
         }
-        if (request.stock() != null) {
-            product.setStock(request.stock());
-        }
         if (request.weightGram() != null) {
             product.setWeightGram(request.weightGram());
         }
@@ -132,6 +128,17 @@ public class CourierAdminProductAppService {
             } else {
                 if (product.getVisible()) {
                     product.toggleVisible();
+                }
+            }
+        }
+        if (request.soldOut() != null) {
+            if (request.soldOut()) {
+                if (!Boolean.TRUE.equals(product.getSoldOut())) {
+                    product.toggleSoldOut();
+                }
+            } else {
+                if (Boolean.TRUE.equals(product.getSoldOut())) {
+                    product.toggleSoldOut();
                 }
             }
         }
@@ -200,6 +207,11 @@ public class CourierAdminProductAppService {
     @Transactional
     public void toggleVisible(Long id) {
         courierProductService.findByIdWithLock(id).toggleVisible();
+    }
+
+    @Transactional
+    public void toggleSoldOut(Long id) {
+        courierProductService.findByIdWithLock(id).toggleSoldOut();
     }
 
     @Transactional

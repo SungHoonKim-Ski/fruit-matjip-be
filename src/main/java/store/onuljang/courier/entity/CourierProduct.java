@@ -36,13 +36,14 @@ public class CourierProduct extends BaseEntity {
     private BigDecimal price;
 
     @Getter
-    @Column(name = "stock")
-    private Integer stock;
-
-    @Getter
     @Column(name = "visible", nullable = false)
     @Builder.Default
     private Boolean visible = true;
+
+    @Getter
+    @Column(name = "sold_out", nullable = false)
+    @Builder.Default
+    private Boolean soldOut = false;
 
     @Getter
     @Setter
@@ -142,30 +143,25 @@ public class CourierProduct extends BaseEntity {
         if (Boolean.FALSE.equals(visible)) {
             throw new IllegalStateException("판매가 중단된 상품입니다.");
         }
+        if (Boolean.TRUE.equals(soldOut)) {
+            throw new IllegalStateException("품절된 상품입니다.");
+        }
         if (quantity <= 0) {
             throw new IllegalStateException("구매 수량은 1개 이상이어야 합니다.");
-        }
-        if (stock != null && stock < quantity) {
-            throw new IllegalStateException("상품의 재고가 부족합니다.");
         }
     }
 
     public void purchase(int quantity) {
         assertPurchasable(quantity);
-        if (stock != null) {
-            stock -= quantity;
-        }
         this.totalSold += quantity;
     }
 
     public void restoreStock(int quantity) {
-        if (stock != null) {
-            stock += quantity;
-        }
+        // stock field removed — no-op
     }
 
     public boolean isAvailable() {
-        return Boolean.TRUE.equals(visible) && deletedAt == null && (stock == null || stock > 0);
+        return Boolean.TRUE.equals(visible) && !Boolean.TRUE.equals(soldOut) && deletedAt == null;
     }
 
     public void softDelete() {
@@ -176,12 +172,12 @@ public class CourierProduct extends BaseEntity {
         this.price = price;
     }
 
-    public void setStock(Integer stock) {
-        this.stock = stock;
-    }
-
     public void toggleVisible() {
         this.visible = !this.visible;
+    }
+
+    public void toggleSoldOut() {
+        this.soldOut = !this.soldOut;
     }
 
     public void toggleRecommended() {

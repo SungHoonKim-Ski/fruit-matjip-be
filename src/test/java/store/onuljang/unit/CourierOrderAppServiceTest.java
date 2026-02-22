@@ -62,7 +62,7 @@ class CourierOrderAppServiceTest {
         ReflectionTestUtils.setField(testUser, "id", 1L);
     }
 
-    private CourierProduct createProduct(String name, int stock, BigDecimal price) {
+    private CourierProduct createProduct(String name, BigDecimal price) {
         Admin admin =
                 Admin.builder()
                         .name("관리자")
@@ -74,7 +74,6 @@ class CourierOrderAppServiceTest {
                         .name(name)
                         .productUrl("https://example.com/img.jpg")
                         .price(price)
-                        .stock(stock)
                         .visible(true)
                         .registeredAdmin(admin)
                         .build();
@@ -127,7 +126,7 @@ class CourierOrderAppServiceTest {
             String idempotencyKey = "idem-key-001";
             CourierOrderReadyRequest request = createReadyRequest(1L, 2, idempotencyKey);
 
-            CourierProduct product = createProduct("제주 감귤 5kg", 10, new BigDecimal("15000"));
+            CourierProduct product = createProduct("제주 감귤 5kg", new BigDecimal("15000"));
             ReflectionTestUtils.setField(product, "id", 1L);
 
             ShippingFeeResult feeResult =
@@ -228,13 +227,14 @@ class CourierOrderAppServiceTest {
         }
 
         @Test
-        @DisplayName("재고 부족 시 예외 발생")
-        void ready_insufficientStock_throwsException() {
+        @DisplayName("품절 상품 주문 시 예외 발생")
+        void ready_soldOut_throwsException() {
             // arrange
             String idempotencyKey = "idem-key-002";
             CourierOrderReadyRequest request = createReadyRequest(1L, 10, idempotencyKey);
 
-            CourierProduct product = createProduct("제주 감귤 5kg", 3, new BigDecimal("15000"));
+            CourierProduct product = createProduct("제주 감귤 5kg", new BigDecimal("15000"));
+            product.toggleSoldOut(); // mark as soldOut
             ReflectionTestUtils.setField(product, "id", 1L);
 
             given(userService.findByUId(testUid)).willReturn(testUser);
@@ -247,7 +247,7 @@ class CourierOrderAppServiceTest {
             // act / assert
             assertThatThrownBy(() -> courierOrderAppService.ready(testUid, request))
                     .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("재고가 부족합니다");
+                    .hasMessageContaining("품절된 상품");
             verify(courierOrderService, never()).save(any());
         }
     }
@@ -264,7 +264,7 @@ class CourierOrderAppServiceTest {
             // arrange
             CourierOrder order =
                     createOrder(CourierOrderStatus.PENDING_PAYMENT, "C-26021400-ABCD2", testUser);
-            CourierProduct product = createProduct("감귤", 7, new BigDecimal("15000"));
+            CourierProduct product = createProduct("감귤", new BigDecimal("15000"));
             ReflectionTestUtils.setField(product, "id", 1L);
 
             CourierOrderItem item =
@@ -287,7 +287,6 @@ class CourierOrderAppServiceTest {
 
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
-            assertThat(product.getStock()).isEqualTo(10);
             verify(courierPaymentService).markCanceled(order);
         }
 
@@ -321,7 +320,7 @@ class CourierOrderAppServiceTest {
             // arrange
             CourierOrder order =
                     createOrder(CourierOrderStatus.PENDING_PAYMENT, "C-26021400-ABCD2", testUser);
-            CourierProduct product = createProduct("감귤", 7, new BigDecimal("15000"));
+            CourierProduct product = createProduct("감귤", new BigDecimal("15000"));
             ReflectionTestUtils.setField(product, "id", 1L);
 
             CourierOrderItem item =
@@ -344,7 +343,6 @@ class CourierOrderAppServiceTest {
 
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.FAILED);
-            assertThat(product.getStock()).isEqualTo(10);
             verify(courierPaymentService).markFailed(order);
         }
     }

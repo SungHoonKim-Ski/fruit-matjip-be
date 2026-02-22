@@ -42,12 +42,11 @@ class CourierProductTest {
     }
 
     private CourierProduct createProduct(
-            String name, int stock, BigDecimal price, boolean visible) {
+            String name, BigDecimal price, boolean visible) {
         return CourierProduct.builder()
                 .name(name)
                 .productUrl("https://example.com/img.jpg")
                 .price(price)
-                .stock(stock)
                 .visible(visible)
                 .registeredAdmin(testAdmin)
                 .build();
@@ -63,29 +62,17 @@ class CourierProductTest {
         @DisplayName("정상 구매 가능 상품")
         void purchasable_Success() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act & assert
             product.assertPurchasable(5);
         }
 
         @Test
-        @DisplayName("재고 부족 시 예외")
-        void purchasable_InsufficientStock() {
-            // arrange
-            CourierProduct product = createProduct("상품A", 3, new BigDecimal("10000"), true);
-
-            // act & assert
-            assertThatThrownBy(() -> product.assertPurchasable(5))
-                    .isInstanceOf(IllegalStateException.class)
-                    .hasMessageContaining("재고가 부족합니다");
-        }
-
-        @Test
         @DisplayName("비공개 상품 구매 불가")
         void purchasable_NotVisible() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), false);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), false);
 
             // act & assert
             assertThatThrownBy(() -> product.assertPurchasable(1))
@@ -97,7 +84,7 @@ class CourierProductTest {
         @DisplayName("삭제된 상품 구매 불가")
         void purchasable_Deleted() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
             product.softDelete();
 
             // act & assert
@@ -110,7 +97,7 @@ class CourierProductTest {
         @DisplayName("수량이 0 이하일 때 예외")
         void purchasable_ZeroQuantity() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act & assert
             assertThatThrownBy(() -> product.assertPurchasable(0))
@@ -124,16 +111,15 @@ class CourierProductTest {
     class Purchase {
 
         @Test
-        @DisplayName("구매 시 재고 차감 및 판매량 증가")
+        @DisplayName("구매 시 판매량 증가")
         void purchase_Success() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act
             product.purchase(3);
 
             // assert
-            assertThat(product.getStock()).isEqualTo(7);
             assertThat(product.getTotalSold()).isEqualTo(3L);
         }
 
@@ -141,14 +127,13 @@ class CourierProductTest {
         @DisplayName("연속 구매 시 누적 반영")
         void purchase_Multiple() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act
             product.purchase(3);
             product.purchase(2);
 
             // assert
-            assertThat(product.getStock()).isEqualTo(5);
             assertThat(product.getTotalSold()).isEqualTo(5L);
         }
     }
@@ -158,17 +143,13 @@ class CourierProductTest {
     class RestoreStock {
 
         @Test
-        @DisplayName("재고 복원 성공")
+        @DisplayName("재고 복원 호출 시 예외 없이 정상 처리")
         void restoreStock_Success() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
-            product.purchase(5);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
-            // act
+            // act & assert — restoreStock is a no-op; verify it runs without error
             product.restoreStock(3);
-
-            // assert
-            assertThat(product.getStock()).isEqualTo(8);
         }
     }
 
@@ -180,7 +161,7 @@ class CourierProductTest {
         @DisplayName("삭제 후 isAvailable false")
         void softDelete_NotAvailable() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act
             product.softDelete();
@@ -198,7 +179,7 @@ class CourierProductTest {
         @DisplayName("visible 토글 동작")
         void toggleVisible_Success() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act
             product.toggleVisible();
@@ -222,7 +203,7 @@ class CourierProductTest {
         @DisplayName("상세 이미지 교체 성공")
         void replaceDetailImages_Success() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act
             product.replaceDetailImages(List.of("img1.jpg", "img2.jpg"));
@@ -239,7 +220,7 @@ class CourierProductTest {
         @DisplayName("빈 리스트로 교체 시 이미지 전부 삭제")
         void replaceDetailImages_Empty() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
             product.replaceDetailImages(List.of("img1.jpg"));
 
             // act
@@ -255,10 +236,10 @@ class CourierProductTest {
     class IsAvailable {
 
         @Test
-        @DisplayName("visible=true, 미삭제, stock>0 이면 true")
+        @DisplayName("visible=true, 미삭제이면 true")
         void isAvailable_True() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
 
             // act & assert
             assertThat(product.isAvailable()).isTrue();
@@ -268,17 +249,18 @@ class CourierProductTest {
         @DisplayName("visible=false 이면 false")
         void isAvailable_NotVisible() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), false);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), false);
 
             // act & assert
             assertThat(product.isAvailable()).isFalse();
         }
 
         @Test
-        @DisplayName("stock=0 이면 false")
-        void isAvailable_ZeroStock() {
+        @DisplayName("softDelete 후 false")
+        void isAvailable_Deleted() {
             // arrange
-            CourierProduct product = createProduct("상품A", 0, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
+            product.softDelete();
 
             // act & assert
             assertThat(product.isAvailable()).isFalse();
@@ -293,7 +275,7 @@ class CourierProductTest {
         @DisplayName("카테고리 교체 성공")
         void updateCategories_Success() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
             CourierProductCategory cat1 =
                     CourierProductCategory.builder().name("과일").build();
             CourierProductCategory cat2 =
@@ -311,7 +293,7 @@ class CourierProductTest {
         @DisplayName("null 전달 시 카테고리 비움")
         void updateCategories_Null() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
             CourierProductCategory cat =
                     CourierProductCategory.builder().name("과일").build();
             product.updateCategories(Set.of(cat));
@@ -327,7 +309,7 @@ class CourierProductTest {
         @DisplayName("빈 Set 전달 시 카테고리 비움")
         void updateCategories_EmptySet() {
             // arrange
-            CourierProduct product = createProduct("상품A", 10, new BigDecimal("10000"), true);
+            CourierProduct product = createProduct("상품A", new BigDecimal("10000"), true);
             CourierProductCategory cat =
                     CourierProductCategory.builder().name("과일").build();
             product.updateCategories(Set.of(cat));
@@ -361,9 +343,9 @@ class CourierProductTest {
         void getProducts_All() {
             // arrange
             CourierProduct product1 =
-                    createProduct("상품1", 10, new BigDecimal("10000"), true);
+                    createProduct("상품1", new BigDecimal("10000"), true);
             CourierProduct product2 =
-                    createProduct("상품2", 5, new BigDecimal("5000"), true);
+                    createProduct("상품2", new BigDecimal("5000"), true);
             ReflectionTestUtils.setField(product1, "id", 1L);
             ReflectionTestUtils.setField(product2, "id", 2L);
 
@@ -385,7 +367,7 @@ class CourierProductTest {
             // arrange
             Long categoryId = 1L;
             CourierProduct product1 =
-                    createProduct("상품1", 10, new BigDecimal("10000"), true);
+                    createProduct("상품1", new BigDecimal("10000"), true);
             ReflectionTestUtils.setField(product1, "id", 1L);
 
             given(courierProductService.findAllVisibleByCategory(categoryId))
@@ -418,7 +400,7 @@ class CourierProductTest {
         void getDetail_Success() {
             // arrange
             CourierProduct product =
-                    createProduct("상세상품", 15, new BigDecimal("25000"), true);
+                    createProduct("상세상품", new BigDecimal("25000"), true);
             ReflectionTestUtils.setField(product, "id", 1L);
 
             given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
@@ -429,7 +411,6 @@ class CourierProductTest {
             // assert
             assertThat(result.name()).isEqualTo("상세상품");
             assertThat(result.price()).isEqualTo(new BigDecimal("25000"));
-            assertThat(result.stock()).isEqualTo(15);
         }
 
         @Test

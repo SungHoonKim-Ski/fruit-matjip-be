@@ -69,13 +69,12 @@ class CourierAdminProductAppServiceTest {
         sessionUtilMock.close();
     }
 
-    private CourierProduct createProduct(String name, int stock) {
+    private CourierProduct createProduct(String name) {
         CourierProduct product =
                 CourierProduct.builder()
                         .name(name)
                         .productUrl("https://example.com/img.jpg")
                         .price(new BigDecimal("15000"))
-                        .stock(stock)
                         .visible(true)
                         .registeredAdmin(testAdmin)
                         .build();
@@ -93,8 +92,8 @@ class CourierAdminProductAppServiceTest {
         @DisplayName("전체 상품 목록을 반환한다")
         void getProducts_success() {
             // arrange
-            CourierProduct product1 = createProduct("감귤", 10);
-            CourierProduct product2 = createProduct("한라봉", 5);
+            CourierProduct product1 = createProduct("감귤");
+            CourierProduct product2 = createProduct("한라봉");
             ReflectionTestUtils.setField(product2, "id", 2L);
 
             given(courierProductService.findAll()).willReturn(List.of(product1, product2));
@@ -119,7 +118,7 @@ class CourierAdminProductAppServiceTest {
         @DisplayName("상세 이미지 포함 단일 상품을 반환한다")
         void getProduct_success() {
             // arrange
-            CourierProduct product = createProduct("감귤", 10);
+            CourierProduct product = createProduct("감귤");
             product.replaceDetailImages(List.of("img1.jpg", "img2.jpg"));
 
             given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
@@ -153,7 +152,6 @@ class CourierAdminProductAppServiceTest {
                             "감귤",
                             "https://example.com/img.jpg",
                             new BigDecimal("15000"),
-                            10,
                             500,
                             "제주 감귤",
                             1,
@@ -173,7 +171,6 @@ class CourierAdminProductAppServiceTest {
             // assert
             assertThat(result.name()).isEqualTo("감귤");
             assertThat(result.price()).isEqualByComparingTo(new BigDecimal("15000"));
-            assertThat(result.stock()).isEqualTo(10);
             assertThat(result.detailImageUrls()).hasSize(2);
             verify(courierProductService).save(any(CourierProduct.class));
         }
@@ -187,7 +184,6 @@ class CourierAdminProductAppServiceTest {
                             "한라봉",
                             "https://example.com/img.jpg",
                             new BigDecimal("25000"),
-                            5,
                             null,
                             null,
                             null,
@@ -221,7 +217,7 @@ class CourierAdminProductAppServiceTest {
         @DisplayName("이름, 가격, 재고 필드 수정 성공")
         void updateProduct_fieldsUpdate() {
             // arrange
-            CourierProduct product = createProduct("감귤", 10);
+            CourierProduct product = createProduct("감귤");
 
             CourierProductUpdateRequest request =
                     new CourierProductUpdateRequest(
@@ -247,19 +243,18 @@ class CourierAdminProductAppServiceTest {
             // assert
             assertThat(result.name()).isEqualTo("제주 감귤");
             assertThat(result.price()).isEqualByComparingTo(new BigDecimal("18000"));
-            assertThat(result.stock()).isEqualTo(20);
         }
 
         @Test
         @DisplayName("visible true -> false 토글 수정")
         void updateProduct_visibleToggle() {
             // arrange
-            CourierProduct product = createProduct("감귤", 10);
+            CourierProduct product = createProduct("감귤");
             assertThat(product.getVisible()).isTrue();
 
             CourierProductUpdateRequest request =
                     new CourierProductUpdateRequest(
-                            null, null, null, null, null, null, null, false, null, null, null, null);
+                            null, null, null, null, null, null, false, null, null, null, null, null);
 
             given(courierProductService.findByIdWithDetailImages(1L)).willReturn(product);
 
@@ -275,7 +270,7 @@ class CourierAdminProductAppServiceTest {
         @DisplayName("카테고리 변경 성공")
         void updateProduct_categoriesUpdate() {
             // arrange
-            CourierProduct product = createProduct("감귤", 10);
+            CourierProduct product = createProduct("감귤");
 
             CourierProductCategory category =
                     CourierProductCategory.builder().name("과일").build();
@@ -309,7 +304,7 @@ class CourierAdminProductAppServiceTest {
         @DisplayName("softDelete 호출")
         void deleteProduct_callsSoftDelete() {
             // arrange
-            CourierProduct product = createProduct("감귤", 10);
+            CourierProduct product = createProduct("감귤");
 
             given(courierProductService.findById(1L)).willReturn(product);
 
@@ -331,7 +326,7 @@ class CourierAdminProductAppServiceTest {
         @DisplayName("잠금 획득 후 toggleVisible 호출")
         void toggleVisible_callsWithLock() {
             // arrange
-            CourierProduct product = createProduct("감귤", 10);
+            CourierProduct product = createProduct("감귤");
             assertThat(product.getVisible()).isTrue();
 
             given(courierProductService.findByIdWithLock(1L)).willReturn(product);

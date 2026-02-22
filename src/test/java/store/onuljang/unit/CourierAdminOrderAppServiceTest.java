@@ -75,7 +75,7 @@ class CourierAdminOrderAppServiceTest {
         return order;
     }
 
-    private CourierProduct createProduct(String name, int stock) {
+    private CourierProduct createProduct(String name) {
         Admin admin =
                 Admin.builder()
                         .name("관리자")
@@ -86,7 +86,6 @@ class CourierAdminOrderAppServiceTest {
                 .name(name)
                 .productUrl("https://example.com/img.jpg")
                 .price(new BigDecimal("15000"))
-                .stock(stock)
                 .visible(true)
                 .registeredAdmin(admin)
                 .build();
@@ -409,7 +408,7 @@ class CourierAdminOrderAppServiceTest {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
             ReflectionTestUtils.setField(order, "pgTid", "T_PG_TID_001");
-            CourierProduct product = createProduct("감귤", 7);
+            CourierProduct product = createProduct("감귤");
             ReflectionTestUtils.setField(product, "id", 1L);
             createOrderItem(order, product, 3);
 
@@ -420,7 +419,6 @@ class CourierAdminOrderAppServiceTest {
 
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
-            assertThat(product.getStock()).isEqualTo(10);
             verify(courierPaymentService).markCanceled(order);
             verify(courierRefundService).refund(order, order.getTotalAmount());
         }
@@ -430,7 +428,7 @@ class CourierAdminOrderAppServiceTest {
         void cancel_preparing_success() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PREPARING, "C-26021400-ABCD1");
-            CourierProduct product = createProduct("감귤", 7);
+            CourierProduct product = createProduct("감귤");
             ReflectionTestUtils.setField(product, "id", 1L);
             createOrderItem(order, product, 3);
 
@@ -441,7 +439,6 @@ class CourierAdminOrderAppServiceTest {
 
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
-            assertThat(product.getStock()).isEqualTo(10);
             verify(courierPaymentService).markCanceled(order);
             verify(courierRefundService, never()).refund(any(), any());
         }
@@ -452,7 +449,7 @@ class CourierAdminOrderAppServiceTest {
             // arrange
             CourierOrder order =
                     createOrder(CourierOrderStatus.PENDING_PAYMENT, "C-26021400-ABCD1");
-            CourierProduct product = createProduct("감귤", 7);
+            CourierProduct product = createProduct("감귤");
             ReflectionTestUtils.setField(product, "id", 1L);
             createOrderItem(order, product, 2);
 
@@ -463,7 +460,6 @@ class CourierAdminOrderAppServiceTest {
 
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
-            assertThat(product.getStock()).isEqualTo(9);
             verify(courierPaymentService).markCanceled(order);
             verify(courierRefundService, never()).refund(any(), any());
         }

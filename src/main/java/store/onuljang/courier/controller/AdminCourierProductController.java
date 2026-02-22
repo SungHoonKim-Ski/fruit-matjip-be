@@ -81,6 +81,13 @@ public class AdminCourierProductController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/sold-out/{id}")
+    public ResponseEntity<Void> toggleSoldOut(
+            @Valid @NotNull @Positive @PathVariable("id") Long id) {
+        courierAdminProductAppService.toggleSoldOut(id);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/categories")
     public ResponseEntity<CourierCategoryResponse> getCategories() {
         return ResponseEntity.ok(courierAdminProductAppService.getCategories());

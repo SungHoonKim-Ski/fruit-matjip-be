@@ -96,7 +96,6 @@ class CourierClaimAppServiceTest {
                         .name(productName)
                         .productUrl("https://example.com/img.jpg")
                         .price(BigDecimal.valueOf(15000))
-                        .stock(10)
                         .visible(true)
                         .registeredAdmin(admin)
                         .build();
