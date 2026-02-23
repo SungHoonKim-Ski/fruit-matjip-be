@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
+import org.hibernate.annotations.BatchSize;
 import store.onuljang.shared.entity.base.BaseEntity;
 
 @NoArgsConstructor
@@ -33,6 +34,7 @@ public class CourierProductOptionGroup extends BaseEntity {
     private Integer sortOrder = 0;
 
     @Builder.Default
+    @BatchSize(size = 200)
     @OneToMany(mappedBy = "optionGroup", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private List<CourierProductOption> options = new ArrayList<>();
