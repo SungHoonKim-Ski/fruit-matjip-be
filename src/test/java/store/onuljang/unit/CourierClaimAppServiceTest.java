@@ -99,6 +99,7 @@ class CourierClaimAppServiceTest {
                         .visible(true)
                         .registeredAdmin(admin)
                         .build();
+        ReflectionTestUtils.setField(product, "id", 20L);
         CourierOrderItem item =
                 CourierOrderItem.builder()
                         .courierOrder(order)
@@ -167,10 +168,10 @@ class CourierClaimAppServiceTest {
         }
 
         @Test
-        @DisplayName("DELIVERED 아닌 주문에 대해 UserValidateException 발생")
-        void createClaim_notDelivered_throwsException() {
+        @DisplayName("결제 전 상태(PENDING_PAYMENT)에서 UserValidateException 발생")
+        void createClaim_pendingPayment_throwsException() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.PENDING_PAYMENT, "C-26021400-ABCD1");
             CourierClaimRequest request =
                     new CourierClaimRequest(CourierClaimType.QUALITY_ISSUE, null, "과일 상태 불량");
 
@@ -184,7 +185,7 @@ class CourierClaimAppServiceTest {
                                     courierClaimAppService.createClaim(
                                             testUid, "C-26021400-ABCD1", request))
                     .isInstanceOf(UserValidateException.class)
-                    .hasMessageContaining("배송완료 상태에서만");
+                    .hasMessageContaining("결제 완료 후 문의가 가능합니다.");
             verify(courierClaimService, never()).save(any());
         }
 
@@ -195,7 +196,7 @@ class CourierClaimAppServiceTest {
             CourierOrder order = createOrder(CourierOrderStatus.DELIVERED, "C-26021400-ABCD1");
             CourierOrderItem item = createOrderItem(order, "감귤", 2);
             CourierClaimRequest request =
-                    new CourierClaimRequest(CourierClaimType.QUALITY_ISSUE, 10L, "과일 상태 불량");
+                    new CourierClaimRequest(CourierClaimType.QUALITY_ISSUE, 20L, "과일 상태 불량");
 
             given(userService.findByUId(testUid)).willReturn(testUser);
             given(courierOrderService.findByDisplayCodeAndUser("C-26021400-ABCD1", testUser))

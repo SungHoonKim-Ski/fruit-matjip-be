@@ -47,15 +47,18 @@ public class CourierClaimAppService {
         Users user = userService.findByUId(uid);
         CourierOrder order = courierOrderService.findByDisplayCodeAndUser(displayCode, user);
 
-        if (order.getStatus() != CourierOrderStatus.DELIVERED) {
-            throw new UserValidateException("배송완료 상태에서만 CS 요청이 가능합니다.");
+        if (order.getStatus() == CourierOrderStatus.PENDING_PAYMENT
+                || order.getStatus() == CourierOrderStatus.CANCELED
+                || order.getStatus() == CourierOrderStatus.FAILED) {
+            throw new UserValidateException("결제 완료 후 문의가 가능합니다.");
         }
 
         CourierOrderItem targetItem = null;
         if (request.courierOrderItemId() != null) {
             targetItem =
                     order.getItems().stream()
-                            .filter(i -> i.getId().equals(request.courierOrderItemId()))
+                            .filter(i -> i.getCourierProduct() != null
+                                    && i.getCourierProduct().getId().equals(request.courierOrderItemId()))
                             .findFirst()
                             .orElseThrow(() -> new UserValidateException("주문에 해당 상품이 없습니다."));
             targetItem.markClaimRequested();

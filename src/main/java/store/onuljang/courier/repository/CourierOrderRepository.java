@@ -29,11 +29,13 @@ public interface CourierOrderRepository extends JpaRepository<CourierOrder, Long
 
     List<CourierOrder> findByUserAndStatus(Users user, CourierOrderStatus status);
 
-    @Query(
-            "SELECT o FROM CourierOrder o WHERE o.user = :user AND (:cursor IS NULL OR o.id < :cursor)"
-                    + " ORDER BY o.id DESC")
-    List<CourierOrder> findByUserWithCursor(
-            @Param("user") Users user, @Param("cursor") Long cursor, Pageable pageable);
+    @Query("SELECT o FROM CourierOrder o WHERE o.user = :user"
+            + " AND o.createdAt >= :start AND o.createdAt < :end"
+            + " ORDER BY o.id DESC")
+    List<CourierOrder> findByUserAndDateRange(
+            @Param("user") Users user,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end);
 
     @Query("SELECT o FROM CourierOrder o LEFT JOIN FETCH o.items WHERE o.id = :id")
     Optional<CourierOrder> findByIdWithItems(@Param("id") Long id);

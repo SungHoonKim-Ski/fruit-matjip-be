@@ -1,6 +1,7 @@
 package store.onuljang.courier.appservice;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -254,9 +255,18 @@ public class CourierOrderAppService {
         restoreStock(order);
     }
 
-    public List<CourierOrderResponse> getOrders(String uid, Long cursor, int size) {
+    public List<CourierOrderResponse> getOrders(String uid, Integer year, Integer month) {
         Users user = userService.findByUId(uid);
-        List<CourierOrder> orders = courierOrderService.findByUser(user, cursor, size);
+
+        // Default to current month if not specified
+        java.time.YearMonth ym = (year != null && month != null)
+                ? java.time.YearMonth.of(year, month)
+                : java.time.YearMonth.now(java.time.ZoneId.of("Asia/Seoul"));
+
+        LocalDateTime start = ym.atDay(1).atStartOfDay();
+        LocalDateTime end = ym.plusMonths(1).atDay(1).atStartOfDay();
+
+        List<CourierOrder> orders = courierOrderService.findByUserAndDateRange(user, start, end);
         return orders.stream().map(CourierOrderResponse::from).toList();
     }
 

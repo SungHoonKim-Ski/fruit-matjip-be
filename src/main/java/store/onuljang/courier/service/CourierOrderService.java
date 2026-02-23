@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
+import org.springframework.data.domain.PageRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.courier.entity.CourierOrder;
@@ -54,9 +54,8 @@ public class CourierOrderService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 택배 주문입니다."));
     }
 
-    public List<CourierOrder> findByUser(Users user, Long cursor, int size) {
-        return courierOrderRepository.findByUserWithCursor(
-                user, cursor, PageRequest.of(0, size));
+    public List<CourierOrder> findByUserAndDateRange(Users user, LocalDateTime start, LocalDateTime end) {
+        return courierOrderRepository.findByUserAndDateRange(user, start, end);
     }
 
     public Optional<CourierOrder> findByIdempotencyKey(Users user, String key) {

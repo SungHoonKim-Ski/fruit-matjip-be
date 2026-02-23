@@ -2,7 +2,6 @@ package store.onuljang.courier.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -65,10 +64,10 @@ public class CourierOrderController {
     @GetMapping("/orders")
     public ResponseEntity<List<CourierOrderResponse>> getOrders(
             Authentication auth,
-            @RequestParam(required = false) Long cursor,
-            @RequestParam(defaultValue = "20") @Positive int size) {
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
         String uid = auth.getName();
-        return ResponseEntity.ok(courierOrderAppService.getOrders(uid, cursor, size));
+        return ResponseEntity.ok(courierOrderAppService.getOrders(uid, year, month));
     }
 
     @GetMapping("/orders/{displayCode}")

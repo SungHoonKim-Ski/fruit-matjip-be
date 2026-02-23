@@ -364,12 +364,13 @@ class CourierOrderAppServiceTest {
             ReflectionTestUtils.setField(order2, "id", 2L);
 
             given(userService.findByUId(testUid)).willReturn(testUser);
-            given(courierOrderService.findByUser(testUser, null, 20))
+            given(courierOrderService.findByUserAndDateRange(
+                    eq(testUser), any(java.time.LocalDateTime.class), any(java.time.LocalDateTime.class)))
                     .willReturn(List.of(order1, order2));
 
             // act
             List<CourierOrderResponse> result =
-                    courierOrderAppService.getOrders(testUid, null, 20);
+                    courierOrderAppService.getOrders(testUid, null, null);
 
             // assert
             assertThat(result).hasSize(2);

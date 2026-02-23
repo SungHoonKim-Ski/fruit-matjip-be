@@ -84,6 +84,24 @@ class CourierRepositoryIntegrationTest extends IntegrationTestBase {
         return item;
     }
 
+    private CourierOrder saveCourierOrder(Users user, CourierOrderStatus status, LocalDateTime createdAt) {
+        CourierOrder order = CourierOrder.builder()
+                .user(user)
+                .displayCode("C-" + UUID.randomUUID().toString().substring(0, 12))
+                .status(status)
+                .receiverName("홍길동")
+                .receiverPhone("010-1234-5678")
+                .postalCode("06134")
+                .address1("서울시 강남구 테헤란로 1")
+                .productAmount(new BigDecimal("10000"))
+                .shippingFee(new BigDecimal("3000"))
+                .totalAmount(new BigDecimal("13000"))
+                .build();
+        CourierOrder saved = courierOrderRepository.save(order);
+        saved.updateCreatedAt(createdAt);
+        return courierOrderRepository.save(saved);
+    }
+
     @Nested
     @DisplayName("CourierProductRepository.findMinSortOrder")
     class FindMinSortOrder {
@@ -264,6 +282,116 @@ class CourierRepositoryIntegrationTest extends IntegrationTestBase {
 
             // Assert
             assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
+    @DisplayName("CourierOrderRepository.findByUserAndDateRange")
+    class FindByUserAndDateRange {
+
+        @Test
+        @DisplayName("해당 월의 주문만 반환된다")
+        void 해당_월_주문만_반환() {
+            // Arrange
+            CourierProduct product = saveCourierProduct("상품", 0);
+
+            CourierOrder febOrder = saveCourierOrder(user, CourierOrderStatus.PAID,
+                    LocalDateTime.of(2026, 2, 15, 10, 0));
+            saveOrderItem(febOrder, product);
+
+            CourierOrder janOrder = saveCourierOrder(user, CourierOrderStatus.PAID,
+                    LocalDateTime.of(2026, 1, 20, 10, 0));
+            saveOrderItem(janOrder, product);
+
+            CourierOrder marOrder = saveCourierOrder(user, CourierOrderStatus.PAID,
+                    LocalDateTime.of(2026, 3, 1, 10, 0));
+            saveOrderItem(marOrder, product);
+
+            entityManager.flush();
+            entityManager.clear();
+
+            LocalDateTime start = LocalDateTime.of(2026, 2, 1, 0, 0);
+            LocalDateTime end = LocalDateTime.of(2026, 3, 1, 0, 0);
+
+            // Act
+            List<CourierOrder> result = courierOrderRepository.findByUserAndDateRange(user, start, end);
+
+            // Assert
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getId()).isEqualTo(febOrder.getId());
+        }
+
+        @Test
+        @DisplayName("다른 사용자의 주문은 포함되지 않는다")
+        void 다른_사용자_주문_미포함() {
+            // Arrange
+            Users otherUser = testFixture.createUser("다른유저");
+            CourierProduct product = saveCourierProduct("상품", 0);
+
+            CourierOrder myOrder = saveCourierOrder(user, CourierOrderStatus.PAID,
+                    LocalDateTime.of(2026, 2, 10, 10, 0));
+            saveOrderItem(myOrder, product);
+
+            CourierOrder otherOrder = saveCourierOrder(otherUser, CourierOrderStatus.PAID,
+                    LocalDateTime.of(2026, 2, 10, 10, 0));
+            saveOrderItem(otherOrder, product);
+
+            entityManager.flush();
+            entityManager.clear();
+
+            LocalDateTime start = LocalDateTime.of(2026, 2, 1, 0, 0);
+            LocalDateTime end = LocalDateTime.of(2026, 3, 1, 0, 0);
+
+            // Act
+            List<CourierOrder> result = courierOrderRepository.findByUserAndDateRange(user, start, end);
+
+            // Assert
+            assertThat(result).hasSize(1);
+            assertThat(result.get(0).getId()).isEqualTo(myOrder.getId());
+        }
+
+        @Test
+        @DisplayName("해당 월에 주문이 없으면 빈 목록을 반환한다")
+        void 주문_없으면_빈_목록() {
+            // Arrange — no orders
+
+            LocalDateTime start = LocalDateTime.of(2026, 5, 1, 0, 0);
+            LocalDateTime end = LocalDateTime.of(2026, 6, 1, 0, 0);
+
+            // Act
+            List<CourierOrder> result = courierOrderRepository.findByUserAndDateRange(user, start, end);
+
+            // Assert
+            assertThat(result).isEmpty();
+        }
+
+        @Test
+        @DisplayName("모든 상태의 주문이 포함된다")
+        void 모든_상태_포함() {
+            // Arrange
+            CourierProduct product = saveCourierProduct("상품", 0);
+            LocalDateTime base = LocalDateTime.of(2026, 4, 15, 10, 0);
+
+            CourierOrder paidOrder = saveCourierOrder(user, CourierOrderStatus.PAID, base);
+            saveOrderItem(paidOrder, product);
+
+            CourierOrder canceledOrder = saveCourierOrder(user, CourierOrderStatus.CANCELED, base.plusHours(1));
+            saveOrderItem(canceledOrder, product);
+
+            CourierOrder pendingOrder = saveCourierOrder(user, CourierOrderStatus.PENDING_PAYMENT, base.plusHours(2));
+            saveOrderItem(pendingOrder, product);
+
+            entityManager.flush();
+            entityManager.clear();
+
+            LocalDateTime start = LocalDateTime.of(2026, 4, 1, 0, 0);
+            LocalDateTime end = LocalDateTime.of(2026, 5, 1, 0, 0);
+
+            // Act
+            List<CourierOrder> result = courierOrderRepository.findByUserAndDateRange(user, start, end);
+
+            // Assert
+            assertThat(result).hasSize(3);
         }
     }
 }
