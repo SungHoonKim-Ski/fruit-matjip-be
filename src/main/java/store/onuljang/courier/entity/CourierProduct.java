@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.*;
-import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLRestriction;
 import store.onuljang.shared.entity.base.BaseEntity;
 import store.onuljang.shared.util.TimeUtil;
@@ -86,13 +85,11 @@ public class CourierProduct extends BaseEntity {
     private Admin registeredAdmin;
 
     @Builder.Default
-    @BatchSize(size = 200)
     @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private List<CourierProductCategoryMapping> categoryMappings = new ArrayList<>();
 
     @Builder.Default
-    @BatchSize(size = 200)
     @OneToMany(mappedBy = "courierProduct", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("sortOrder ASC")
     private List<CourierProductOptionGroup> optionGroups = new ArrayList<>();
