@@ -1,0 +1,12 @@
+CREATE TABLE IF NOT EXISTS user_courier_info (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_uid VARCHAR(255) NOT NULL UNIQUE,
+    receiver_name VARCHAR(50) NOT NULL,
+    receiver_phone VARCHAR(30) NOT NULL,
+    postal_code VARCHAR(10) NOT NULL,
+    address1 VARCHAR(200) NOT NULL,
+    address2 VARCHAR(200),
+    created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    CONSTRAINT fk_user_courier_info_user FOREIGN KEY (user_uid) REFERENCES users(uid)
+);

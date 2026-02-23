@@ -88,4 +88,18 @@ public class CourierOrderController {
     public ResponseEntity<CourierConfigResponse> getConfig() {
         return ResponseEntity.ok(CourierConfigResponse.from(courierConfigService.getConfig()));
     }
+
+    @GetMapping("/info")
+    public ResponseEntity<CourierInfoResponse> getInfo(Authentication auth) {
+        String uid = auth.getName();
+        return ResponseEntity.ok(courierOrderAppService.getCourierInfo(uid));
+    }
+
+    @PutMapping("/info")
+    public ResponseEntity<Void> saveInfo(
+            Authentication auth, @RequestBody @Valid CourierInfoRequest request) {
+        String uid = auth.getName();
+        courierOrderAppService.saveCourierInfo(uid, request);
+        return ResponseEntity.ok().build();
+    }
 }

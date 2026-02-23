@@ -22,11 +22,14 @@ import store.onuljang.courier.entity.CourierProductOptionGroup;
 import store.onuljang.courier.service.*;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 import store.onuljang.shared.entity.enums.PaymentProvider;
+import store.onuljang.shared.exception.UserNoContentException;
 import store.onuljang.shared.exception.UserValidateException;
 import store.onuljang.shared.feign.dto.request.KakaoPayApproveRequest;
 import store.onuljang.shared.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.shared.service.KakaoPayService;
+import store.onuljang.shared.user.entity.UserCourierInfo;
 import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.user.service.UserCourierInfoService;
 import store.onuljang.shared.user.service.UserService;
 import store.onuljang.shared.util.DisplayCodeGenerator;
 import store.onuljang.shared.util.TimeUtil;
@@ -40,6 +43,7 @@ public class CourierOrderAppService {
     private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
 
     UserService userService;
+    UserCourierInfoService userCourierInfoService;
     CourierOrderService courierOrderService;
     CourierPaymentService courierPaymentService;
     CourierPaymentProcessor courierPaymentProcessor;
@@ -166,6 +170,9 @@ public class CourierOrderAppService {
 
         CourierOrder saved = courierOrderService.save(order);
 
+        // 배송 정보 저장/갱신
+        upsertCourierInfo(user, request);
+
         // 5) 주문 항목 생성 + 재고 차감
         for (CourierOrderItemData data : itemDataList) {
             data.product.purchase(data.quantity);
@@ -274,6 +281,35 @@ public class CourierOrderAppService {
         Users user = userService.findByUId(uid);
         CourierOrder order = courierOrderService.findByDisplayCodeAndUser(displayCode, user);
         return CourierOrderDetailResponse.from(order);
+    }
+
+    public CourierInfoResponse getCourierInfo(String uid) {
+        Users user = userService.findByUId(uid);
+        return userCourierInfoService.findByUser(user)
+            .map(CourierInfoResponse::from)
+            .orElseThrow(() -> new UserNoContentException("택배 배송 정보가 없습니다."));
+    }
+
+    @Transactional
+    public void saveCourierInfo(String uid, CourierInfoRequest request) {
+        Users user = userService.findByUidWithLock(uid);
+        upsertCourierInfo(user, request.receiverName(), request.receiverPhone(), request.postalCode(),
+            request.address1(), request.address2());
+    }
+
+    private void upsertCourierInfo(Users user, CourierOrderReadyRequest request) {
+        upsertCourierInfo(user, request.receiverName(), request.receiverPhone(), request.postalCode(),
+            request.address1(), request.address2());
+    }
+
+    private void upsertCourierInfo(Users user, String receiverName, String receiverPhone, String postalCode,
+            String address1, String address2) {
+        UserCourierInfo existing = userCourierInfoService.findByUser(user).orElse(null);
+        if (existing != null) {
+            userCourierInfoService.update(existing, receiverName, receiverPhone, postalCode, address1, address2);
+        } else {
+            userCourierInfoService.create(user, receiverName, receiverPhone, postalCode, address1, address2);
+        }
     }
 
     private void cancelPendingPayments(Users user) {

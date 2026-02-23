@@ -32,6 +32,7 @@ import store.onuljang.shared.exception.NotFoundException;
 import store.onuljang.shared.exception.UserValidateException;
 import store.onuljang.shared.service.KakaoPayService;
 import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.user.service.UserCourierInfoService;
 import store.onuljang.shared.user.service.UserService;
 import store.onuljang.shop.admin.entity.Admin;
 
@@ -47,6 +48,7 @@ class CourierOrderAppServiceTest {
     @Mock private CourierProductService courierProductService;
     @Mock private CourierShippingFeeService courierShippingFeeService;
     @Mock private KakaoPayService kakaoPayService;
+    @Mock private UserCourierInfoService userCourierInfoService;
 
     private Users testUser;
     private final String testUid = UUID.randomUUID().toString();
