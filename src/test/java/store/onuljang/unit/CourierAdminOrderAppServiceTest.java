@@ -3,7 +3,9 @@ package store.onuljang.unit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -32,7 +34,9 @@ import store.onuljang.courier.service.CourierOrderService;
 import store.onuljang.courier.service.CourierPaymentService;
 import store.onuljang.courier.service.CourierRefundService;
 import store.onuljang.courier.service.WaybillExcelService;
+import store.onuljang.shared.entity.enums.CourierCompany;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
+import store.onuljang.shared.entity.enums.UserPointTransactionType;
 import store.onuljang.shared.exception.AdminValidateException;
 import store.onuljang.shared.user.entity.Users;
 import store.onuljang.shop.admin.entity.Admin;
@@ -109,6 +113,26 @@ class CourierAdminOrderAppServiceTest {
                         .build();
         order.getItems().add(item);
         return item;
+    }
+
+    private CourierOrder createOrderWithPointUsed(
+            CourierOrderStatus status, String displayCode, BigDecimal pointUsed) {
+        CourierOrder order =
+                CourierOrder.builder()
+                        .user(testUser)
+                        .displayCode(displayCode)
+                        .status(status)
+                        .receiverName("홍길동")
+                        .receiverPhone("010-1234-5678")
+                        .postalCode("06134")
+                        .address1("서울시 강남구")
+                        .productAmount(BigDecimal.valueOf(30000))
+                        .shippingFee(BigDecimal.valueOf(4000))
+                        .totalAmount(BigDecimal.valueOf(34000))
+                        .pointUsed(pointUsed)
+                        .build();
+        ReflectionTestUtils.setField(order, "id", 1L);
+        return order;
     }
 
     // --- getOrders ---
@@ -367,33 +391,50 @@ class CourierAdminOrderAppServiceTest {
     class Ship {
 
         @Test
-        @DisplayName("PAID 상태에서 운송장 번호와 함께 발송 처리 성공")
+        @DisplayName("PAID 상태에서 운송장 번호와 택배사(LOGEN)와 함께 발송 처리 성공")
         void ship_fromPaid_success() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
-            courierAdminOrderAppService.ship(1L, "1234567890");
+            courierAdminOrderAppService.ship(1L, "1234567890", CourierCompany.LOGEN);
 
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
             assertThat(order.getWaybillNumber()).isEqualTo("1234567890");
+            assertThat(order.getCourierCompany()).isEqualTo(CourierCompany.LOGEN);
         }
 
         @Test
-        @DisplayName("PREPARING 상태에서 발송 처리 성공")
-        void ship_fromPreparing_success() {
+        @DisplayName("PREPARING 상태에서 CJ 택배사로 발송 처리 성공")
+        void ship_fromPreparing_withCj_success() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PREPARING, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
-            courierAdminOrderAppService.ship(1L, "1234567890");
+            courierAdminOrderAppService.ship(1L, "9876543210", CourierCompany.CJ);
 
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
-            assertThat(order.getWaybillNumber()).isEqualTo("1234567890");
+            assertThat(order.getWaybillNumber()).isEqualTo("9876543210");
+            assertThat(order.getCourierCompany()).isEqualTo(CourierCompany.CJ);
+        }
+
+        @Test
+        @DisplayName("PAID 상태에서 LOTTE 택배사로 발송 처리 성공")
+        void ship_fromPaid_withLotte_success() {
+            // arrange
+            CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
+            given(courierOrderService.findById(1L)).willReturn(order);
+
+            // act
+            courierAdminOrderAppService.ship(1L, "1111222233", CourierCompany.LOTTE);
+
+            // assert
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(order.getCourierCompany()).isEqualTo(CourierCompany.LOTTE);
         }
 
         @Test
@@ -404,7 +445,10 @@ class CourierAdminOrderAppServiceTest {
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act / assert
-            assertThatThrownBy(() -> courierAdminOrderAppService.ship(1L, "1234567890"))
+            assertThatThrownBy(
+                            () ->
+                                    courierAdminOrderAppService.ship(
+                                            1L, "1234567890", CourierCompany.LOGEN))
                     .isInstanceOf(AdminValidateException.class)
                     .hasMessageContaining("결제완료 또는 준비중 상태에서만");
         }
@@ -417,7 +461,10 @@ class CourierAdminOrderAppServiceTest {
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act / assert
-            assertThatThrownBy(() -> courierAdminOrderAppService.ship(1L, "1234567890"))
+            assertThatThrownBy(
+                            () ->
+                                    courierAdminOrderAppService.ship(
+                                            1L, "1234567890", CourierCompany.HANJIN))
                     .isInstanceOf(AdminValidateException.class)
                     .hasMessageContaining("결제완료 또는 준비중 상태에서만");
         }
@@ -469,6 +516,90 @@ class CourierAdminOrderAppServiceTest {
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
             verify(courierPaymentService).markCanceled(order);
             verify(courierRefundService).refund(order, order.getTotalAmount());
+        }
+
+        @Test
+        @DisplayName("PAID 포인트 사용 주문 취소 시 PG는 pgPaymentAmount로 환불하고 포인트를 환원한다")
+        void cancel_paid_withPointUsed_refundsPgPaymentAmountAndRestoresPoints() {
+            // arrange
+            CourierOrder order = createOrderWithPointUsed(
+                    CourierOrderStatus.PAID, "C-26021400-ABCD1", BigDecimal.valueOf(5000));
+            ReflectionTestUtils.setField(order, "pgTid", "T_PG_TID_003");
+            CourierProduct product = createProduct("감귤");
+            ReflectionTestUtils.setField(product, "id", 1L);
+            createOrderItem(order, product, 3);
+
+            given(courierOrderService.findByIdWithItems(1L)).willReturn(order);
+
+            // act
+            courierAdminOrderAppService.cancel(1L);
+
+            // assert
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
+            // PG 환불은 pgPaymentAmount(29000)로 호출 (totalAmount(34000)이 아님)
+            org.mockito.ArgumentCaptor<BigDecimal> refundCaptor =
+                    org.mockito.ArgumentCaptor.forClass(BigDecimal.class);
+            verify(courierRefundService).refund(eq(order), refundCaptor.capture());
+            assertThat(refundCaptor.getValue()).isEqualByComparingTo(BigDecimal.valueOf(29000));
+            // 포인트 환원 호출 확인
+            verify(userPointService).earn(
+                    eq(testUser.getUid()), eq(BigDecimal.valueOf(5000)),
+                    eq(UserPointTransactionType.CANCEL_USE),
+                    any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("PREPARING 포인트 사용 주문 취소 시 PG는 pgPaymentAmount로 환불하고 포인트를 환원한다")
+        void cancel_preparing_withPointUsed_refundsPgPaymentAmountAndRestoresPoints() {
+            // arrange
+            CourierOrder order = createOrderWithPointUsed(
+                    CourierOrderStatus.PREPARING, "C-26021400-ABCD1", BigDecimal.valueOf(5000));
+            ReflectionTestUtils.setField(order, "pgTid", "T_PG_TID_004");
+            CourierProduct product = createProduct("감귤");
+            ReflectionTestUtils.setField(product, "id", 1L);
+            createOrderItem(order, product, 3);
+
+            given(courierOrderService.findByIdWithItems(1L)).willReturn(order);
+
+            // act
+            courierAdminOrderAppService.cancel(1L);
+
+            // assert
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
+            org.mockito.ArgumentCaptor<BigDecimal> refundCaptor =
+                    org.mockito.ArgumentCaptor.forClass(BigDecimal.class);
+            verify(courierRefundService).refund(eq(order), refundCaptor.capture());
+            assertThat(refundCaptor.getValue()).isEqualByComparingTo(BigDecimal.valueOf(29000));
+            verify(userPointService).earn(
+                    eq(testUser.getUid()), eq(BigDecimal.valueOf(5000)),
+                    eq(UserPointTransactionType.CANCEL_USE),
+                    any(), any(), any(), any());
+        }
+
+        @Test
+        @DisplayName("전액 포인트 결제 주문 취소 시 PG 환불 없이 포인트만 환원한다")
+        void cancel_paid_fullPointPayment_noRefundButRestoresPoints() {
+            // arrange
+            CourierOrder order = createOrderWithPointUsed(
+                    CourierOrderStatus.PAID, "C-26021400-ABCD1", BigDecimal.valueOf(34000));
+            CourierProduct product = createProduct("감귤");
+            ReflectionTestUtils.setField(product, "id", 1L);
+            createOrderItem(order, product, 3);
+
+            given(courierOrderService.findByIdWithItems(1L)).willReturn(order);
+
+            // act
+            courierAdminOrderAppService.cancel(1L);
+
+            // assert
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
+            // pgPaymentAmount = 0 이므로 PG 환불 미호출
+            verify(courierRefundService, never()).refund(any(), any());
+            // 포인트 전액 환원
+            verify(userPointService).earn(
+                    eq(testUser.getUid()), eq(BigDecimal.valueOf(34000)),
+                    eq(UserPointTransactionType.CANCEL_USE),
+                    any(), any(), any(), any());
         }
 
         @Test
@@ -529,6 +660,30 @@ class CourierAdminOrderAppServiceTest {
             assertThatThrownBy(() -> courierAdminOrderAppService.cancel(1L))
                     .isInstanceOf(AdminValidateException.class)
                     .hasMessageContaining("이미 발송/배송완료/취소된 주문");
+        }
+
+        @Test
+        @DisplayName("PAID 상태에서 PG 환불 실패 시 AdminValidateException 발생하고 취소 미처리")
+        void cancel_paid_refundFails_throwsException() {
+            // arrange
+            CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
+            ReflectionTestUtils.setField(order, "pgTid", "T_PG_TID_001");
+            CourierProduct product = createProduct("감귤");
+            ReflectionTestUtils.setField(product, "id", 1L);
+            createOrderItem(order, product, 2);
+
+            given(courierOrderService.findByIdWithItems(1L)).willReturn(order);
+            doThrow(new RuntimeException("PG 통신 오류"))
+                    .when(courierRefundService)
+                    .refund(any(), any());
+
+            // act / assert
+            assertThatThrownBy(() -> courierAdminOrderAppService.cancel(1L))
+                    .isInstanceOf(AdminValidateException.class)
+                    .hasMessageContaining("PG 환불에 실패했습니다");
+
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.PAID);
+            verify(courierPaymentService, never()).markCanceled(any());
         }
     }
 
