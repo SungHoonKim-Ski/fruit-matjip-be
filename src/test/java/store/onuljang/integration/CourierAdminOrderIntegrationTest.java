@@ -17,6 +17,7 @@ import store.onuljang.courier.entity.CourierOrderItem;
 import store.onuljang.courier.entity.CourierProduct;
 import store.onuljang.courier.repository.CourierOrderRepository;
 import store.onuljang.courier.repository.CourierProductRepository;
+import store.onuljang.shared.entity.enums.CourierCompany;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 import store.onuljang.shared.entity.enums.UserPointTransactionType;
 import store.onuljang.shared.exception.AdminValidateException;
@@ -262,7 +263,7 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
             String waybillNumber = "1234567890";
 
             // Act
-            courierAdminOrderAppService.ship(order.getId(), waybillNumber);
+            courierAdminOrderAppService.ship(order.getId(), waybillNumber, CourierCompany.LOGEN);
 
             // Assert
             entityManager.flush();
@@ -281,7 +282,7 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
             String waybillNumber = "9876543210";
 
             // Act
-            courierAdminOrderAppService.ship(order.getId(), waybillNumber);
+            courierAdminOrderAppService.ship(order.getId(), waybillNumber, CourierCompany.LOGEN);
 
             // Assert
             entityManager.flush();
@@ -300,7 +301,7 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
 
             // Act & Assert
             assertThatThrownBy(() ->
-                    courierAdminOrderAppService.ship(order.getId(), "1111111111"))
+                    courierAdminOrderAppService.ship(order.getId(), "1111111111", CourierCompany.LOGEN))
                     .isInstanceOf(AdminValidateException.class)
                     .hasMessageContaining("발송 처리는 결제완료 또는 준비중 상태에서만 가능합니다");
         }

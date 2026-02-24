@@ -66,13 +66,13 @@ public class CourierAdminOrderAppService {
     }
 
     @Transactional
-    public void ship(Long id, String waybillNumber) {
+    public void ship(Long id, String waybillNumber, CourierCompany courierCompany) {
         CourierOrder order = courierOrderService.findById(id);
         if (order.getStatus() != CourierOrderStatus.PAID
                 && order.getStatus() != CourierOrderStatus.PREPARING) {
             throw new AdminValidateException("발송 처리는 결제완료 또는 준비중 상태에서만 가능합니다.");
         }
-        order.markShipped(waybillNumber);
+        order.markShipped(waybillNumber, courierCompany);
     }
 
     @Transactional
@@ -90,7 +90,8 @@ public class CourierAdminOrderAppService {
                 try {
                     courierRefundService.refund(order, order.getPgPaymentAmount());
                 } catch (Exception e) {
-                    log.warn("환불 실패 (orderId={}): {}", order.getId(), e.getMessage());
+                    log.error("환불 실패 (orderId={}): {}", order.getId(), e.getMessage(), e);
+                    throw new AdminValidateException("PG 환불에 실패했습니다. 수동 처리가 필요합니다.");
                 }
             }
             if (order.getPointUsed().compareTo(java.math.BigDecimal.ZERO) > 0) {

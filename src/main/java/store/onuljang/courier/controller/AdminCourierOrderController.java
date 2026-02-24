@@ -71,7 +71,7 @@ public class AdminCourierOrderController {
     public ResponseEntity<Void> ship(
             @Valid @NotNull @Positive @PathVariable("id") Long id,
             @Valid @RequestBody CourierShipRequest request) {
-        courierAdminOrderAppService.ship(id, request.waybillNumber());
+        courierAdminOrderAppService.ship(id, request.waybillNumber(), request.courierCompany());
         return ResponseEntity.ok().build();
     }
 
