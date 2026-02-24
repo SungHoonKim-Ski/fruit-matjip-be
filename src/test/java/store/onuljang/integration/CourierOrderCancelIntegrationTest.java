@@ -178,11 +178,11 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("PREPARING 상태 주문을 사용자가 취소하면 CANCELED로 전환된다")
-        void PREPARING_상태_사용자_취소_성공() {
+        @DisplayName("ORDERING 상태 주문을 사용자가 취소하면 CANCELED로 전환된다")
+        void ORDERING_상태_사용자_취소_성공() {
             // Arrange
             CourierProduct product = saveCourierProduct("상품B");
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PREPARING);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDERING);
             addOrderItem(order, product);
             entityManager.flush();
 
@@ -197,11 +197,11 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("SHIPPED 상태 주문을 사용자가 취소하면 400 예외가 발생한다")
-        void SHIPPED_상태_사용자_취소_실패() {
+        @DisplayName("ORDER_COMPLETED 상태 주문을 사용자가 취소하면 400 예외가 발생한다")
+        void ORDER_COMPLETED_상태_사용자_취소_실패() {
             // Arrange
             CourierProduct product = saveCourierProduct("상품C");
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.SHIPPED);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDER_COMPLETED);
             addOrderItem(order, product);
             entityManager.flush();
 
@@ -209,7 +209,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierOrderAppService.cancelPaidOrder(user.getUid(), order.getDisplayCode()))
                     .isInstanceOf(UserValidateException.class)
-                    .hasMessageContaining("발송 완료된 주문은 취소할 수 없습니다.");
+                    .hasMessageContaining("발주완료 이후 주문은 취소할 수 없습니다.");
         }
 
         @Test
@@ -282,15 +282,15 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
     }
 
     @Nested
-    @DisplayName("관리자 취소 버그픽스 - cancel() PREPARING + 포인트 환원")
+    @DisplayName("관리자 취소 버그픽스 - cancel() ORDERING + 포인트 환원")
     class AdminCancelBugfix {
 
         @Test
-        @DisplayName("PREPARING 상태 주문을 관리자가 취소하면 CANCELED로 전환된다 (버그픽스)")
-        void PREPARING_상태_관리자_취소_성공() {
+        @DisplayName("ORDERING 상태 주문을 관리자가 취소하면 CANCELED로 전환된다 (버그픽스)")
+        void ORDERING_상태_관리자_취소_성공() {
             // Arrange
             CourierProduct product = saveCourierProduct("상품F");
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PREPARING);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDERING);
             addOrderItem(order, product);
             entityManager.flush();
 
@@ -305,8 +305,8 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("PREPARING 포인트 사용 주문 관리자 취소 시 포인트가 환원된다 (버그픽스)")
-        void PREPARING_포인트_주문_관리자_취소_포인트_환원() {
+        @DisplayName("ORDERING 포인트 사용 주문 관리자 취소 시 포인트가 환원된다 (버그픽스)")
+        void ORDERING_포인트_주문_관리자_취소_포인트_환원() {
             // Arrange
             BigDecimal pointUsed = new BigDecimal("5000");
             givePoints(user, pointUsed);
@@ -314,7 +314,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             entityManager.clear();
 
             CourierProduct product = saveCourierProduct("상품G");
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PREPARING, pointUsed);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDERING, pointUsed);
             addOrderItem(order, product);
             entityManager.flush();
 
@@ -368,7 +368,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierOrderAppService.cancelPaidOrder(user.getUid(), order.getDisplayCode()))
                     .isInstanceOf(UserValidateException.class)
-                    .hasMessageContaining("발송 완료된 주문은 취소할 수 없습니다.");
+                    .hasMessageContaining("발주완료 이후 주문은 취소할 수 없습니다.");
         }
 
         @Test
@@ -384,7 +384,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierOrderAppService.cancelPaidOrder(user.getUid(), order.getDisplayCode()))
                     .isInstanceOf(UserValidateException.class)
-                    .hasMessageContaining("발송 완료된 주문은 취소할 수 없습니다.");
+                    .hasMessageContaining("발주완료 이후 주문은 취소할 수 없습니다.");
         }
 
         @Test
@@ -400,7 +400,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierOrderAppService.cancelPaidOrder(user.getUid(), order.getDisplayCode()))
                     .isInstanceOf(UserValidateException.class)
-                    .hasMessageContaining("발송 완료된 주문은 취소할 수 없습니다.");
+                    .hasMessageContaining("발주완료 이후 주문은 취소할 수 없습니다.");
         }
     }
 
@@ -428,11 +428,11 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("PREPARING 상태 주문 관리자 취소 시 restoreStock이 정상 호출되어 예외 없이 완료된다")
-        void PREPARING_주문_관리자_취소_재고복원_정상완료() {
+        @DisplayName("ORDERING 상태 주문 관리자 취소 시 restoreStock이 정상 호출되어 예외 없이 완료된다")
+        void ORDERING_주문_관리자_취소_재고복원_정상완료() {
             // Arrange
             CourierProduct product = saveCourierProduct("상품M");
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PREPARING);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDERING);
             addOrderItem(order, product);
             entityManager.flush();
 
@@ -452,11 +452,11 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
     class AdminCancelEdgeCases {
 
         @Test
-        @DisplayName("SHIPPED 상태 주문을 관리자가 취소하면 AdminValidateException이 발생한다")
-        void SHIPPED_상태_관리자_취소_실패() {
+        @DisplayName("ORDER_COMPLETED 상태 주문을 관리자가 취소하면 AdminValidateException이 발생한다")
+        void ORDER_COMPLETED_상태_관리자_취소_실패() {
             // Arrange
             CourierProduct product = saveCourierProduct("상품N");
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.SHIPPED);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDER_COMPLETED);
             addOrderItem(order, product);
             entityManager.flush();
 
@@ -464,7 +464,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierAdminOrderAppService.cancel(order.getId()))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("이미 발송/배송완료/취소된 주문은 취소할 수 없습니다.");
+                    .hasMessageContaining("발주완료 이후 또는 취소된 주문은 취소할 수 없습니다.");
         }
 
         @Test
@@ -480,7 +480,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierAdminOrderAppService.cancel(order.getId()))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("이미 발송/배송완료/취소된 주문은 취소할 수 없습니다.");
+                    .hasMessageContaining("발주완료 이후 또는 취소된 주문은 취소할 수 없습니다.");
         }
 
         @Test
@@ -496,7 +496,7 @@ class CourierOrderCancelIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierAdminOrderAppService.cancel(order.getId()))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("이미 발송/배송완료/취소된 주문은 취소할 수 없습니다.");
+                    .hasMessageContaining("발주완료 이후 또는 취소된 주문은 취소할 수 없습니다.");
         }
     }
 

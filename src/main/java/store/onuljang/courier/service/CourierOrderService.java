@@ -83,12 +83,6 @@ public class CourierOrderService {
                 status, PageRequest.of(page, size));
     }
 
-    public Page<CourierOrder> findAllByStatusAndWaybillDownloaded(
-            CourierOrderStatus status, Boolean waybillDownloaded, int page, int size) {
-        return courierOrderRepository.findAllByStatusAndWaybillDownloaded(
-                status, waybillDownloaded, PageRequest.of(page, size));
-    }
-
     public List<CourierOrder> findAllByIds(List<Long> ids) {
         return courierOrderRepository.findAllByIdIn(ids);
     }
@@ -108,7 +102,7 @@ public class CourierOrderService {
 
     public List<CourierOrder> findActiveDeliveries() {
         return courierOrderRepository.findByStatusInAndWaybillNumberIsNotNull(
-                List.of(CourierOrderStatus.SHIPPED, CourierOrderStatus.IN_TRANSIT));
+                List.of(CourierOrderStatus.ORDER_COMPLETED, CourierOrderStatus.IN_TRANSIT));
     }
 
     @Transactional

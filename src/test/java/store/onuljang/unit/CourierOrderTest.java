@@ -61,7 +61,7 @@ class CourierOrderTest {
         @ParameterizedTest
         @EnumSource(
                 value = CourierOrderStatus.class,
-                names = {"PAID", "PREPARING", "SHIPPED", "IN_TRANSIT", "DELIVERED", "CANCELED", "FAILED"})
+                names = {"PAID", "ORDERING", "ORDER_COMPLETED", "IN_TRANSIT", "DELIVERED", "CANCELED", "FAILED"})
         @DisplayName("PENDING_PAYMENT 외 상태에서 결제 불가")
         void canMarkPaid_otherStatuses_returnsFalse(CourierOrderStatus status) {
             // arrange
@@ -94,7 +94,7 @@ class CourierOrderTest {
         @ParameterizedTest
         @EnumSource(
                 value = CourierOrderStatus.class,
-                names = {"PAID", "PREPARING", "SHIPPED", "IN_TRANSIT", "DELIVERED", "CANCELED", "FAILED"})
+                names = {"PAID", "ORDERING", "ORDER_COMPLETED", "IN_TRANSIT", "DELIVERED", "CANCELED", "FAILED"})
         @DisplayName("PENDING_PAYMENT 외 상태에서 사용자 취소 불가")
         void canCancelByUser_otherStatuses_returnsFalse(CourierOrderStatus status) {
             // arrange
@@ -124,7 +124,7 @@ class CourierOrderTest {
         @ParameterizedTest
         @EnumSource(
                 value = CourierOrderStatus.class,
-                names = {"PAID", "PREPARING", "SHIPPED", "IN_TRANSIT", "DELIVERED", "CANCELED", "FAILED"})
+                names = {"PAID", "ORDERING", "ORDER_COMPLETED", "IN_TRANSIT", "DELIVERED", "CANCELED", "FAILED"})
         @DisplayName("PENDING_PAYMENT 외 상태에서 사용자 실패 처리 불가")
         void canFailByUser_otherStatuses_returnsFalse(CourierOrderStatus status) {
             // arrange
@@ -157,29 +157,29 @@ class CourierOrderTest {
         }
 
         @Test
-        @DisplayName("markPreparing은 PREPARING으로 변경")
-        void markPreparing_changesStatus() {
+        @DisplayName("markOrdering은 ORDERING으로 변경")
+        void markOrdering_changesStatus() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PAID);
 
             // act
-            order.markPreparing();
+            order.markOrdering();
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.PREPARING);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDERING);
         }
 
         @Test
-        @DisplayName("markShipped는 SHIPPED로 변경하고 waybillNumber, shippedAt 설정")
-        void markShipped_changesStatusAndSetsWaybillAndShippedAt() {
+        @DisplayName("markOrderCompleted는 ORDER_COMPLETED로 변경하고 waybillNumber, shippedAt 설정")
+        void markOrderCompleted_changesStatusAndSetsWaybillAndShippedAt() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.PREPARING);
+            CourierOrder order = createOrder(CourierOrderStatus.ORDERING);
 
             // act
-            order.markShipped("WAYBILL-001");
+            order.markOrderCompleted("WAYBILL-001");
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(order.getWaybillNumber()).isEqualTo("WAYBILL-001");
             assertThat(order.getShippedAt()).isNotNull();
         }
@@ -188,7 +188,7 @@ class CourierOrderTest {
         @DisplayName("markDelivered는 DELIVERED로 변경하고 deliveredAt 설정")
         void markDelivered_changesStatusAndSetsDeliveredAt() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.SHIPPED);
+            CourierOrder order = createOrder(CourierOrderStatus.ORDER_COMPLETED);
 
             // act
             order.markDelivered();

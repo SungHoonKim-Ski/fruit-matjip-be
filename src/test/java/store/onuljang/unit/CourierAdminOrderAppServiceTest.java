@@ -146,7 +146,7 @@ class CourierAdminOrderAppServiceTest {
         void getOrders_success() {
             // arrange
             CourierOrder order1 = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
-            CourierOrder order2 = createOrder(CourierOrderStatus.SHIPPED, "C-26021400-ABCD2");
+            CourierOrder order2 = createOrder(CourierOrderStatus.ORDER_COMPLETED, "C-26021400-ABCD2");
             ReflectionTestUtils.setField(order2, "id", 2L);
 
             Page<CourierOrder> page =
@@ -155,31 +155,12 @@ class CourierAdminOrderAppServiceTest {
 
             // act
             AdminCourierOrderListResponse result =
-                    courierAdminOrderAppService.getOrders(null, null, 0, 50);
+                    courierAdminOrderAppService.getOrders(null, 0, 50);
 
             // assert
             assertThat(result.orders()).hasSize(2);
             assertThat(result.orders().get(0).displayCode()).isEqualTo("C-26021400-ABCD1");
             assertThat(result.orders().get(1).displayCode()).isEqualTo("C-26021400-ABCD2");
-        }
-
-        @Test
-        @DisplayName("운송장 다운 여부 필터로 주문 목록을 반환한다")
-        void getOrders_withWaybillDownloadedFilter() {
-            // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
-
-            Page<CourierOrder> page =
-                    new PageImpl<>(List.of(order), PageRequest.of(0, 50), 1);
-            given(courierOrderService.findAllByStatusAndWaybillDownloaded(null, false, 0, 50))
-                    .willReturn(page);
-
-            // act
-            AdminCourierOrderListResponse result =
-                    courierAdminOrderAppService.getOrders(null, false, 0, 50);
-
-            // assert
-            assertThat(result.orders()).hasSize(1);
         }
 
         @Test
@@ -195,7 +176,7 @@ class CourierAdminOrderAppServiceTest {
 
             // act
             AdminCourierOrderListResponse result =
-                    courierAdminOrderAppService.getOrders(CourierOrderStatus.PAID, null, 0, 50);
+                    courierAdminOrderAppService.getOrders(CourierOrderStatus.PAID, 0, 50);
 
             // assert
             assertThat(result.orders()).hasSize(1);
@@ -235,52 +216,52 @@ class CourierAdminOrderAppServiceTest {
     class UpdateStatus {
 
         @Test
-        @DisplayName("PAID → PREPARING 상태 변경 성공")
-        void updateStatus_paidToPreparing() {
+        @DisplayName("PAID → ORDERING 상태 변경 성공")
+        void updateStatus_paidToOrdering() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
-            courierAdminOrderAppService.updateStatus(1L, CourierOrderStatus.PREPARING);
+            courierAdminOrderAppService.updateStatus(1L, CourierOrderStatus.ORDERING);
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.PREPARING);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDERING);
         }
 
         @Test
-        @DisplayName("PAID → SHIPPED 상태 변경 성공")
-        void updateStatus_paidToShipped() {
+        @DisplayName("PAID → ORDER_COMPLETED 상태 변경 성공")
+        void updateStatus_paidToOrderCompleted() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
-            courierAdminOrderAppService.updateStatus(1L, CourierOrderStatus.SHIPPED);
+            courierAdminOrderAppService.updateStatus(1L, CourierOrderStatus.ORDER_COMPLETED);
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
         }
 
         @Test
-        @DisplayName("PREPARING → SHIPPED 상태 변경 성공")
-        void updateStatus_preparingToShipped() {
+        @DisplayName("ORDERING → ORDER_COMPLETED 상태 변경 성공")
+        void updateStatus_orderingToOrderCompleted() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.PREPARING, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.ORDERING, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
-            courierAdminOrderAppService.updateStatus(1L, CourierOrderStatus.SHIPPED);
+            courierAdminOrderAppService.updateStatus(1L, CourierOrderStatus.ORDER_COMPLETED);
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
         }
 
         @Test
-        @DisplayName("SHIPPED → IN_TRANSIT 상태 변경 성공")
-        void updateStatus_shippedToInTransit() {
+        @DisplayName("ORDER_COMPLETED → IN_TRANSIT 상태 변경 성공")
+        void updateStatus_orderCompletedToInTransit() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.SHIPPED, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.ORDER_COMPLETED, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
@@ -291,10 +272,10 @@ class CourierAdminOrderAppServiceTest {
         }
 
         @Test
-        @DisplayName("SHIPPED → DELIVERED 상태 변경 성공")
-        void updateStatus_shippedToDelivered() {
+        @DisplayName("ORDER_COMPLETED → DELIVERED 상태 변경 성공")
+        void updateStatus_orderCompletedToDelivered() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.SHIPPED, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.ORDER_COMPLETED, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
@@ -319,7 +300,7 @@ class CourierAdminOrderAppServiceTest {
         }
 
         @Test
-        @DisplayName("잘못된 상태 전이 시 AdminValidateException 발생 - PENDING_PAYMENT → PREPARING 불가")
+        @DisplayName("잘못된 상태 전이 시 AdminValidateException 발생 - PENDING_PAYMENT → ORDERING 불가")
         void updateStatus_invalidTransition_pendingToPreparing() {
             // arrange
             CourierOrder order =
@@ -330,7 +311,7 @@ class CourierAdminOrderAppServiceTest {
             assertThatThrownBy(
                             () ->
                                     courierAdminOrderAppService.updateStatus(
-                                            1L, CourierOrderStatus.PREPARING))
+                                            1L, CourierOrderStatus.ORDERING))
                     .isInstanceOf(AdminValidateException.class)
                     .hasMessageContaining("결제완료 상태에서만");
         }
@@ -348,7 +329,7 @@ class CourierAdminOrderAppServiceTest {
                                     courierAdminOrderAppService.updateStatus(
                                             1L, CourierOrderStatus.DELIVERED))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("발송완료 또는 배송중 상태에서만");
+                    .hasMessageContaining("발주완료 또는 배송중 상태에서만");
         }
 
         @Test
@@ -364,7 +345,7 @@ class CourierAdminOrderAppServiceTest {
                                     courierAdminOrderAppService.updateStatus(
                                             1L, CourierOrderStatus.IN_TRANSIT))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("발송완료 상태에서만");
+                    .hasMessageContaining("발주완료 상태에서만");
         }
 
         @Test
@@ -401,23 +382,23 @@ class CourierAdminOrderAppServiceTest {
             courierAdminOrderAppService.ship(1L, "1234567890", CourierCompany.LOGEN);
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(order.getWaybillNumber()).isEqualTo("1234567890");
             assertThat(order.getCourierCompany()).isEqualTo(CourierCompany.LOGEN);
         }
 
         @Test
-        @DisplayName("PREPARING 상태에서 CJ 택배사로 발송 처리 성공")
-        void ship_fromPreparing_withCj_success() {
+        @DisplayName("ORDERING 상태에서 CJ 택배사로 발주완료 처리 성공")
+        void ship_fromOrdering_withCj_success() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.PREPARING, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.ORDERING, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act
             courierAdminOrderAppService.ship(1L, "9876543210", CourierCompany.CJ);
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(order.getWaybillNumber()).isEqualTo("9876543210");
             assertThat(order.getCourierCompany()).isEqualTo(CourierCompany.CJ);
         }
@@ -433,15 +414,15 @@ class CourierAdminOrderAppServiceTest {
             courierAdminOrderAppService.ship(1L, "1111222233", CourierCompany.LOTTE);
 
             // assert
-            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(order.getCourierCompany()).isEqualTo(CourierCompany.LOTTE);
         }
 
         @Test
-        @DisplayName("SHIPPED 상태에서 발송 처리 시 예외 발생")
-        void ship_fromShipped_throwsException() {
+        @DisplayName("ORDER_COMPLETED 상태에서 발주완료 처리 시 예외 발생")
+        void ship_fromOrderCompleted_throwsException() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.SHIPPED, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.ORDER_COMPLETED, "C-26021400-ABCD1");
             given(courierOrderService.findById(1L)).willReturn(order);
 
             // act / assert
@@ -450,7 +431,7 @@ class CourierAdminOrderAppServiceTest {
                                     courierAdminOrderAppService.ship(
                                             1L, "1234567890", CourierCompany.LOGEN))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("결제완료 또는 준비중 상태에서만");
+                    .hasMessageContaining("결제완료 또는 발주중 상태에서만");
         }
 
         @Test
@@ -466,7 +447,7 @@ class CourierAdminOrderAppServiceTest {
                                     courierAdminOrderAppService.ship(
                                             1L, "1234567890", CourierCompany.HANJIN))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("결제완료 또는 준비중 상태에서만");
+                    .hasMessageContaining("결제완료 또는 발주중 상태에서만");
         }
     }
 
@@ -498,10 +479,10 @@ class CourierAdminOrderAppServiceTest {
         }
 
         @Test
-        @DisplayName("PREPARING 상태에서 취소 - PG 환불 + 재고 복원")
-        void cancel_preparing_success() {
+        @DisplayName("ORDERING 상태에서 취소 - PG 환불 + 재고 복원")
+        void cancel_ordering_success() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.PREPARING, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.ORDERING, "C-26021400-ABCD1");
             ReflectionTestUtils.setField(order, "pgTid", "T_PG_TID_002");
             CourierProduct product = createProduct("감귤");
             ReflectionTestUtils.setField(product, "id", 1L);
@@ -549,11 +530,11 @@ class CourierAdminOrderAppServiceTest {
         }
 
         @Test
-        @DisplayName("PREPARING 포인트 사용 주문 취소 시 PG는 pgPaymentAmount로 환불하고 포인트를 환원한다")
-        void cancel_preparing_withPointUsed_refundsPgPaymentAmountAndRestoresPoints() {
+        @DisplayName("ORDERING 포인트 사용 주문 취소 시 PG는 pgPaymentAmount로 환불하고 포인트를 환원한다")
+        void cancel_ordering_withPointUsed_refundsPgPaymentAmountAndRestoresPoints() {
             // arrange
             CourierOrder order = createOrderWithPointUsed(
-                    CourierOrderStatus.PREPARING, "C-26021400-ABCD1", BigDecimal.valueOf(5000));
+                    CourierOrderStatus.ORDERING, "C-26021400-ABCD1", BigDecimal.valueOf(5000));
             ReflectionTestUtils.setField(order, "pgTid", "T_PG_TID_004");
             CourierProduct product = createProduct("감귤");
             ReflectionTestUtils.setField(product, "id", 1L);
@@ -624,16 +605,16 @@ class CourierAdminOrderAppServiceTest {
         }
 
         @Test
-        @DisplayName("SHIPPED 상태에서 취소 시 예외 발생")
-        void cancel_shipped_throwsException() {
+        @DisplayName("ORDER_COMPLETED 상태에서 취소 시 예외 발생")
+        void cancel_orderCompleted_throwsException() {
             // arrange
-            CourierOrder order = createOrder(CourierOrderStatus.SHIPPED, "C-26021400-ABCD1");
+            CourierOrder order = createOrder(CourierOrderStatus.ORDER_COMPLETED, "C-26021400-ABCD1");
             given(courierOrderService.findByIdWithItems(1L)).willReturn(order);
 
             // act / assert
             assertThatThrownBy(() -> courierAdminOrderAppService.cancel(1L))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("이미 발송/배송완료/취소된 주문");
+                    .hasMessageContaining("발주완료 이후 또는 취소된 주문");
         }
 
         @Test
@@ -646,7 +627,7 @@ class CourierAdminOrderAppServiceTest {
             // act / assert
             assertThatThrownBy(() -> courierAdminOrderAppService.cancel(1L))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("이미 발송/배송완료/취소된 주문");
+                    .hasMessageContaining("발주완료 이후 또는 취소된 주문");
         }
 
         @Test
@@ -659,7 +640,7 @@ class CourierAdminOrderAppServiceTest {
             // act / assert
             assertThatThrownBy(() -> courierAdminOrderAppService.cancel(1L))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("이미 발송/배송완료/취소된 주문");
+                    .hasMessageContaining("발주완료 이후 또는 취소된 주문");
         }
 
         @Test
@@ -708,7 +689,6 @@ class CourierAdminOrderAppServiceTest {
 
             // assert
             assertThat(result).isEqualTo(expectedBytes);
-            assertThat(order.getWaybillDownloadedAt()).isNotNull();
         }
 
         @Test

@@ -72,12 +72,12 @@ public class TrackingResultPollingScheduler {
             CourierOrderStatus current = order.getStatus();
             String newStatus = result.status();
 
-            if ("IN_TRANSIT".equals(newStatus) && current == CourierOrderStatus.SHIPPED) {
+            if ("IN_TRANSIT".equals(newStatus) && current == CourierOrderStatus.ORDER_COMPLETED) {
                 order.markInTransit();
                 log.info("[TrackingResultPollingScheduler] status updated: displayCode={}, {} -> IN_TRANSIT",
                     result.displayCode(), current);
             } else if ("DELIVERED".equals(newStatus)
-                && (current == CourierOrderStatus.SHIPPED || current == CourierOrderStatus.IN_TRANSIT)) {
+                && (current == CourierOrderStatus.ORDER_COMPLETED || current == CourierOrderStatus.IN_TRANSIT)) {
                 order.markDelivered();
                 log.info("[TrackingResultPollingScheduler] status updated: displayCode={}, {} -> DELIVERED",
                     result.displayCode(), current);

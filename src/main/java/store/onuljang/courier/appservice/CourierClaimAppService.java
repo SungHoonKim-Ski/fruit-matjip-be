@@ -198,8 +198,8 @@ public class CourierClaimAppService {
         }
 
         switch (newStatus) {
-            case PREPARING -> order.markPreparing();
-            case SHIPPED -> order.markShipped(order.getWaybillNumber());
+            case ORDERING -> order.markOrdering();
+            case ORDER_COMPLETED -> order.markOrderCompleted(order.getWaybillNumber());
             case IN_TRANSIT -> order.markInTransit();
             case DELIVERED -> order.markDelivered();
             case CANCELED -> order.markCanceled();

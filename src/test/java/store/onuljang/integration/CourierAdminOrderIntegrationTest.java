@@ -107,61 +107,61 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
     class StatusTransitionTests {
 
         @Test
-        @DisplayName("PAID → PREPARING 전환 성공")
-        void PAID_에서_PREPARING_전환_성공() {
+        @DisplayName("PAID → ORDERING 전환 성공")
+        void PAID_에서_ORDERING_전환_성공() {
             // Arrange
             CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PAID);
             entityManager.flush();
 
             // Act
-            courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.PREPARING);
+            courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.ORDERING);
 
             // Assert
             entityManager.flush();
             entityManager.clear();
             CourierOrder updated = courierOrderRepository.findById(order.getId()).orElseThrow();
-            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.PREPARING);
+            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.ORDERING);
         }
 
         @Test
-        @DisplayName("PAID → SHIPPED 전환 성공 (PREPARING 건너뛰기 가능)")
-        void PAID_에서_SHIPPED_건너뛰기_성공() {
+        @DisplayName("PAID → ORDER_COMPLETED 전환 성공 (ORDERING 건너뛰기 가능)")
+        void PAID_에서_ORDER_COMPLETED_건너뛰기_성공() {
             // Arrange
             CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PAID);
             entityManager.flush();
 
             // Act
-            courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.SHIPPED);
+            courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.ORDER_COMPLETED);
 
             // Assert
             entityManager.flush();
             entityManager.clear();
             CourierOrder updated = courierOrderRepository.findById(order.getId()).orElseThrow();
-            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
         }
 
         @Test
-        @DisplayName("PREPARING → SHIPPED 전환 성공")
-        void PREPARING_에서_SHIPPED_전환_성공() {
+        @DisplayName("ORDERING → ORDER_COMPLETED 전환 성공")
+        void ORDERING_에서_ORDER_COMPLETED_전환_성공() {
             // Arrange
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PREPARING);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDERING);
             entityManager.flush();
 
             // Act
-            courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.SHIPPED);
+            courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.ORDER_COMPLETED);
 
             // Assert
             entityManager.flush();
             entityManager.clear();
             CourierOrder updated = courierOrderRepository.findById(order.getId()).orElseThrow();
-            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
         }
 
         @Test
-        @DisplayName("SHIPPED → IN_TRANSIT 전환 성공")
-        void SHIPPED_에서_IN_TRANSIT_전환_성공() {
+        @DisplayName("ORDER_COMPLETED → IN_TRANSIT 전환 성공")
+        void ORDER_COMPLETED_에서_IN_TRANSIT_전환_성공() {
             // Arrange
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.SHIPPED);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDER_COMPLETED);
             entityManager.flush();
 
             // Act
@@ -175,10 +175,10 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("SHIPPED → DELIVERED 전환 성공")
-        void SHIPPED_에서_DELIVERED_전환_성공() {
+        @DisplayName("ORDER_COMPLETED → DELIVERED 전환 성공")
+        void ORDER_COMPLETED_에서_DELIVERED_전환_성공() {
             // Arrange
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.SHIPPED);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDER_COMPLETED);
             entityManager.flush();
 
             // Act
@@ -219,7 +219,7 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.DELIVERED))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("배송완료는 발송완료 또는 배송중 상태에서만 가능합니다");
+                    .hasMessageContaining("배송완료는 발주완료 또는 배송중 상태에서만 가능합니다");
         }
 
         @Test
@@ -233,30 +233,30 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
             assertThatThrownBy(() ->
                     courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.IN_TRANSIT))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("배송중은 발송완료 상태에서만 가능합니다");
+                    .hasMessageContaining("배송중은 발주완료 상태에서만 가능합니다");
         }
 
         @Test
-        @DisplayName("DELIVERED → PREPARING 시도 시 예외 발생")
-        void DELIVERED_에서_PREPARING_시도시_예외() {
+        @DisplayName("DELIVERED → ORDERING 시도 시 예외 발생")
+        void DELIVERED_에서_ORDERING_시도시_예외() {
             // Arrange
             CourierOrder order = saveCourierOrder(user, CourierOrderStatus.DELIVERED);
             entityManager.flush();
 
             // Act & Assert
             assertThatThrownBy(() ->
-                    courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.PREPARING))
+                    courierAdminOrderAppService.updateStatus(order.getId(), CourierOrderStatus.ORDERING))
                     .isInstanceOf(AdminValidateException.class);
         }
     }
 
     @Nested
-    @DisplayName("발송 처리 테스트 - ship()")
+    @DisplayName("발주완료 처리 테스트 - ship()")
     class ShipTests {
 
         @Test
-        @DisplayName("PAID 상태에서 ship() 호출 시 SHIPPED 전환 및 운송장 번호 저장")
-        void PAID_상태_발송처리_성공() {
+        @DisplayName("PAID 상태에서 ship() 호출 시 ORDER_COMPLETED 전환 및 운송장 번호 저장")
+        void PAID_상태_발주완료처리_성공() {
             // Arrange
             CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PAID);
             entityManager.flush();
@@ -269,15 +269,15 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
             entityManager.flush();
             entityManager.clear();
             CourierOrder updated = courierOrderRepository.findById(order.getId()).orElseThrow();
-            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(updated.getWaybillNumber()).isEqualTo(waybillNumber);
         }
 
         @Test
-        @DisplayName("PREPARING 상태에서 ship() 호출 시 SHIPPED 전환 성공")
-        void PREPARING_상태_발송처리_성공() {
+        @DisplayName("ORDERING 상태에서 ship() 호출 시 ORDER_COMPLETED 전환 성공")
+        void ORDERING_상태_발주완료처리_성공() {
             // Arrange
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.PREPARING);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDERING);
             entityManager.flush();
             String waybillNumber = "9876543210";
 
@@ -288,22 +288,22 @@ class CourierAdminOrderIntegrationTest extends IntegrationTestBase {
             entityManager.flush();
             entityManager.clear();
             CourierOrder updated = courierOrderRepository.findById(order.getId()).orElseThrow();
-            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(updated.getWaybillNumber()).isEqualTo(waybillNumber);
         }
 
         @Test
-        @DisplayName("SHIPPED 상태에서 ship() 시도 시 예외 발생")
-        void SHIPPED_상태_발송처리_시도시_예외() {
+        @DisplayName("ORDER_COMPLETED 상태에서 ship() 시도 시 예외 발생")
+        void ORDER_COMPLETED_상태_발주완료처리_시도시_예외() {
             // Arrange
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.SHIPPED);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDER_COMPLETED);
             entityManager.flush();
 
             // Act & Assert
             assertThatThrownBy(() ->
                     courierAdminOrderAppService.ship(order.getId(), "1111111111", CourierCompany.LOGEN))
                     .isInstanceOf(AdminValidateException.class)
-                    .hasMessageContaining("발송 처리는 결제완료 또는 준비중 상태에서만 가능합니다");
+                    .hasMessageContaining("발주완료 처리는 결제완료 또는 발주중 상태에서만 가능합니다");
         }
     }
 

@@ -134,11 +134,11 @@ class CourierClaimIntegrationTest extends IntegrationTestBase {
         }
 
         @Test
-        @DisplayName("SHIPPED 상태에서 클레임 접수 가능")
-        void SHIPPED_상태_클레임_가능() {
+        @DisplayName("ORDER_COMPLETED 상태에서 클레임 접수 가능")
+        void ORDER_COMPLETED_상태_클레임_가능() {
             // Arrange
             CourierProduct product = saveCourierProduct("상품C");
-            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.SHIPPED);
+            CourierOrder order = saveCourierOrder(user, CourierOrderStatus.ORDER_COMPLETED);
             addOrderItem(order, product);
             entityManager.flush();
 

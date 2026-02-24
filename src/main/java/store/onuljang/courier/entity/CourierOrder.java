@@ -115,10 +115,6 @@ public class CourierOrder extends BaseEntity {
     private LocalDateTime deliveredAt;
 
     @Getter
-    @Column(name = "waybill_downloaded_at")
-    private LocalDateTime waybillDownloadedAt;
-
-    @Getter
     @Column(name = "idempotency_key", length = 64)
     private String idempotencyKey;
 
@@ -138,18 +134,18 @@ public class CourierOrder extends BaseEntity {
         this.pgTid = pgTid;
     }
 
-    public void markPreparing() {
-        this.status = CourierOrderStatus.PREPARING;
+    public void markOrdering() {
+        this.status = CourierOrderStatus.ORDERING;
     }
 
-    public void markShipped(String waybillNumber) {
-        this.status = CourierOrderStatus.SHIPPED;
+    public void markOrderCompleted(String waybillNumber) {
+        this.status = CourierOrderStatus.ORDER_COMPLETED;
         this.waybillNumber = waybillNumber;
         this.shippedAt = TimeUtil.nowDateTime();
     }
 
-    public void markShipped(String waybillNumber, CourierCompany courierCompany) {
-        this.status = CourierOrderStatus.SHIPPED;
+    public void markOrderCompleted(String waybillNumber, CourierCompany courierCompany) {
+        this.status = CourierOrderStatus.ORDER_COMPLETED;
         this.waybillNumber = waybillNumber;
         this.courierCompany = courierCompany;
         this.shippedAt = TimeUtil.nowDateTime();
@@ -182,10 +178,6 @@ public class CourierOrder extends BaseEntity {
 
     public boolean canFailByUser() {
         return this.status == CourierOrderStatus.PENDING_PAYMENT;
-    }
-
-    public void markWaybillDownloaded() {
-        this.waybillDownloadedAt = TimeUtil.nowDateTime();
     }
 
     public void setPgTid(String pgTid) {

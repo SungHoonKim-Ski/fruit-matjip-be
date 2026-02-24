@@ -68,7 +68,7 @@ public class TrackingUploadService {
             }
 
             if (order.getStatus() != CourierOrderStatus.PAID
-                    && order.getStatus() != CourierOrderStatus.PREPARING) {
+                    && order.getStatus() != CourierOrderStatus.ORDERING) {
                 errors.add(new TrackingUploadError(
                         parsed.rowNum(),
                         parsed.displayCode(),
@@ -85,7 +85,7 @@ public class TrackingUploadService {
             CourierOrder order = courierOrderRepository
                     .findByDisplayCode(parsed.displayCode())
                     .orElseThrow(() -> new AdminValidateException("주문을 찾을 수 없습니다: " + parsed.displayCode()));
-            order.markShipped(parsed.waybillNumber(), courierCompany);
+            order.markOrderCompleted(parsed.waybillNumber(), courierCompany);
         }
 
         return new TrackingUploadResponse(parsedRows.size());

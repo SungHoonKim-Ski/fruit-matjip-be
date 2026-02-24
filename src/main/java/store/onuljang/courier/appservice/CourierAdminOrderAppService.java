@@ -42,14 +42,9 @@ public class CourierAdminOrderAppService {
     UserPointService userPointService;
 
     public AdminCourierOrderListResponse getOrders(
-            CourierOrderStatus status, Boolean waybillDownloaded, int page, int size) {
-        org.springframework.data.domain.Page<CourierOrder> orders;
-        if (waybillDownloaded != null) {
-            orders = courierOrderService.findAllByStatusAndWaybillDownloaded(
-                    status, waybillDownloaded, page, size);
-        } else {
-            orders = courierOrderService.findAllByStatus(status, page, size);
-        }
+            CourierOrderStatus status, int page, int size) {
+        org.springframework.data.domain.Page<CourierOrder> orders =
+                courierOrderService.findAllByStatus(status, page, size);
         return AdminCourierOrderListResponse.from(orders);
     }
 
@@ -69,23 +64,24 @@ public class CourierAdminOrderAppService {
     public void ship(Long id, String waybillNumber, CourierCompany courierCompany) {
         CourierOrder order = courierOrderService.findById(id);
         if (order.getStatus() != CourierOrderStatus.PAID
-                && order.getStatus() != CourierOrderStatus.PREPARING) {
-            throw new AdminValidateException("발송 처리는 결제완료 또는 준비중 상태에서만 가능합니다.");
+                && order.getStatus() != CourierOrderStatus.ORDERING) {
+            throw new AdminValidateException("발주완료 처리는 결제완료 또는 발주중 상태에서만 가능합니다.");
         }
-        order.markShipped(waybillNumber, courierCompany);
+        order.markOrderCompleted(waybillNumber, courierCompany);
     }
 
     @Transactional
     public void cancel(Long id) {
         CourierOrder order = courierOrderService.findByIdWithItems(id);
-        if (order.getStatus() == CourierOrderStatus.SHIPPED
+        if (order.getStatus() == CourierOrderStatus.ORDER_COMPLETED
+                || order.getStatus() == CourierOrderStatus.IN_TRANSIT
                 || order.getStatus() == CourierOrderStatus.DELIVERED
                 || order.getStatus() == CourierOrderStatus.CANCELED) {
-            throw new AdminValidateException("이미 발송/배송완료/취소된 주문은 취소할 수 없습니다.");
+            throw new AdminValidateException("발주완료 이후 또는 취소된 주문은 취소할 수 없습니다.");
         }
 
         if (order.getStatus() == CourierOrderStatus.PAID
-                || order.getStatus() == CourierOrderStatus.PREPARING) {
+                || order.getStatus() == CourierOrderStatus.ORDERING) {
             if (order.getPgPaymentAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
                 try {
                     courierRefundService.refund(order, order.getPgPaymentAmount());
@@ -113,17 +109,13 @@ public class CourierAdminOrderAppService {
         return trackingUploadService.uploadTracking(file, courierCompany);
     }
 
-    @Transactional
     public byte[] downloadWaybillExcel(Long orderId) {
         CourierOrder order = courierOrderService.findByIdWithItems(orderId);
-        order.markWaybillDownloaded();
         return waybillExcelService.generateWaybillExcel(order);
     }
 
-    @Transactional
     public byte[] downloadWaybillExcelBulk(List<Long> orderIds) {
         List<CourierOrder> orders = courierOrderService.findAllByIds(orderIds);
-        orders.forEach(CourierOrder::markWaybillDownloaded);
         return waybillExcelService.generateWaybillExcel(orders);
     }
 
@@ -135,7 +127,9 @@ public class CourierAdminOrderAppService {
 
         List<CourierOrderStatus> statuses = List.of(
                 CourierOrderStatus.PAID,
-                CourierOrderStatus.SHIPPED,
+                CourierOrderStatus.ORDERING,
+                CourierOrderStatus.ORDER_COMPLETED,
+                CourierOrderStatus.IN_TRANSIT,
                 CourierOrderStatus.DELIVERED);
 
         List<CourierOrder> orders;
@@ -151,35 +145,34 @@ public class CourierAdminOrderAppService {
             throw new UserValidateException("해당 조건에 맞는 주문이 없습니다.");
         }
 
-        orders.forEach(CourierOrder::markWaybillDownloaded);
         return waybillExcelService.generateWaybillExcel(orders);
     }
 
     private void validateAdminTransition(CourierOrder order, CourierOrderStatus nextStatus) {
         CourierOrderStatus current = order.getStatus();
         switch (nextStatus) {
-            case PREPARING -> {
+            case ORDERING -> {
                 if (current != CourierOrderStatus.PAID) {
-                    throw new AdminValidateException("준비중은 결제완료 상태에서만 가능합니다.");
+                    throw new AdminValidateException("발주중은 결제완료 상태에서만 가능합니다.");
                 }
             }
-            case SHIPPED -> {
+            case ORDER_COMPLETED -> {
                 if (current != CourierOrderStatus.PAID
-                        && current != CourierOrderStatus.PREPARING) {
+                        && current != CourierOrderStatus.ORDERING) {
                     throw new AdminValidateException(
-                            "발송완료는 결제완료 또는 준비중 상태에서만 가능합니다.");
+                            "발주완료는 결제완료 또는 발주중 상태에서만 가능합니다.");
                 }
             }
             case IN_TRANSIT -> {
-                if (current != CourierOrderStatus.SHIPPED) {
-                    throw new AdminValidateException("배송중은 발송완료 상태에서만 가능합니다.");
+                if (current != CourierOrderStatus.ORDER_COMPLETED) {
+                    throw new AdminValidateException("배송중은 발주완료 상태에서만 가능합니다.");
                 }
             }
             case DELIVERED -> {
-                if (current != CourierOrderStatus.SHIPPED
+                if (current != CourierOrderStatus.ORDER_COMPLETED
                         && current != CourierOrderStatus.IN_TRANSIT) {
                     throw new AdminValidateException(
-                            "배송완료는 발송완료 또는 배송중 상태에서만 가능합니다.");
+                            "배송완료는 발주완료 또는 배송중 상태에서만 가능합니다.");
                 }
             }
             default -> throw new AdminValidateException("변경할 수 없는 상태입니다: " + nextStatus);
@@ -188,8 +181,8 @@ public class CourierAdminOrderAppService {
 
     private void applyStatus(CourierOrder order, CourierOrderStatus nextStatus) {
         switch (nextStatus) {
-            case PREPARING -> order.markPreparing();
-            case SHIPPED -> order.markShipped(order.getWaybillNumber());
+            case ORDERING -> order.markOrdering();
+            case ORDER_COMPLETED -> order.markOrderCompleted(order.getWaybillNumber());
             case IN_TRANSIT -> order.markInTransit();
             case DELIVERED -> order.markDelivered();
             default -> throw new AdminValidateException("변경할 수 없는 상태입니다.");

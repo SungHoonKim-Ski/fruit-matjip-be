@@ -62,7 +62,7 @@ class TrackingResultPollingSchedulerTest {
             .shippingFee(new BigDecimal("3000"))
             .totalAmount(new BigDecimal("13000"))
             .build();
-        if (status == CourierOrderStatus.SHIPPED || status == CourierOrderStatus.IN_TRANSIT) {
+        if (status == CourierOrderStatus.ORDER_COMPLETED || status == CourierOrderStatus.IN_TRANSIT) {
             org.springframework.test.util.ReflectionTestUtils.setField(order, "waybillNumber", "WB-001");
             org.springframework.test.util.ReflectionTestUtils.setField(order, "courierCompany", CourierCompany.LOGEN);
         }
@@ -100,10 +100,10 @@ class TrackingResultPollingSchedulerTest {
     }
 
     @Test
-    @DisplayName("SHIPPED 주문에 IN_TRANSIT 결과 수신 시 markInTransit 호출 및 메시지 삭제")
+    @DisplayName("ORDER_COMPLETED 주문에 IN_TRANSIT 결과 수신 시 markInTransit 호출 및 메시지 삭제")
     void processMessage_shippedOrder_inTransitResult_marksInTransit() throws Exception {
         // Arrange
-        CourierOrder order = buildOrder("C-001", CourierOrderStatus.SHIPPED);
+        CourierOrder order = buildOrder("C-001", CourierOrderStatus.ORDER_COMPLETED);
         when(courierOrderService.findByDisplayCode("C-001")).thenReturn(order);
 
         Message message = buildMessage("C-001", "IN_TRANSIT");
@@ -119,10 +119,10 @@ class TrackingResultPollingSchedulerTest {
     }
 
     @Test
-    @DisplayName("SHIPPED 주문에 DELIVERED 결과 수신 시 markDelivered 호출 및 메시지 삭제")
+    @DisplayName("ORDER_COMPLETED 주문에 DELIVERED 결과 수신 시 markDelivered 호출 및 메시지 삭제")
     void processMessage_shippedOrder_deliveredResult_marksDelivered() throws Exception {
         // Arrange
-        CourierOrder order = buildOrder("C-002", CourierOrderStatus.SHIPPED);
+        CourierOrder order = buildOrder("C-002", CourierOrderStatus.ORDER_COMPLETED);
         when(courierOrderService.findByDisplayCode("C-002")).thenReturn(order);
 
         Message message = buildMessage("C-002", "DELIVERED");
@@ -173,8 +173,8 @@ class TrackingResultPollingSchedulerTest {
     @DisplayName("큐에서 여러 메시지 수신 시 각각 처리함")
     void run_multipleMessages_processesAll() throws Exception {
         // Arrange
-        CourierOrder order1 = buildOrder("C-010", CourierOrderStatus.SHIPPED);
-        CourierOrder order2 = buildOrder("C-011", CourierOrderStatus.SHIPPED);
+        CourierOrder order1 = buildOrder("C-010", CourierOrderStatus.ORDER_COMPLETED);
+        CourierOrder order2 = buildOrder("C-011", CourierOrderStatus.ORDER_COMPLETED);
         when(courierOrderService.findByDisplayCode("C-010")).thenReturn(order1);
         when(courierOrderService.findByDisplayCode("C-011")).thenReturn(order2);
 

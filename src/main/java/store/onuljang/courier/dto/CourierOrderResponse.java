@@ -8,6 +8,7 @@ import store.onuljang.shared.entity.enums.CourierOrderStatus;
 public record CourierOrderResponse(
         String displayCode,
         CourierOrderStatus status,
+        String statusDisplayName,
         String productSummary,
         int totalQuantity,
         BigDecimal totalAmount,
@@ -25,6 +26,7 @@ public record CourierOrderResponse(
         return new CourierOrderResponse(
                 order.getDisplayCode(),
                 order.getStatus(),
+                order.getStatus().getCustomerDisplayName(),
                 order.getProductSummary(),
                 order.getTotalQuantity(),
                 order.getTotalAmount(),

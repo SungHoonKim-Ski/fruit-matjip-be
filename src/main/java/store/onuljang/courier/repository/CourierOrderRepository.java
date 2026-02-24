@@ -47,17 +47,6 @@ public interface CourierOrderRepository extends JpaRepository<CourierOrder, Long
     Page<CourierOrder> findAllByStatusOrderByIdDesc(
             @Param("status") CourierOrderStatus status, Pageable pageable);
 
-    @Query(
-            "SELECT o FROM CourierOrder o WHERE (:status IS NULL OR o.status = :status)"
-                    + " AND (:waybillDownloaded IS NULL"
-                    + " OR (:waybillDownloaded = true AND o.waybillDownloadedAt IS NOT NULL)"
-                    + " OR (:waybillDownloaded = false AND o.waybillDownloadedAt IS NULL))"
-                    + " ORDER BY o.id DESC")
-    Page<CourierOrder> findAllByStatusAndWaybillDownloaded(
-            @Param("status") CourierOrderStatus status,
-            @Param("waybillDownloaded") Boolean waybillDownloaded,
-            Pageable pageable);
-
     List<CourierOrder> findAllByIdIn(List<Long> ids);
 
     List<CourierOrder> findByStatusInAndWaybillNumberIsNotNull(List<CourierOrderStatus> statuses);

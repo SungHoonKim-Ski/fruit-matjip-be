@@ -10,6 +10,7 @@ import store.onuljang.shared.entity.enums.CourierOrderStatus;
 public record CourierOrderDetailResponse(
         String displayCode,
         CourierOrderStatus status,
+        String statusDisplayName,
         String receiverName,
         String receiverPhone,
         String postalCode,
@@ -37,6 +38,7 @@ public record CourierOrderDetailResponse(
         return new CourierOrderDetailResponse(
                 order.getDisplayCode(),
                 order.getStatus(),
+                order.getStatus().getCustomerDisplayName(),
                 order.getReceiverName(),
                 order.getReceiverPhone(),
                 order.getPostalCode(),

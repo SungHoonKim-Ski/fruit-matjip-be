@@ -58,7 +58,7 @@ class CourierTrackingRequestSchedulerTest {
         CourierOrder order = CourierOrder.builder()
             .user(null)
             .displayCode(displayCode)
-            .status(CourierOrderStatus.SHIPPED)
+            .status(CourierOrderStatus.ORDER_COMPLETED)
             .receiverName("홍길동")
             .receiverPhone("010-1234-5678")
             .postalCode("06134")
@@ -67,7 +67,7 @@ class CourierTrackingRequestSchedulerTest {
             .shippingFee(new BigDecimal("3000"))
             .totalAmount(new BigDecimal("13000"))
             .build();
-        order.markShipped(waybillNumber, CourierCompany.LOGEN);
+        order.markOrderCompleted(waybillNumber, CourierCompany.LOGEN);
         return order;
     }
 

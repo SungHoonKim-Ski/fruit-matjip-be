@@ -130,8 +130,8 @@ class TrackingUploadIntegrationTest extends IntegrationTestBase {
     class SuccessUpload {
 
         @Test
-        @DisplayName("정상 업로드 시 운송장번호 저장 + SHIPPED 상태 전환")
-        void 정상_업로드_운송장번호_저장_SHIPPED_전환() throws IOException {
+        @DisplayName("정상 업로드 시 운송장번호 저장 + ORDER_COMPLETED 상태 전환")
+        void 정상_업로드_운송장번호_저장_ORDER_COMPLETED_전환() throws IOException {
             // Arrange
             String displayCode = uniqueDisplayCode();
             CourierProduct product = saveCourierProduct("상품A");
@@ -153,17 +153,17 @@ class TrackingUploadIntegrationTest extends IntegrationTestBase {
             entityManager.flush();
             entityManager.clear();
             CourierOrder updated = courierOrderRepository.findByDisplayCode(displayCode).orElseThrow();
-            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(updated.getWaybillNumber()).isEqualTo("1234567890");
             assertThat(updated.getCourierCompany()).isEqualTo(CourierCompany.LOGEN);
         }
 
         @Test
-        @DisplayName("PREPARING 상태 주문도 SHIPPED 전환 가능")
-        void PREPARING_상태_주문_SHIPPED_전환() throws IOException {
+        @DisplayName("ORDERING 상태 주문도 ORDER_COMPLETED 전환 가능")
+        void ORDERING_상태_주문_ORDER_COMPLETED_전환() throws IOException {
             // Arrange
             String displayCode = uniqueDisplayCode();
-            CourierOrder order = saveCourierOrder(CourierOrderStatus.PREPARING, displayCode);
+            CourierOrder order = saveCourierOrder(CourierOrderStatus.ORDERING, displayCode);
             entityManager.flush();
 
             MockMultipartFile file = createExcelFile(new String[][]{
@@ -180,7 +180,7 @@ class TrackingUploadIntegrationTest extends IntegrationTestBase {
             entityManager.flush();
             entityManager.clear();
             CourierOrder updated = courierOrderRepository.findByDisplayCode(displayCode).orElseThrow();
-            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+            assertThat(updated.getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
             assertThat(updated.getWaybillNumber()).isEqualTo("9876543210");
             assertThat(updated.getCourierCompany()).isEqualTo(CourierCompany.HANJIN);
         }
@@ -251,9 +251,9 @@ class TrackingUploadIntegrationTest extends IntegrationTestBase {
         void 이미_운송장_등록된_주문_에러() throws IOException {
             // Arrange
             String displayCode = uniqueDisplayCode();
-            CourierOrder order = saveCourierOrder(CourierOrderStatus.SHIPPED, displayCode);
+            CourierOrder order = saveCourierOrder(CourierOrderStatus.ORDER_COMPLETED, displayCode);
             // 이미 운송장 등록된 상태 시뮬레이션
-            order.markShipped("EXISTING-WAYBILL");
+            order.markOrderCompleted("EXISTING-WAYBILL");
             entityManager.flush();
 
             MockMultipartFile file = createExcelFile(new String[][]{

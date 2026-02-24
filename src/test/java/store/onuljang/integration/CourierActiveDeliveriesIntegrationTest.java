@@ -57,17 +57,17 @@ class CourierActiveDeliveriesIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    @DisplayName("SHIPPED 상태이고 운송장번호가 있는 주문을 반환함")
-    void findActiveDeliveries_shippedWithWaybill_returned() {
+    @DisplayName("ORDER_COMPLETED 상태이고 운송장번호가 있는 주문을 반환함")
+    void findActiveDeliveries_orderCompletedWithWaybill_returned() {
         // Arrange
-        saveOrder(CourierOrderStatus.SHIPPED, "WB-001");
+        saveOrder(CourierOrderStatus.ORDER_COMPLETED, "WB-001");
 
         // Act
         List<CourierOrder> result = courierOrderService.findActiveDeliveries();
 
         // Assert
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getStatus()).isEqualTo(CourierOrderStatus.SHIPPED);
+        assertThat(result.get(0).getStatus()).isEqualTo(CourierOrderStatus.ORDER_COMPLETED);
     }
 
     @Test
@@ -85,10 +85,10 @@ class CourierActiveDeliveriesIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    @DisplayName("운송장번호가 없는 SHIPPED 주문은 반환하지 않음")
-    void findActiveDeliveries_shippedWithoutWaybill_notReturned() {
+    @DisplayName("운송장번호가 없는 ORDER_COMPLETED 주문은 반환하지 않음")
+    void findActiveDeliveries_orderCompletedWithoutWaybill_notReturned() {
         // Arrange
-        saveOrder(CourierOrderStatus.SHIPPED, null);
+        saveOrder(CourierOrderStatus.ORDER_COMPLETED, null);
 
         // Act
         List<CourierOrder> result = courierOrderService.findActiveDeliveries();
@@ -113,10 +113,10 @@ class CourierActiveDeliveriesIntegrationTest extends IntegrationTestBase {
     }
 
     @Test
-    @DisplayName("SHIPPED와 IN_TRANSIT 혼합 주문 모두 반환함")
+    @DisplayName("ORDER_COMPLETED와 IN_TRANSIT 혼합 주문 모두 반환함")
     void findActiveDeliveries_mixedActiveStatuses_allReturned() {
         // Arrange
-        saveOrder(CourierOrderStatus.SHIPPED, "WB-010");
+        saveOrder(CourierOrderStatus.ORDER_COMPLETED, "WB-010");
         saveOrder(CourierOrderStatus.IN_TRANSIT, "WB-011");
         saveOrder(CourierOrderStatus.DELIVERED, "WB-012");
 
@@ -126,7 +126,7 @@ class CourierActiveDeliveriesIntegrationTest extends IntegrationTestBase {
         // Assert
         assertThat(result).hasSize(2);
         assertThat(result).extracting(CourierOrder::getStatus)
-            .containsExactlyInAnyOrder(CourierOrderStatus.SHIPPED, CourierOrderStatus.IN_TRANSIT);
+            .containsExactlyInAnyOrder(CourierOrderStatus.ORDER_COMPLETED, CourierOrderStatus.IN_TRANSIT);
     }
 
     @Test
