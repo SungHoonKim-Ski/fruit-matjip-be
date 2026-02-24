@@ -22,7 +22,7 @@ class WaybillExcelFilterRequestTest {
             // Arrange
             LocalDate start = LocalDate.of(2025, 1, 1);
             LocalDate end = LocalDate.of(2025, 6, 1);
-            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null);
+            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null, null);
 
             // Act & Assert
             assertThatNoException().isThrownBy(request::validate);
@@ -34,7 +34,7 @@ class WaybillExcelFilterRequestTest {
             // Arrange
             LocalDate start = LocalDate.of(2025, 6, 1);
             LocalDate end = LocalDate.of(2025, 1, 1);
-            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null);
+            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null, null);
 
             // Act & Assert
             assertThatThrownBy(request::validate)
@@ -48,7 +48,7 @@ class WaybillExcelFilterRequestTest {
             // Arrange
             LocalDate start = LocalDate.of(2025, 1, 1);
             LocalDate end = start.plusDays(366);
-            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null);
+            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null, null);
 
             // Act & Assert
             assertThatThrownBy(request::validate)
@@ -62,7 +62,7 @@ class WaybillExcelFilterRequestTest {
             // Arrange
             LocalDate start = LocalDate.of(2025, 3, 1);
             LocalDate end = LocalDate.of(2025, 3, 31);
-            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null);
+            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(start, end, null, null);
 
             // Act & Assert
             assertThatNoException().isThrownBy(request::validate);
@@ -73,7 +73,7 @@ class WaybillExcelFilterRequestTest {
         void 시작일_종료일_같음_예외없음() {
             // Arrange
             LocalDate date = LocalDate.of(2025, 5, 15);
-            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(date, date, 1L);
+            WaybillExcelFilterRequest request = new WaybillExcelFilterRequest(date, date, 1L, null);
 
             // Act & Assert
             assertThatNoException().isThrownBy(request::validate);

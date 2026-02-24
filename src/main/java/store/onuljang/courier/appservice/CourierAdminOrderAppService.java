@@ -109,13 +109,21 @@ public class CourierAdminOrderAppService {
         return trackingUploadService.uploadTracking(file, courierCompany);
     }
 
+    @Transactional
     public byte[] downloadWaybillExcel(Long orderId) {
         CourierOrder order = courierOrderService.findByIdWithItems(orderId);
+        if (order.getStatus() == CourierOrderStatus.PAID) {
+            order.markOrdering();
+        }
         return waybillExcelService.generateWaybillExcel(order);
     }
 
+    @Transactional
     public byte[] downloadWaybillExcelBulk(List<Long> orderIds) {
         List<CourierOrder> orders = courierOrderService.findAllByIds(orderIds);
+        orders.stream()
+                .filter(o -> o.getStatus() == CourierOrderStatus.PAID)
+                .forEach(CourierOrder::markOrdering);
         return waybillExcelService.generateWaybillExcel(orders);
     }
 
@@ -125,12 +133,14 @@ public class CourierAdminOrderAppService {
         LocalDateTime startDateTime = request.startDate().atStartOfDay();
         LocalDateTime endDateTime = request.endDate().plusDays(1).atStartOfDay();
 
-        List<CourierOrderStatus> statuses = List.of(
-                CourierOrderStatus.PAID,
-                CourierOrderStatus.ORDERING,
-                CourierOrderStatus.ORDER_COMPLETED,
-                CourierOrderStatus.IN_TRANSIT,
-                CourierOrderStatus.DELIVERED);
+        List<CourierOrderStatus> statuses = request.status() != null
+                ? List.of(request.status())
+                : List.of(
+                        CourierOrderStatus.PAID,
+                        CourierOrderStatus.ORDERING,
+                        CourierOrderStatus.ORDER_COMPLETED,
+                        CourierOrderStatus.IN_TRANSIT,
+                        CourierOrderStatus.DELIVERED);
 
         List<CourierOrder> orders;
         if (request.productId() != null) {
@@ -144,6 +154,10 @@ public class CourierAdminOrderAppService {
         if (orders.isEmpty()) {
             throw new UserValidateException("해당 조건에 맞는 주문이 없습니다.");
         }
+
+        orders.stream()
+                .filter(o -> o.getStatus() == CourierOrderStatus.PAID)
+                .forEach(CourierOrder::markOrdering);
 
         return waybillExcelService.generateWaybillExcel(orders);
     }

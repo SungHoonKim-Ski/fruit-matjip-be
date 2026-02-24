@@ -2,11 +2,13 @@ package store.onuljang.courier.dto;
 
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import store.onuljang.shared.entity.enums.CourierOrderStatus;
 
 public record WaybillExcelFilterRequest(
         @NotNull LocalDate startDate,
         @NotNull LocalDate endDate,
-        Long productId) {
+        Long productId,
+        CourierOrderStatus status) {
 
     public void validate() {
         if (endDate.isBefore(startDate)) {
