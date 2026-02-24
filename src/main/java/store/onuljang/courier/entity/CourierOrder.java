@@ -115,6 +115,14 @@ public class CourierOrder extends BaseEntity {
     private LocalDateTime deliveredAt;
 
     @Getter
+    @Column(name = "tracking_location", length = 200)
+    private String trackingLocation;
+
+    @Getter
+    @Column(name = "tracking_updated_at")
+    private LocalDateTime trackingUpdatedAt;
+
+    @Getter
     @Column(name = "idempotency_key", length = 64)
     private String idempotencyKey;
 
@@ -153,6 +161,11 @@ public class CourierOrder extends BaseEntity {
 
     public void markInTransit() {
         this.status = CourierOrderStatus.IN_TRANSIT;
+    }
+
+    public void updateTrackingInfo(String location, LocalDateTime trackingTime) {
+        this.trackingLocation = location;
+        this.trackingUpdatedAt = trackingTime;
     }
 
     public void markDelivered() {

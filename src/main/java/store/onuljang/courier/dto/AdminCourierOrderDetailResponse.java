@@ -29,6 +29,8 @@ public record AdminCourierOrderDetailResponse(
         LocalDateTime paidAt,
         LocalDateTime shippedAt,
         LocalDateTime deliveredAt,
+        String trackingLocation,
+        LocalDateTime trackingUpdatedAt,
         LocalDateTime createdAt,
         List<CourierOrderItemResponse> items) {
 
@@ -57,6 +59,8 @@ public record AdminCourierOrderDetailResponse(
                 order.getPaidAt(),
                 order.getShippedAt(),
                 order.getDeliveredAt(),
+                order.getTrackingLocation(),
+                order.getTrackingUpdatedAt(),
                 order.getCreatedAt(),
                 itemResponses);
     }

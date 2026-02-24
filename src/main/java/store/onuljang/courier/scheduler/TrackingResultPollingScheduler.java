@@ -22,9 +22,11 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
+import java.time.LocalDateTime;
 import store.onuljang.courier.entity.CourierOrder;
 import store.onuljang.courier.service.CourierOrderService;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
+import store.onuljang.shared.util.TimeUtil;
 
 @Slf4j
 @Component
@@ -83,6 +85,11 @@ public class TrackingResultPollingScheduler {
                     result.displayCode(), current);
             }
 
+            if (result.location() != null && !result.location().isBlank()) {
+                LocalDateTime trackingTime = parseTrackingTimestamp(result.timestamp());
+                order.updateTrackingInfo(result.location(), trackingTime);
+            }
+
             sqsClient.deleteMessage(DeleteMessageRequest.builder()
                 .queueUrl(trackingResultQueueUrl)
                 .receiptHandle(message.receiptHandle())
@@ -96,5 +103,16 @@ public class TrackingResultPollingScheduler {
     @Recover
     public void recover(Exception e) {
         log.error("[TrackingResultPollingScheduler] job failed after retries: {}", e.getMessage(), e);
+    }
+
+    private LocalDateTime parseTrackingTimestamp(String timestamp) {
+        if (timestamp == null || timestamp.isBlank()) {
+            return TimeUtil.nowDateTime();
+        }
+        try {
+            return LocalDateTime.parse(timestamp, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (Exception e) {
+            return TimeUtil.nowDateTime();
+        }
     }
 }
