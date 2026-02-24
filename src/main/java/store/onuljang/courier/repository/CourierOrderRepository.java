@@ -4,6 +4,7 @@ import jakarta.persistence.LockModeType;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -43,7 +44,7 @@ public interface CourierOrderRepository extends JpaRepository<CourierOrder, Long
     @Query(
             "SELECT o FROM CourierOrder o WHERE (:status IS NULL OR o.status = :status)"
                     + " ORDER BY o.id DESC")
-    List<CourierOrder> findAllByStatusOrderByIdDesc(
+    Page<CourierOrder> findAllByStatusOrderByIdDesc(
             @Param("status") CourierOrderStatus status, Pageable pageable);
 
     List<CourierOrder> findAllByIdIn(List<Long> ids);

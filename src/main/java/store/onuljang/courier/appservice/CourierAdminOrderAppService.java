@@ -34,7 +34,8 @@ public class CourierAdminOrderAppService {
     WaybillExcelService waybillExcelService;
 
     public AdminCourierOrderListResponse getOrders(CourierOrderStatus status, int page, int size) {
-        List<CourierOrder> orders = courierOrderService.findAllByStatus(status, page, size);
+        org.springframework.data.domain.Page<CourierOrder> orders =
+                courierOrderService.findAllByStatus(status, page, size);
         return AdminCourierOrderListResponse.from(orders);
     }
 

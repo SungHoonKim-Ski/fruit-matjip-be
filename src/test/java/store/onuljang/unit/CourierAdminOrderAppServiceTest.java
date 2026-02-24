@@ -18,6 +18,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 import store.onuljang.courier.appservice.CourierAdminOrderAppService;
 import store.onuljang.courier.dto.AdminCourierOrderDetailResponse;
@@ -120,8 +123,9 @@ class CourierAdminOrderAppServiceTest {
             CourierOrder order2 = createOrder(CourierOrderStatus.SHIPPED, "C-26021400-ABCD2");
             ReflectionTestUtils.setField(order2, "id", 2L);
 
-            given(courierOrderService.findAllByStatus(null, 0, 50))
-                    .willReturn(List.of(order1, order2));
+            Page<CourierOrder> page =
+                    new PageImpl<>(List.of(order1, order2), PageRequest.of(0, 50), 2);
+            given(courierOrderService.findAllByStatus(null, 0, 50)).willReturn(page);
 
             // act
             AdminCourierOrderListResponse result =
@@ -139,8 +143,10 @@ class CourierAdminOrderAppServiceTest {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
 
+            Page<CourierOrder> page =
+                    new PageImpl<>(List.of(order), PageRequest.of(0, 50), 1);
             given(courierOrderService.findAllByStatus(CourierOrderStatus.PAID, 0, 50))
-                    .willReturn(List.of(order));
+                    .willReturn(page);
 
             // act
             AdminCourierOrderListResponse result =

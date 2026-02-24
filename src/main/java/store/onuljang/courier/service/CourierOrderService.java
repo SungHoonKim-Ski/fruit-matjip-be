@@ -4,8 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.AccessLevel;
-import org.springframework.data.domain.PageRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -77,7 +78,7 @@ public class CourierOrderService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 택배 주문입니다."));
     }
 
-    public List<CourierOrder> findAllByStatus(CourierOrderStatus status, int page, int size) {
+    public Page<CourierOrder> findAllByStatus(CourierOrderStatus status, int page, int size) {
         return courierOrderRepository.findAllByStatusOrderByIdDesc(
                 status, PageRequest.of(page, size));
     }
