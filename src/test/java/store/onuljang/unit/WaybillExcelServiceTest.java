@@ -1,6 +1,7 @@
 package store.onuljang.unit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.given;
 
 import java.io.ByteArrayInputStream;
 import java.math.BigDecimal;
@@ -11,15 +12,19 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import store.onuljang.courier.entity.CourierConfig;
 import store.onuljang.courier.entity.CourierOrder;
 import store.onuljang.courier.entity.CourierOrderItem;
 import store.onuljang.courier.entity.CourierProduct;
+import store.onuljang.courier.service.CourierConfigService;
 import store.onuljang.courier.service.WaybillExcelService;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 import store.onuljang.shared.user.entity.Users;
@@ -29,6 +34,19 @@ import store.onuljang.shop.admin.entity.Admin;
 class WaybillExcelServiceTest {
 
     @InjectMocks private WaybillExcelService waybillExcelService;
+    @Mock private CourierConfigService courierConfigService;
+
+    @BeforeEach
+    void setUp() {
+        CourierConfig config = CourierConfig.builder()
+                .senderName("과일맛집")
+                .senderPhone("010-0000-0000")
+                .senderPhone2("02-1234-5678")
+                .senderAddress("서울시 중구 명동길 1")
+                .senderDetailAddress("1층")
+                .build();
+        given(courierConfigService.getConfig()).willReturn(config);
+    }
 
     private CourierOrder createOrder(
             String displayCode, String receiverName, String receiverPhone) {
@@ -108,22 +126,29 @@ class WaybillExcelServiceTest {
             Row dataRow = sheet.getRow(1);
             assertThat(dataRow).isNotNull();
 
-            // 받는 사람 정보 (A~E)
-            assertThat(dataRow.getCell(0).getStringCellValue()).isEqualTo("홍길동");
-            assertThat(dataRow.getCell(1).getStringCellValue()).isEqualTo("010-1234-5678");
-            assertThat(dataRow.getCell(2).getStringCellValue()).isEqualTo("");
-            assertThat(dataRow.getCell(3).getStringCellValue())
-                    .isEqualTo("서울시 강남구 테헤란로 123");
-            assertThat(dataRow.getCell(4).getStringCellValue()).isEqualTo("5층 501호");
+            // 보내는 사람 정보 (0~4)
+            assertThat(dataRow.getCell(0).getStringCellValue()).isEqualTo("과일맛집");
+            assertThat(dataRow.getCell(1).getStringCellValue()).isEqualTo("010-0000-0000");
+            assertThat(dataRow.getCell(2).getStringCellValue()).isEqualTo("02-1234-5678");
+            assertThat(dataRow.getCell(3).getStringCellValue()).isEqualTo("서울시 중구 명동길 1");
+            assertThat(dataRow.getCell(4).getStringCellValue()).isEqualTo("1층");
 
-            // 상품/주문 정보 (F~K)
-            assertThat(dataRow.getCell(5).getStringCellValue()).isEqualTo("제주 감귤 5kg");
-            assertThat(dataRow.getCell(6).getStringCellValue()).isEqualTo("");
-            assertThat((int) dataRow.getCell(7).getNumericCellValue()).isEqualTo(2);
+            // 받는 사람 정보 (5~9)
+            assertThat(dataRow.getCell(5).getStringCellValue()).isEqualTo("홍길동");
+            assertThat(dataRow.getCell(6).getStringCellValue()).isEqualTo("010-1234-5678");
+            assertThat(dataRow.getCell(7).getStringCellValue()).isEqualTo("");
             assertThat(dataRow.getCell(8).getStringCellValue())
+                    .isEqualTo("서울시 강남구 테헤란로 123");
+            assertThat(dataRow.getCell(9).getStringCellValue()).isEqualTo("5층 501호");
+
+            // 상품/주문 정보 (10~15)
+            assertThat(dataRow.getCell(10).getStringCellValue()).isEqualTo("제주 감귤 5kg");
+            assertThat(dataRow.getCell(11).getStringCellValue()).isEqualTo("");
+            assertThat((int) dataRow.getCell(12).getNumericCellValue()).isEqualTo(2);
+            assertThat(dataRow.getCell(13).getStringCellValue())
                     .isEqualTo("부재 시 경비실에 맡겨주세요");
-            assertThat(dataRow.getCell(9).getStringCellValue()).isEqualTo("2026-02-22 10:30");
-            assertThat(dataRow.getCell(10).getStringCellValue()).isEqualTo("C-26022200-ABCD1");
+            assertThat(dataRow.getCell(14).getStringCellValue()).isEqualTo("2026-02-22 10:30");
+            assertThat(dataRow.getCell(15).getStringCellValue()).isEqualTo("C-26022200-ABCD1");
         }
     }
 
@@ -145,12 +170,14 @@ class WaybillExcelServiceTest {
             Sheet sheet = wb.getSheetAt(0);
 
             Row row1 = sheet.getRow(1);
-            assertThat(row1.getCell(0).getStringCellValue()).isEqualTo("홍길동");
-            assertThat(row1.getCell(10).getStringCellValue()).isEqualTo("C-26022200-ABCD1");
+            assertThat(row1.getCell(0).getStringCellValue()).isEqualTo("과일맛집");
+            assertThat(row1.getCell(5).getStringCellValue()).isEqualTo("홍길동");
+            assertThat(row1.getCell(15).getStringCellValue()).isEqualTo("C-26022200-ABCD1");
 
             Row row2 = sheet.getRow(2);
-            assertThat(row2.getCell(0).getStringCellValue()).isEqualTo("김철수");
-            assertThat(row2.getCell(10).getStringCellValue()).isEqualTo("C-26022200-ABCD2");
+            assertThat(row2.getCell(0).getStringCellValue()).isEqualTo("과일맛집");
+            assertThat(row2.getCell(5).getStringCellValue()).isEqualTo("김철수");
+            assertThat(row2.getCell(15).getStringCellValue()).isEqualTo("C-26022200-ABCD2");
         }
     }
 
@@ -172,9 +199,12 @@ class WaybillExcelServiceTest {
             Sheet sheet = wb.getSheetAt(0);
             Row dataRow = sheet.getRow(1);
 
-            assertThat(dataRow.getCell(2).getStringCellValue()).isEqualTo("");
-            assertThat(dataRow.getCell(4).getStringCellValue()).isEqualTo("");
-            assertThat(dataRow.getCell(8).getStringCellValue()).isEqualTo("");
+            // receiver phone2 placeholder
+            assertThat(dataRow.getCell(7).getStringCellValue()).isEqualTo("");
+            // address2 (null → "")
+            assertThat(dataRow.getCell(9).getStringCellValue()).isEqualTo("");
+            // shippingMemo (null → "")
+            assertThat(dataRow.getCell(13).getStringCellValue()).isEqualTo("");
         }
     }
 }
