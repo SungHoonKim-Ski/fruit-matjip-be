@@ -17,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 import store.onuljang.courier.entity.CourierClaim;
@@ -171,16 +173,18 @@ class CourierClaimServiceTest {
             // arrange
             CourierClaim claim = createClaim(CourierClaimStatus.REQUESTED);
 
+            Page<CourierClaim> page =
+                    new PageImpl<>(List.of(claim), PageRequest.of(0, 50), 1);
             given(courierClaimRepository.findAllByStatusOrderByIdDesc(
                             CourierClaimStatus.REQUESTED, PageRequest.of(0, 50)))
-                    .willReturn(List.of(claim));
+                    .willReturn(page);
 
             // act
-            List<CourierClaim> result =
+            Page<CourierClaim> result =
                     courierClaimService.findAllByStatus(CourierClaimStatus.REQUESTED, 0, 50);
 
             // assert
-            assertThat(result).hasSize(1);
+            assertThat(result.getContent()).hasSize(1);
             verify(courierClaimRepository)
                     .findAllByStatusOrderByIdDesc(
                             CourierClaimStatus.REQUESTED, PageRequest.of(0, 50));

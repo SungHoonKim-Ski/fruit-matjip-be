@@ -46,7 +46,14 @@ public class AdminCourierClaimController {
     @PatchMapping("/{id}/reject")
     public ResponseEntity<CourierClaimResponse> rejectClaim(
             @PathVariable("id") Long id, @RequestBody Map<String, String> body) {
-        String adminNote = body.getOrDefault("adminNote", "");
+        String adminNote = body.getOrDefault("admin_note", body.getOrDefault("adminNote", ""));
         return ResponseEntity.ok(courierClaimAppService.rejectClaim(id, adminNote));
+    }
+
+    @PatchMapping("/{id}/order-status")
+    public ResponseEntity<CourierClaimResponse> updateOrderStatus(
+            @PathVariable("id") Long id, @RequestBody Map<String, String> body) {
+        String newStatus = body.getOrDefault("order_status", body.getOrDefault("orderStatus", ""));
+        return ResponseEntity.ok(courierClaimAppService.updateClaimOrderStatus(id, newStatus));
     }
 }

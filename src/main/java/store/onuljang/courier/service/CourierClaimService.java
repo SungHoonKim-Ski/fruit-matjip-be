@@ -4,6 +4,7 @@ import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +37,7 @@ public class CourierClaimService {
         return courierClaimRepository.findByCourierOrderOrderByIdDesc(order);
     }
 
-    public List<CourierClaim> findAllByStatus(CourierClaimStatus status, int page, int size) {
+    public Page<CourierClaim> findAllByStatus(CourierClaimStatus status, int page, int size) {
         return courierClaimRepository.findAllByStatusOrderByIdDesc(
                 status, PageRequest.of(page, size));
     }

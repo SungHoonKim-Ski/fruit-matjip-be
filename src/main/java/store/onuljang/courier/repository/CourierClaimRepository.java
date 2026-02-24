@@ -1,6 +1,7 @@
 package store.onuljang.courier.repository;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,6 +16,6 @@ public interface CourierClaimRepository extends JpaRepository<CourierClaim, Long
 
     @Query(
             "SELECT c FROM CourierClaim c WHERE (:status IS NULL OR c.claimStatus = :status) ORDER BY c.id DESC")
-    List<CourierClaim> findAllByStatusOrderByIdDesc(
+    Page<CourierClaim> findAllByStatusOrderByIdDesc(
             @Param("status") CourierClaimStatus status, Pageable pageable);
 }

@@ -3,6 +3,7 @@ package store.onuljang.courier.appservice;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.AccessLevel;
+import org.springframework.data.domain.Page;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -97,7 +98,7 @@ public class CourierClaimAppService {
 
     public CourierClaimListResponse getAdminClaims(
             CourierClaimStatus status, int page, int size) {
-        List<CourierClaim> claims = courierClaimService.findAllByStatus(status, page, size);
+        Page<CourierClaim> claims = courierClaimService.findAllByStatus(status, page, size);
         return CourierClaimListResponse.from(claims);
     }
 
@@ -139,6 +140,32 @@ public class CourierClaimAppService {
                 claim.getCourierOrderItem().markRefunded();
             }
             claim.resolve();
+        }
+
+        return CourierClaimResponse.from(claim);
+    }
+
+    // === 관리자: 주문 상태 변경 ===
+
+    @Transactional
+    public CourierClaimResponse updateClaimOrderStatus(Long claimId, String statusStr) {
+        CourierClaim claim = courierClaimService.findById(claimId);
+        CourierOrder order = claim.getCourierOrder();
+
+        CourierOrderStatus newStatus;
+        try {
+            newStatus = CourierOrderStatus.valueOf(statusStr);
+        } catch (IllegalArgumentException e) {
+            throw new AdminValidateException("유효하지 않은 주문 상태입니다: " + statusStr);
+        }
+
+        switch (newStatus) {
+            case PREPARING -> order.markPreparing();
+            case SHIPPED -> order.markShipped(order.getWaybillNumber());
+            case IN_TRANSIT -> order.markInTransit();
+            case DELIVERED -> order.markDelivered();
+            case CANCELED -> order.markCanceled();
+            default -> throw new AdminValidateException("변경할 수 없는 상태입니다: " + statusStr);
         }
 
         return CourierClaimResponse.from(claim);
