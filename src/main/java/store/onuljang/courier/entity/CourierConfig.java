@@ -25,6 +25,14 @@ public class CourierConfig extends BaseEntity {
     @Builder.Default
     private BigDecimal baseShippingFee = new BigDecimal("3000");
 
+    @Column(name = "combined_shipping_enabled", nullable = false)
+    @Builder.Default
+    private boolean combinedShippingEnabled = false;
+
+    @Column(name = "combined_shipping_max_quantity", nullable = false)
+    @Builder.Default
+    private int combinedShippingMaxQuantity = 1;
+
     @Lob
     @Column(name = "notice_text", columnDefinition = "TEXT")
     private String noticeText;
@@ -48,6 +56,8 @@ public class CourierConfig extends BaseEntity {
             boolean enabled,
             BigDecimal islandSurcharge,
             BigDecimal baseShippingFee,
+            boolean combinedShippingEnabled,
+            int combinedShippingMaxQuantity,
             String noticeText,
             String senderName,
             String senderPhone,
@@ -57,6 +67,8 @@ public class CourierConfig extends BaseEntity {
         this.enabled = enabled;
         this.islandSurcharge = islandSurcharge;
         this.baseShippingFee = baseShippingFee;
+        this.combinedShippingEnabled = combinedShippingEnabled;
+        this.combinedShippingMaxQuantity = combinedShippingMaxQuantity;
         this.noticeText = noticeText;
         this.senderName = senderName;
         this.senderPhone = senderPhone;

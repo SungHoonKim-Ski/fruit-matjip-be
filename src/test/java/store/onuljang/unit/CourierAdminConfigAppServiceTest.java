@@ -32,6 +32,8 @@ class CourierAdminConfigAppServiceTest {
                         .enabled(true)
                         .islandSurcharge(new BigDecimal("3000"))
                         .baseShippingFee(new BigDecimal("3000"))
+                        .combinedShippingEnabled(false)
+                        .combinedShippingMaxQuantity(1)
                         .noticeText("공지사항")
                         .senderName("과일맛집")
                         .senderPhone("010-0000-0000")
@@ -88,6 +90,8 @@ class CourierAdminConfigAppServiceTest {
                             false,
                             new BigDecimal("5000"),
                             new BigDecimal("2500"),
+                            null,
+                            null,
                             "변경된 공지",
                             "김철수",
                             "010-9999-8888",
@@ -130,6 +134,8 @@ class CourierAdminConfigAppServiceTest {
                             null,
                             null,
                             null,
+                            null,
+                            null,
                             null);
 
             // act
@@ -158,6 +164,8 @@ class CourierAdminConfigAppServiceTest {
                             null,
                             null,
                             new BigDecimal("4500"),
+                            null,
+                            null,
                             null,
                             null,
                             null,

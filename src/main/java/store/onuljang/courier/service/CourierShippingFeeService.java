@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.courier.dto.ShippingFeeItemInput;
 import store.onuljang.courier.dto.ShippingFeePreviewRequest;
 import store.onuljang.courier.dto.ShippingFeeResult;
+import store.onuljang.courier.entity.CourierConfig;
 import store.onuljang.courier.entity.CourierProduct;
 import store.onuljang.courier.entity.ShippingFeeTemplate;
 import store.onuljang.courier.repository.ShippingFeeTemplateRepository;
@@ -54,6 +55,7 @@ public class CourierShippingFeeService {
     public ShippingFeeResult calculateByItems(
             List<ShippingFeeItemInput> items, String postalCode) {
 
+        CourierConfig config = courierConfigService.getConfig();
         BigDecimal totalShippingFee = BigDecimal.ZERO;
 
         // 템플릿별 그룹핑
@@ -88,20 +90,28 @@ public class CourierShippingFeeService {
             totalShippingFee = totalShippingFee.add(template.calculateFee(groupQuantity, groupAmount));
         }
 
-        // 2) 기본배송 상품: baseShippingFee × 수량
+        // 2) 기본배송 상품
         if (!globalPolicyItems.isEmpty()) {
             int totalQuantity =
                     globalPolicyItems.stream().mapToInt(ShippingFeeItemInput::quantity).sum();
-            BigDecimal baseShippingFee = courierConfigService.getConfig().getBaseShippingFee();
+            BigDecimal baseShippingFee = config.getBaseShippingFee();
+
+            int feeCount;
+            if (config.isCombinedShippingEnabled() && config.getCombinedShippingMaxQuantity() > 0) {
+                int maxQty = config.getCombinedShippingMaxQuantity();
+                feeCount = (totalQuantity + maxQty - 1) / maxQty;
+            } else {
+                feeCount = totalQuantity;
+            }
             totalShippingFee =
-                    totalShippingFee.add(baseShippingFee.multiply(BigDecimal.valueOf(totalQuantity)));
+                    totalShippingFee.add(baseShippingFee.multiply(BigDecimal.valueOf(feeCount)));
         }
 
         // 3) 도서산간 추가
         boolean isIsland = isIslandPostalCode(postalCode);
         BigDecimal islandSurcharge = BigDecimal.ZERO;
         if (isIsland) {
-            islandSurcharge = courierConfigService.getConfig().getIslandSurcharge();
+            islandSurcharge = config.getIslandSurcharge();
         }
 
         BigDecimal finalTotal = totalShippingFee.add(islandSurcharge);
