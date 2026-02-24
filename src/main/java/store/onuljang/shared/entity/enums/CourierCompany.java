@@ -4,5 +4,6 @@ public enum CourierCompany {
     HANJIN,
     LOGEN,
     CJ,
-    LOTTE
+    LOTTE,
+    EPOST
 }
