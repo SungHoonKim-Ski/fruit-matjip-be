@@ -106,6 +106,11 @@ public class CourierOrderService {
                 startDateTime, endDateTime, statuses, productId);
     }
 
+    public List<CourierOrder> findActiveDeliveries() {
+        return courierOrderRepository.findByStatusInAndWaybillNumberIsNotNull(
+                List.of(CourierOrderStatus.SHIPPED, CourierOrderStatus.IN_TRANSIT));
+    }
+
     @Transactional
     public void completePaid(long orderId, String pgTid, String approveAid) {
         CourierOrder order = findById(orderId);

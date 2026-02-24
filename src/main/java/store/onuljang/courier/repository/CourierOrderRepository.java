@@ -60,6 +60,8 @@ public interface CourierOrderRepository extends JpaRepository<CourierOrder, Long
 
     List<CourierOrder> findAllByIdIn(List<Long> ids);
 
+    List<CourierOrder> findByStatusInAndWaybillNumberIsNotNull(List<CourierOrderStatus> statuses);
+
     @Query("SELECT DISTINCT o FROM CourierOrder o " +
            "JOIN FETCH o.items i " +
            "WHERE o.paidAt >= :startDateTime AND o.paidAt < :endDateTime " +
