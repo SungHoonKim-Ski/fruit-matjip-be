@@ -24,9 +24,11 @@ public record CourierProductCreateRequest(
 
     List<Long> categoryIds,
 
-    Long shippingFeeTemplateId,
+    @NotNull(message = "배송비는 필수입니다")
+    @Min(value = 0, message = "배송비는 0원 이상이어야 합니다")
+    BigDecimal shippingFee,
 
-    BigDecimal combinedShippingFee,
+    Integer combinedShippingQuantity,
 
     List<OptionGroupRequest> optionGroups
 ) {}

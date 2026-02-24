@@ -6,5 +6,5 @@ public record ShippingFeeItemInput(
         Long productId,
         int quantity,
         BigDecimal itemAmount,
-        Long templateId,
-        BigDecimal combinedShippingFee) {}
+        BigDecimal shippingFee,
+        int combinedShippingQuantity) {}

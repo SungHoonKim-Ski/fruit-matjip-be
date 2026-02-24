@@ -31,7 +31,6 @@ class CourierAdminConfigAppServiceTest {
                 CourierConfig.builder()
                         .enabled(true)
                         .islandSurcharge(new BigDecimal("3000"))
-                        .baseShippingFee(new BigDecimal("3000"))
                         .noticeText("공지사항")
                         .senderName("과일맛집")
                         .senderPhone("010-0000-0000")
@@ -61,7 +60,6 @@ class CourierAdminConfigAppServiceTest {
             assertThat(result.id()).isEqualTo(1L);
             assertThat(result.enabled()).isTrue();
             assertThat(result.islandSurcharge()).isEqualByComparingTo(new BigDecimal("3000"));
-            assertThat(result.baseShippingFee()).isEqualByComparingTo(new BigDecimal("3000"));
             assertThat(result.senderName()).isEqualTo("과일맛집");
             assertThat(result.senderPhone()).isEqualTo("010-0000-0000");
             assertThat(result.senderPhone2()).isEqualTo("02-1234-5678");
@@ -87,7 +85,6 @@ class CourierAdminConfigAppServiceTest {
                     new CourierConfigUpdateRequest(
                             false,
                             new BigDecimal("5000"),
-                            new BigDecimal("2500"),
                             "변경된 공지",
                             "김철수",
                             "010-9999-8888",
@@ -102,7 +99,6 @@ class CourierAdminConfigAppServiceTest {
             // assert
             assertThat(result.enabled()).isFalse();
             assertThat(result.islandSurcharge()).isEqualByComparingTo(new BigDecimal("5000"));
-            assertThat(result.baseShippingFee()).isEqualByComparingTo(new BigDecimal("2500"));
             assertThat(result.noticeText()).isEqualTo("변경된 공지");
             assertThat(result.senderName()).isEqualTo("김철수");
             assertThat(result.senderPhone()).isEqualTo("010-9999-8888");
@@ -129,7 +125,6 @@ class CourierAdminConfigAppServiceTest {
                             null,
                             null,
                             null,
-                            null,
                             null);
 
             // act
@@ -139,39 +134,9 @@ class CourierAdminConfigAppServiceTest {
             // assert
             assertThat(result.enabled()).isTrue();
             assertThat(result.islandSurcharge()).isEqualByComparingTo(new BigDecimal("4000"));
-            assertThat(result.baseShippingFee()).isEqualByComparingTo(new BigDecimal("3000"));
             assertThat(result.noticeText()).isEqualTo("공지사항");
             assertThat(result.senderName()).isEqualTo("과일맛집");
             assertThat(result.senderPhone()).isEqualTo("010-0000-0000");
-        }
-
-        @Test
-        @DisplayName("baseShippingFee 수정 시 반영")
-        void updateConfig_baseShippingFee_updates() {
-            // arrange
-            CourierConfig config = buildConfig();
-            given(courierConfigService.getConfig()).willReturn(config);
-            given(courierConfigService.updateConfig(config)).willReturn(config);
-
-            CourierConfigUpdateRequest request =
-                    new CourierConfigUpdateRequest(
-                            null,
-                            null,
-                            new BigDecimal("4500"),
-                            null,
-                            null,
-                            null,
-                            null,
-                            null,
-                            null);
-
-            // act
-            CourierConfigAdminResponse result =
-                    courierAdminConfigAppService.updateConfig(request);
-
-            // assert
-            assertThat(result.baseShippingFee()).isEqualByComparingTo(new BigDecimal("4500"));
-            assertThat(result.islandSurcharge()).isEqualByComparingTo(new BigDecimal("3000"));
         }
     }
 }

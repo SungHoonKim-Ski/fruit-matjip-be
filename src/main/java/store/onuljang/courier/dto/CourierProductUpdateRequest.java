@@ -13,7 +13,7 @@ public record CourierProductUpdateRequest(
     Boolean visible,
     Boolean soldOut,
     List<Long> categoryIds,
-    Long shippingFeeTemplateId,
-    BigDecimal combinedShippingFee,
+    BigDecimal shippingFee,
+    Integer combinedShippingQuantity,
     List<OptionGroupRequest> optionGroups
 ) {}

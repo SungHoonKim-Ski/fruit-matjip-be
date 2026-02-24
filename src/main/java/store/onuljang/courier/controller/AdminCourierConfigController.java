@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import store.onuljang.courier.appservice.CourierAdminConfigAppService;
 import store.onuljang.courier.dto.CourierConfigAdminResponse;
 import store.onuljang.courier.dto.CourierConfigUpdateRequest;
-import store.onuljang.courier.dto.ShippingFeeTemplateListResponse;
-import store.onuljang.courier.dto.ShippingFeeTemplateRequest;
-import store.onuljang.courier.dto.ShippingFeeTemplateResponse;
 
 @RestController
 @RequestMapping("/api/admin/courier")
@@ -32,29 +29,5 @@ public class AdminCourierConfigController {
     public ResponseEntity<CourierConfigAdminResponse> updateConfig(
             @Valid @RequestBody CourierConfigUpdateRequest request) {
         return ResponseEntity.ok(courierAdminConfigAppService.updateConfig(request));
-    }
-
-    @GetMapping("/shipping-fee-templates")
-    public ResponseEntity<ShippingFeeTemplateListResponse> getShippingFeeTemplates() {
-        return ResponseEntity.ok(courierAdminConfigAppService.getShippingFeeTemplates());
-    }
-
-    @PostMapping("/shipping-fee-templates")
-    public ResponseEntity<ShippingFeeTemplateResponse> createShippingFeeTemplate(
-            @Valid @RequestBody ShippingFeeTemplateRequest request) {
-        return ResponseEntity.ok(courierAdminConfigAppService.createShippingFeeTemplate(request));
-    }
-
-    @PutMapping("/shipping-fee-templates/{id}")
-    public ResponseEntity<ShippingFeeTemplateResponse> updateShippingFeeTemplate(
-            @PathVariable("id") Long id, @Valid @RequestBody ShippingFeeTemplateRequest request) {
-        return ResponseEntity.ok(
-                courierAdminConfigAppService.updateShippingFeeTemplate(id, request));
-    }
-
-    @DeleteMapping("/shipping-fee-templates/{id}")
-    public ResponseEntity<Void> deleteShippingFeeTemplate(@PathVariable("id") Long id) {
-        courierAdminConfigAppService.deleteShippingFeeTemplate(id);
-        return ResponseEntity.ok().build();
     }
 }

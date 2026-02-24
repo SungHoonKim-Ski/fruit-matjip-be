@@ -25,7 +25,6 @@ import store.onuljang.courier.entity.CourierProductOptionGroup;
 import store.onuljang.courier.repository.CourierProductCategoryMappingRepository;
 import store.onuljang.courier.repository.CourierProductRepository;
 import store.onuljang.courier.service.CourierProductService;
-import store.onuljang.courier.service.ShippingFeeTemplateService;
 import store.onuljang.shop.admin.dto.PresignedUrlRequest;
 import store.onuljang.courier.dto.CourierCategoryResponse;
 import store.onuljang.courier.entity.CourierProductCategory;
@@ -47,7 +46,6 @@ public class CourierAdminProductAppService {
     AdminUploadService adminUploadService;
     AdminService adminService;
     CourierProductCategoryMappingRepository courierProductCategoryMappingRepository;
-    ShippingFeeTemplateService shippingFeeTemplateService;
     CourierProductRepository courierProductRepository;
 
     public CourierProductListResponse getProducts() {
@@ -79,12 +77,10 @@ public class CourierAdminProductAppService {
             product.updateCategories(categories);
         }
 
-        if (request.shippingFeeTemplateId() != null) {
-            product.setShippingFeeTemplate(
-                    shippingFeeTemplateService.findById(request.shippingFeeTemplateId()));
+        product.setShippingFee(request.shippingFee());
+        if (request.combinedShippingQuantity() != null) {
+            product.setCombinedShippingQuantity(request.combinedShippingQuantity());
         }
-
-        product.setCombinedShippingFee(request.combinedShippingFee());
 
         courierProductService.save(product);
 
@@ -145,12 +141,12 @@ public class CourierAdminProductAppService {
             product.updateCategories(categories);
         }
 
-        if (request.shippingFeeTemplateId() != null) {
-            product.setShippingFeeTemplate(
-                    shippingFeeTemplateService.findById(request.shippingFeeTemplateId()));
+        if (request.shippingFee() != null) {
+            product.setShippingFee(request.shippingFee());
         }
-
-        product.setCombinedShippingFee(request.combinedShippingFee());
+        if (request.combinedShippingQuantity() != null) {
+            product.setCombinedShippingQuantity(request.combinedShippingQuantity());
+        }
 
         if (request.optionGroups() != null) {
             List<CourierProductOptionGroup> groups = buildOptionGroups(product, request.optionGroups());

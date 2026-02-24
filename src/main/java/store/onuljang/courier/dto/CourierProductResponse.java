@@ -22,9 +22,8 @@ public record CourierProductResponse(
     int recommendOrder,
     List<CategoryItem> categories,
     LocalDateTime createdAt,
-    Long shippingFeeTemplateId,
-    String shippingFeeTemplateName,
-    BigDecimal combinedShippingFee,
+    BigDecimal shippingFee,
+    int combinedShippingQuantity,
     List<OptionGroupResponse> optionGroups
 ) {
     public record CategoryItem(Long id, String name) {}
@@ -49,15 +48,8 @@ public record CourierProductResponse(
                 .recommendOrder(product.getRecommendOrder())
                 .categories(categoryItems)
                 .createdAt(product.getCreatedAt())
-                .shippingFeeTemplateId(
-                        product.getShippingFeeTemplate() != null
-                                ? product.getShippingFeeTemplate().getId()
-                                : null)
-                .shippingFeeTemplateName(
-                        product.getShippingFeeTemplate() != null
-                                ? product.getShippingFeeTemplate().getName()
-                                : null)
-                .combinedShippingFee(product.getCombinedShippingFee())
+                .shippingFee(product.getShippingFee())
+                .combinedShippingQuantity(product.getCombinedShippingQuantity())
                 .optionGroups(product.getOptionGroups().stream()
                         .map(OptionGroupResponse::from).toList())
                 .build();

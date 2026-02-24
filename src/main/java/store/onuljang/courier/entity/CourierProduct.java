@@ -96,14 +96,15 @@ public class CourierProduct extends BaseEntity {
 
     @Getter
     @Setter
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shipping_fee_template_id")
-    private ShippingFeeTemplate shippingFeeTemplate;
+    @Column(name = "shipping_fee", nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal shippingFee = BigDecimal.ZERO;
 
     @Getter
     @Setter
-    @Column(name = "combined_shipping_fee", precision = 12, scale = 2)
-    private BigDecimal combinedShippingFee;
+    @Column(name = "combined_shipping_quantity", nullable = false)
+    @Builder.Default
+    private Integer combinedShippingQuantity = 1;
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;

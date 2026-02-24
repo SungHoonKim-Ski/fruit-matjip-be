@@ -129,7 +129,7 @@ public class CourierOrderAppService {
                     product, itemReq.quantity(), itemAmount, selectedOptionsJson, selectedOptionIdsStr));
         }
 
-        // 3) 배송비 계산 (상품별 템플릿 기반)
+        // 3) 배송비 계산 (상품별)
         List<ShippingFeeItemInput> feeItems =
                 itemDataList.stream()
                         .map(
@@ -138,12 +138,8 @@ public class CourierOrderAppService {
                                                 data.product().getId(),
                                                 data.quantity(),
                                                 data.amount(),
-                                                data.product().getShippingFeeTemplate() != null
-                                                        ? data.product()
-                                                                .getShippingFeeTemplate()
-                                                                .getId()
-                                                        : null,
-                                                data.product().getCombinedShippingFee()))
+                                                data.product().getShippingFee(),
+                                                data.product().getCombinedShippingQuantity()))
                         .toList();
         ShippingFeeResult feeResult =
                 courierShippingFeeService.calculateByItems(feeItems, request.postalCode());
@@ -296,8 +292,8 @@ public class CourierOrderAppService {
         Users user = userService.findByUId(uid);
         CourierOrder order = courierOrderService.findByDisplayCodeAndUser(displayCode, user);
         if (order.getStatus() != CourierOrderStatus.PAID
-                && order.getStatus() != CourierOrderStatus.PREPARING) {
-            throw new UserValidateException("발송 완료된 주문은 취소할 수 없습니다.");
+                && order.getStatus() != CourierOrderStatus.ORDERING) {
+            throw new UserValidateException("발주완료 이후 주문은 취소할 수 없습니다.");
         }
         if (order.getPgPaymentAmount().compareTo(BigDecimal.ZERO) > 0) {
             courierRefundService.refund(order, order.getPgPaymentAmount());

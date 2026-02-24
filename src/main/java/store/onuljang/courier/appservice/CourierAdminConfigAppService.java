@@ -7,13 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.courier.dto.CourierConfigAdminResponse;
 import store.onuljang.courier.dto.CourierConfigUpdateRequest;
-import store.onuljang.courier.dto.ShippingFeeTemplateListResponse;
-import store.onuljang.courier.dto.ShippingFeeTemplateRequest;
-import store.onuljang.courier.dto.ShippingFeeTemplateResponse;
 import store.onuljang.courier.entity.CourierConfig;
-import store.onuljang.courier.entity.ShippingFeeTemplate;
 import store.onuljang.courier.service.CourierConfigService;
-import store.onuljang.courier.service.ShippingFeeTemplateService;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,7 +17,6 @@ import store.onuljang.courier.service.ShippingFeeTemplateService;
 public class CourierAdminConfigAppService {
 
     CourierConfigService courierConfigService;
-    ShippingFeeTemplateService shippingFeeTemplateService;
 
     public CourierConfigAdminResponse getConfig() {
         CourierConfig config = courierConfigService.getConfig();
@@ -37,9 +31,6 @@ public class CourierAdminConfigAppService {
                 request.islandSurcharge() != null
                         ? request.islandSurcharge()
                         : config.getIslandSurcharge(),
-                request.baseShippingFee() != null
-                        ? request.baseShippingFee()
-                        : config.getBaseShippingFee(),
                 request.noticeText() != null ? request.noticeText() : config.getNoticeText(),
                 request.senderName() != null ? request.senderName() : config.getSenderName(),
                 request.senderPhone() != null ? request.senderPhone() : config.getSenderPhone(),
@@ -52,40 +43,5 @@ public class CourierAdminConfigAppService {
                         : config.getSenderDetailAddress());
         courierConfigService.updateConfig(config);
         return CourierConfigAdminResponse.from(config);
-    }
-
-    public ShippingFeeTemplateListResponse getShippingFeeTemplates() {
-        return ShippingFeeTemplateListResponse.from(shippingFeeTemplateService.findAll());
-    }
-
-    @Transactional
-    public ShippingFeeTemplateResponse createShippingFeeTemplate(
-            ShippingFeeTemplateRequest request) {
-        ShippingFeeTemplate template =
-                ShippingFeeTemplate.builder()
-                        .name(request.name())
-                        .baseFee(request.baseFee())
-                        .perQuantityFee(request.perQuantityFee())
-                        .freeShippingMinAmount(request.freeShippingMinAmount())
-                        .sortOrder(request.sortOrder() != null ? request.sortOrder() : 0)
-                        .build();
-        return ShippingFeeTemplateResponse.from(shippingFeeTemplateService.save(template));
-    }
-
-    @Transactional
-    public ShippingFeeTemplateResponse updateShippingFeeTemplate(
-            Long id, ShippingFeeTemplateRequest request) {
-        ShippingFeeTemplate template = shippingFeeTemplateService.findById(id);
-        template.setName(request.name());
-        template.setBaseFee(request.baseFee());
-        template.setPerQuantityFee(request.perQuantityFee());
-        template.setFreeShippingMinAmount(request.freeShippingMinAmount());
-        if (request.sortOrder() != null) template.setSortOrder(request.sortOrder());
-        return ShippingFeeTemplateResponse.from(template);
-    }
-
-    @Transactional
-    public void deleteShippingFeeTemplate(Long id) {
-        shippingFeeTemplateService.delete(id);
     }
 }
