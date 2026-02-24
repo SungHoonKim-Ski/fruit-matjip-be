@@ -1,6 +1,5 @@
 package store.onuljang.courier.appservice;
 
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -8,16 +7,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.courier.dto.CourierConfigAdminResponse;
 import store.onuljang.courier.dto.CourierConfigUpdateRequest;
-import store.onuljang.courier.dto.ShippingFeePolicyListResponse;
-import store.onuljang.courier.dto.ShippingFeePolicyRequest;
 import store.onuljang.courier.dto.ShippingFeeTemplateListResponse;
 import store.onuljang.courier.dto.ShippingFeeTemplateRequest;
 import store.onuljang.courier.dto.ShippingFeeTemplateResponse;
 import store.onuljang.courier.entity.CourierConfig;
-import store.onuljang.courier.entity.ShippingFeePolicy;
 import store.onuljang.courier.entity.ShippingFeeTemplate;
 import store.onuljang.courier.service.CourierConfigService;
-import store.onuljang.courier.service.CourierShippingFeeService;
 import store.onuljang.courier.service.ShippingFeeTemplateService;
 
 @Service
@@ -27,7 +22,6 @@ import store.onuljang.courier.service.ShippingFeeTemplateService;
 public class CourierAdminConfigAppService {
 
     CourierConfigService courierConfigService;
-    CourierShippingFeeService courierShippingFeeService;
     ShippingFeeTemplateService shippingFeeTemplateService;
 
     public CourierConfigAdminResponse getConfig() {
@@ -43,6 +37,9 @@ public class CourierAdminConfigAppService {
                 request.islandSurcharge() != null
                         ? request.islandSurcharge()
                         : config.getIslandSurcharge(),
+                request.baseShippingFee() != null
+                        ? request.baseShippingFee()
+                        : config.getBaseShippingFee(),
                 request.noticeText() != null ? request.noticeText() : config.getNoticeText(),
                 request.senderName() != null ? request.senderName() : config.getSenderName(),
                 request.senderPhone() != null ? request.senderPhone() : config.getSenderPhone(),
@@ -55,30 +52,6 @@ public class CourierAdminConfigAppService {
                         : config.getSenderDetailAddress());
         courierConfigService.updateConfig(config);
         return CourierConfigAdminResponse.from(config);
-    }
-
-    public ShippingFeePolicyListResponse getShippingFeePolicies() {
-        List<ShippingFeePolicy> policies = courierShippingFeeService.findAll();
-        return ShippingFeePolicyListResponse.from(policies);
-    }
-
-    @Transactional
-    public ShippingFeePolicyListResponse replaceShippingFeePolicies(
-            List<ShippingFeePolicyRequest> requests) {
-        List<ShippingFeePolicy> policies =
-                requests.stream()
-                        .map(
-                                req ->
-                                        ShippingFeePolicy.builder()
-                                                .minQuantity(req.minQuantity())
-                                                .maxQuantity(req.maxQuantity())
-                                                .fee(req.fee())
-                                                .sortOrder(
-                                                        req.sortOrder() != null ? req.sortOrder() : 0)
-                                                .build())
-                        .toList();
-        List<ShippingFeePolicy> saved = courierShippingFeeService.replaceAll(policies);
-        return ShippingFeePolicyListResponse.from(saved);
     }
 
     public ShippingFeeTemplateListResponse getShippingFeeTemplates() {

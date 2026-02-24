@@ -87,6 +87,7 @@ class CourierConfigServiceTest {
             config.update(
                     true,
                     new BigDecimal("5000"),
+                    new BigDecimal("3000"),
                     "변경된 안내",
                     "김철수",
                     "010-9999-8888",

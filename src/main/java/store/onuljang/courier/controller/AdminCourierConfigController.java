@@ -1,7 +1,6 @@
 package store.onuljang.courier.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -11,8 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import store.onuljang.courier.appservice.CourierAdminConfigAppService;
 import store.onuljang.courier.dto.CourierConfigAdminResponse;
 import store.onuljang.courier.dto.CourierConfigUpdateRequest;
-import store.onuljang.courier.dto.ShippingFeePolicyListResponse;
-import store.onuljang.courier.dto.ShippingFeePolicyRequest;
 import store.onuljang.courier.dto.ShippingFeeTemplateListResponse;
 import store.onuljang.courier.dto.ShippingFeeTemplateRequest;
 import store.onuljang.courier.dto.ShippingFeeTemplateResponse;
@@ -35,17 +32,6 @@ public class AdminCourierConfigController {
     public ResponseEntity<CourierConfigAdminResponse> updateConfig(
             @Valid @RequestBody CourierConfigUpdateRequest request) {
         return ResponseEntity.ok(courierAdminConfigAppService.updateConfig(request));
-    }
-
-    @GetMapping("/shipping-fee-policies")
-    public ResponseEntity<ShippingFeePolicyListResponse> getShippingFeePolicies() {
-        return ResponseEntity.ok(courierAdminConfigAppService.getShippingFeePolicies());
-    }
-
-    @PutMapping("/shipping-fee-policies")
-    public ResponseEntity<ShippingFeePolicyListResponse> replaceShippingFeePolicies(
-            @Valid @RequestBody List<ShippingFeePolicyRequest> requests) {
-        return ResponseEntity.ok(courierAdminConfigAppService.replaceShippingFeePolicies(requests));
     }
 
     @GetMapping("/shipping-fee-templates")

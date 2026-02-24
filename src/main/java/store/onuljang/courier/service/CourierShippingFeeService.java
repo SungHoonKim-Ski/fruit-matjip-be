@@ -14,9 +14,7 @@ import store.onuljang.courier.dto.ShippingFeeItemInput;
 import store.onuljang.courier.dto.ShippingFeePreviewRequest;
 import store.onuljang.courier.dto.ShippingFeeResult;
 import store.onuljang.courier.entity.CourierProduct;
-import store.onuljang.courier.entity.ShippingFeePolicy;
 import store.onuljang.courier.entity.ShippingFeeTemplate;
-import store.onuljang.courier.repository.ShippingFeePolicyRepository;
 import store.onuljang.courier.repository.ShippingFeeTemplateRepository;
 import store.onuljang.shared.exception.UserValidateException;
 
@@ -26,7 +24,6 @@ import store.onuljang.shared.exception.UserValidateException;
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class CourierShippingFeeService {
 
-    ShippingFeePolicyRepository shippingFeePolicyRepository;
     ShippingFeeTemplateRepository shippingFeeTemplateRepository;
     CourierConfigService courierConfigService;
     CourierProductService courierProductService;
@@ -49,26 +46,6 @@ public class CourierShippingFeeService {
                         })
                         .toList();
         return calculateByItems(feeItems, request.postalCode());
-    }
-
-    public ShippingFeeResult calculate(int totalQuantity, String postalCode) {
-        ShippingFeePolicy policy =
-                shippingFeePolicyRepository.findAllByQuantityRange(totalQuantity).stream()
-                        .findFirst()
-                        .orElseThrow(
-                                () -> new UserValidateException("해당 수량에 대한 배송비 정책이 없습니다."));
-
-        BigDecimal shippingFee = policy.getFee();
-        boolean isIsland = isIslandPostalCode(postalCode);
-        BigDecimal islandSurcharge = BigDecimal.ZERO;
-
-        if (isIsland) {
-            islandSurcharge = courierConfigService.getConfig().getIslandSurcharge();
-        }
-
-        BigDecimal totalShippingFee = shippingFee.add(islandSurcharge);
-
-        return new ShippingFeeResult(shippingFee, islandSurcharge, isIsland, totalShippingFee);
     }
 
     /**
@@ -111,16 +88,13 @@ public class CourierShippingFeeService {
             totalShippingFee = totalShippingFee.add(template.calculateFee(groupQuantity, groupAmount));
         }
 
-        // 2) 전역 정책 상품 배송비 계산
+        // 2) 기본배송 상품: baseShippingFee × 수량
         if (!globalPolicyItems.isEmpty()) {
-            int policyQuantity =
+            int totalQuantity =
                     globalPolicyItems.stream().mapToInt(ShippingFeeItemInput::quantity).sum();
-            ShippingFeePolicy policy =
-                    shippingFeePolicyRepository.findAllByQuantityRange(policyQuantity).stream()
-                            .findFirst()
-                            .orElseThrow(
-                                    () -> new UserValidateException("해당 수량에 대한 배송비 정책이 없습니다."));
-            totalShippingFee = totalShippingFee.add(policy.getFee());
+            BigDecimal baseShippingFee = courierConfigService.getConfig().getBaseShippingFee();
+            totalShippingFee =
+                    totalShippingFee.add(baseShippingFee.multiply(BigDecimal.valueOf(totalQuantity)));
         }
 
         // 3) 도서산간 추가
@@ -132,36 +106,6 @@ public class CourierShippingFeeService {
 
         BigDecimal finalTotal = totalShippingFee.add(islandSurcharge);
         return new ShippingFeeResult(totalShippingFee, islandSurcharge, isIsland, finalTotal);
-    }
-
-    public List<ShippingFeePolicy> findAll() {
-        return shippingFeePolicyRepository.findAllByOrderBySortOrderAsc();
-    }
-
-    @Transactional
-    public List<ShippingFeePolicy> replaceAll(List<ShippingFeePolicy> policies) {
-        validateNoOverlap(policies);
-        shippingFeePolicyRepository.deleteAllInBatch();
-        return shippingFeePolicyRepository.saveAll(policies);
-    }
-
-    private void validateNoOverlap(List<ShippingFeePolicy> policies) {
-        for (int i = 0; i < policies.size(); i++) {
-            for (int j = i + 1; j < policies.size(); j++) {
-                ShippingFeePolicy a = policies.get(i);
-                ShippingFeePolicy b = policies.get(j);
-                if (a.getMinQuantity() <= b.getMaxQuantity()
-                        && b.getMinQuantity() <= a.getMaxQuantity()) {
-                    throw new UserValidateException(
-                            String.format(
-                                    "수량 범위가 겹칩니다: [%d-%d]과 [%d-%d]",
-                                    a.getMinQuantity(),
-                                    a.getMaxQuantity(),
-                                    b.getMinQuantity(),
-                                    b.getMaxQuantity()));
-                }
-            }
-        }
     }
 
     public boolean isIslandPostalCode(String postalCode) {

@@ -21,6 +21,10 @@ public class CourierConfig extends BaseEntity {
     @Builder.Default
     private BigDecimal islandSurcharge = new BigDecimal("3000");
 
+    @Column(name = "base_shipping_fee", nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal baseShippingFee = new BigDecimal("3000");
+
     @Lob
     @Column(name = "notice_text", columnDefinition = "TEXT")
     private String noticeText;
@@ -43,6 +47,7 @@ public class CourierConfig extends BaseEntity {
     public void update(
             boolean enabled,
             BigDecimal islandSurcharge,
+            BigDecimal baseShippingFee,
             String noticeText,
             String senderName,
             String senderPhone,
@@ -51,6 +56,7 @@ public class CourierConfig extends BaseEntity {
             String senderDetailAddress) {
         this.enabled = enabled;
         this.islandSurcharge = islandSurcharge;
+        this.baseShippingFee = baseShippingFee;
         this.noticeText = noticeText;
         this.senderName = senderName;
         this.senderPhone = senderPhone;
