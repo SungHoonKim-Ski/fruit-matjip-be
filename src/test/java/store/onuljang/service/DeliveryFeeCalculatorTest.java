@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
+import store.onuljang.config.TestSqsConfig;
 import store.onuljang.shop.delivery.service.DeliveryFeeCalculator;
 import store.onuljang.shared.exception.UserValidateException;
 
@@ -18,7 +19,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestS3Config.class)
+@Import({TestS3Config.class, TestSqsConfig.class})
 @Transactional
 class DeliveryFeeCalculatorTest {
 

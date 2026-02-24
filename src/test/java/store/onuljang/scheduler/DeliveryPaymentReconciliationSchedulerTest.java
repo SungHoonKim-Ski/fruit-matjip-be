@@ -13,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.shared.config.KakaoPayConfigDto;
 import store.onuljang.config.TestS3Config;
+import store.onuljang.config.TestSqsConfig;
 import store.onuljang.shop.delivery.scheduler.DeliveryPaymentReconciliationScheduler;
 import store.onuljang.shared.exception.KakaoPayException;
 import store.onuljang.shared.feign.dto.reseponse.KakaoPayOrderResponse;
@@ -42,7 +43,7 @@ import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestS3Config.class)
+@Import({TestS3Config.class, TestSqsConfig.class})
 @Transactional
 class DeliveryPaymentReconciliationSchedulerTest {
 

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
+import store.onuljang.config.TestSqsConfig;
 import store.onuljang.shop.reservation.scheduler.ReservationAggregationScheduler;
 import store.onuljang.shop.admin.entity.Admin;
 import store.onuljang.shop.product.entity.Product;
@@ -27,7 +28,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestS3Config.class)
+@Import({TestS3Config.class, TestSqsConfig.class})
 @Transactional
 class ReservationAggregationSchedulerTest {
 

@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
+import store.onuljang.config.TestSqsConfig;
 import store.onuljang.shop.reservation.scheduler.UserWarnResetScheduler;
 import store.onuljang.shared.user.repository.UserRepository;
 import store.onuljang.shared.user.entity.Users;
@@ -22,7 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestS3Config.class)
+@Import({TestS3Config.class, TestSqsConfig.class})
 @Transactional
 class UserWarnResetSchedulerTest {
 

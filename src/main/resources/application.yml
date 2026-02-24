@@ -72,6 +72,11 @@ cloud:
       bucket: ${S3_APP_BUCKET_NAME}
       log:
         bucket: ${S3_LOG_BUCKET_NAME}
+    sqs:
+      base-url: https://sqs.${cloud.aws.region.static}.amazonaws.com/${cloud.aws.account-id}
+      courier-tracking-request-queue-url: ${cloud.aws.sqs.base-url}/${SQS_COURIER_TRACKING_REQUEST_QUEUE_NAME:}
+      courier-tracking-result-queue-url: ${cloud.aws.sqs.base-url}/${SQS_COURIER_TRACKING_RESULT_QUEUE_NAME:}
+    account-id: ${AWS_ACCOUNT_ID:895428158418}
     stack:
       auto: false
     region:

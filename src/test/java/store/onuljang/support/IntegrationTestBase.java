@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
+import store.onuljang.config.TestSqsConfig;
 
 import java.nio.charset.StandardCharsets;
 
@@ -24,7 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Transactional
-@Import(TestS3Config.class)
+@Import({TestS3Config.class, TestSqsConfig.class})
 public abstract class IntegrationTestBase {
 
     @Autowired

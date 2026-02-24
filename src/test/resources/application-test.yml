@@ -85,6 +85,12 @@ cloud:
       bucket: test-bucket
       log:
         bucket: test-log-bucket
+    sqs:
+      enabled: false
+      base-url: https://sqs.ap-northeast-2.amazonaws.com/000000000000
+      courier-tracking-request-queue-url: https://sqs.ap-northeast-2.amazonaws.com/000000000000/test-courier-tracking-request
+      courier-tracking-result-queue-url: https://sqs.ap-northeast-2.amazonaws.com/000000000000/test-courier-tracking-result
+    account-id: "000000000000"
     region:
       static: ap-northeast-2
     credentials:

@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
+import store.onuljang.config.TestSqsConfig;
 import store.onuljang.shared.exception.AdminValidateException;
 import store.onuljang.shop.admin.appservice.AdminDeliveryAppService;
 import store.onuljang.shared.user.entity.*;
@@ -38,7 +39,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@Import(TestS3Config.class)
+@Import({TestS3Config.class, TestSqsConfig.class})
 @Transactional
 class AdminDeliveryAppServiceTest {
 
