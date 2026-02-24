@@ -108,6 +108,10 @@ public class CourierOrder extends BaseEntity {
     private LocalDateTime deliveredAt;
 
     @Getter
+    @Column(name = "waybill_downloaded_at")
+    private LocalDateTime waybillDownloadedAt;
+
+    @Getter
     @Column(name = "idempotency_key", length = 64)
     private String idempotencyKey;
 
@@ -164,6 +168,10 @@ public class CourierOrder extends BaseEntity {
 
     public boolean canFailByUser() {
         return this.status == CourierOrderStatus.PENDING_PAYMENT;
+    }
+
+    public void markWaybillDownloaded() {
+        this.waybillDownloadedAt = TimeUtil.nowDateTime();
     }
 
     public void setPgTid(String pgTid) {

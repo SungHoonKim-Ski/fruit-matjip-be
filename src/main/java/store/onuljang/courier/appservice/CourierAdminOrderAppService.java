@@ -33,9 +33,15 @@ public class CourierAdminOrderAppService {
     CourierRefundService courierRefundService;
     WaybillExcelService waybillExcelService;
 
-    public AdminCourierOrderListResponse getOrders(CourierOrderStatus status, int page, int size) {
-        org.springframework.data.domain.Page<CourierOrder> orders =
-                courierOrderService.findAllByStatus(status, page, size);
+    public AdminCourierOrderListResponse getOrders(
+            CourierOrderStatus status, Boolean waybillDownloaded, int page, int size) {
+        org.springframework.data.domain.Page<CourierOrder> orders;
+        if (waybillDownloaded != null) {
+            orders = courierOrderService.findAllByStatusAndWaybillDownloaded(
+                    status, waybillDownloaded, page, size);
+        } else {
+            orders = courierOrderService.findAllByStatus(status, page, size);
+        }
         return AdminCourierOrderListResponse.from(orders);
     }
 
@@ -83,17 +89,21 @@ public class CourierAdminOrderAppService {
         restoreStock(order);
     }
 
+    @Transactional
     public byte[] downloadWaybillExcel(Long orderId) {
         CourierOrder order = courierOrderService.findByIdWithItems(orderId);
+        order.markWaybillDownloaded();
         return waybillExcelService.generateWaybillExcel(order);
     }
 
+    @Transactional
     public byte[] downloadWaybillExcelBulk(List<Long> orderIds) {
         List<CourierOrder> orders = courierOrderService.findAllByIds(orderIds);
+        orders.forEach(CourierOrder::markWaybillDownloaded);
         return waybillExcelService.generateWaybillExcel(orders);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public byte[] downloadWaybillExcelByFilter(WaybillExcelFilterRequest request) {
         request.validate();
         LocalDateTime startDateTime = request.startDate().atStartOfDay();
@@ -117,6 +127,7 @@ public class CourierAdminOrderAppService {
             throw new UserValidateException("해당 조건에 맞는 주문이 없습니다.");
         }
 
+        orders.forEach(CourierOrder::markWaybillDownloaded);
         return waybillExcelService.generateWaybillExcel(orders);
     }
 

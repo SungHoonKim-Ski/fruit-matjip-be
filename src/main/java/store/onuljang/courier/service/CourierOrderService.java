@@ -83,6 +83,12 @@ public class CourierOrderService {
                 status, PageRequest.of(page, size));
     }
 
+    public Page<CourierOrder> findAllByStatusAndWaybillDownloaded(
+            CourierOrderStatus status, Boolean waybillDownloaded, int page, int size) {
+        return courierOrderRepository.findAllByStatusAndWaybillDownloaded(
+                status, waybillDownloaded, PageRequest.of(page, size));
+    }
+
     public List<CourierOrder> findAllByIds(List<Long> ids) {
         return courierOrderRepository.findAllByIdIn(ids);
     }

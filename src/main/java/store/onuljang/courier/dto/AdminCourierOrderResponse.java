@@ -15,6 +15,7 @@ public record AdminCourierOrderResponse(
         int totalQuantity,
         BigDecimal totalAmount,
         String waybillNumber,
+        boolean waybillDownloaded,
         LocalDateTime paidAt,
         LocalDateTime shippedAt,
         LocalDateTime createdAt) {
@@ -30,6 +31,7 @@ public record AdminCourierOrderResponse(
                 order.getTotalQuantity(),
                 order.getTotalAmount(),
                 order.getWaybillNumber(),
+                order.getWaybillDownloadedAt() != null,
                 order.getPaidAt(),
                 order.getShippedAt(),
                 order.getCreatedAt());

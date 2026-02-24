@@ -40,9 +40,11 @@ public class AdminCourierOrderController {
     @GetMapping
     public ResponseEntity<AdminCourierOrderListResponse> getOrders(
             @RequestParam(required = false) CourierOrderStatus status,
+            @RequestParam(required = false) Boolean waybillDownloaded,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "50") @jakarta.validation.constraints.Max(200) int size) {
-        return ResponseEntity.ok(courierAdminOrderAppService.getOrders(status, page, size));
+        return ResponseEntity.ok(
+                courierAdminOrderAppService.getOrders(status, waybillDownloaded, page, size));
     }
 
     @GetMapping("/{id}")

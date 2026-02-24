@@ -129,12 +129,31 @@ class CourierAdminOrderAppServiceTest {
 
             // act
             AdminCourierOrderListResponse result =
-                    courierAdminOrderAppService.getOrders(null, 0, 50);
+                    courierAdminOrderAppService.getOrders(null, null, 0, 50);
 
             // assert
             assertThat(result.orders()).hasSize(2);
             assertThat(result.orders().get(0).displayCode()).isEqualTo("C-26021400-ABCD1");
             assertThat(result.orders().get(1).displayCode()).isEqualTo("C-26021400-ABCD2");
+        }
+
+        @Test
+        @DisplayName("운송장 다운 여부 필터로 주문 목록을 반환한다")
+        void getOrders_withWaybillDownloadedFilter() {
+            // arrange
+            CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
+
+            Page<CourierOrder> page =
+                    new PageImpl<>(List.of(order), PageRequest.of(0, 50), 1);
+            given(courierOrderService.findAllByStatusAndWaybillDownloaded(null, false, 0, 50))
+                    .willReturn(page);
+
+            // act
+            AdminCourierOrderListResponse result =
+                    courierAdminOrderAppService.getOrders(null, false, 0, 50);
+
+            // assert
+            assertThat(result.orders()).hasSize(1);
         }
 
         @Test
@@ -150,7 +169,7 @@ class CourierAdminOrderAppServiceTest {
 
             // act
             AdminCourierOrderListResponse result =
-                    courierAdminOrderAppService.getOrders(CourierOrderStatus.PAID, 0, 50);
+                    courierAdminOrderAppService.getOrders(CourierOrderStatus.PAID, null, 0, 50);
 
             // assert
             assertThat(result.orders()).hasSize(1);
@@ -517,7 +536,7 @@ class CourierAdminOrderAppServiceTest {
     class DownloadWaybillExcel {
 
         @Test
-        @DisplayName("단건 운송장 Excel 다운로드 성공")
+        @DisplayName("단건 운송장 Excel 다운로드 성공 및 다운로드 마킹")
         void downloadWaybillExcel_success() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PAID, "C-26021400-ABCD1");
@@ -531,6 +550,7 @@ class CourierAdminOrderAppServiceTest {
 
             // assert
             assertThat(result).isEqualTo(expectedBytes);
+            assertThat(order.getWaybillDownloadedAt()).isNotNull();
         }
 
         @Test
