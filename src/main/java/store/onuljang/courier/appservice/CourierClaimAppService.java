@@ -19,13 +19,16 @@ import store.onuljang.courier.entity.CourierOrderItem;
 import store.onuljang.courier.service.CourierClaimService;
 import store.onuljang.courier.service.CourierOrderService;
 import store.onuljang.courier.service.CourierRefundService;
+import store.onuljang.shared.entity.enums.CourierClaimReturnStatus;
 import store.onuljang.shared.entity.enums.CourierClaimStatus;
 import store.onuljang.shared.entity.enums.CourierClaimType;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 import store.onuljang.shared.entity.enums.ShippingFeeBearer;
+import store.onuljang.shared.entity.enums.UserPointTransactionType;
 import store.onuljang.shared.exception.AdminValidateException;
 import store.onuljang.shared.exception.UserValidateException;
 import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.user.service.UserPointService;
 import store.onuljang.shared.user.service.UserService;
 
 @Slf4j
@@ -36,6 +39,7 @@ import store.onuljang.shared.user.service.UserService;
 public class CourierClaimAppService {
 
     UserService userService;
+    UserPointService userPointService;
     CourierOrderService courierOrderService;
     CourierClaimService courierClaimService;
     CourierRefundService courierRefundService;
@@ -134,6 +138,25 @@ public class CourierClaimAppService {
 
         claim.approve(request.adminNote(), refundAmount, bearer);
 
+        // 포인트 발행
+        if (request.pointAmount() != null && request.pointAmount().compareTo(BigDecimal.ZERO) > 0) {
+            claim.setPointAmount(request.pointAmount());
+            String userUid = order.getUser().getUid();
+            userPointService.earn(
+                    userUid,
+                    request.pointAmount(),
+                    UserPointTransactionType.EARN_CS,
+                    "CS#" + claimId + " 포인트 발행",
+                    "COURIER_CLAIM",
+                    claimId,
+                    "admin");
+        }
+
+        // 회수 상태 설정
+        if (Boolean.TRUE.equals(request.returnRequired())) {
+            claim.updateReturnStatus(CourierClaimReturnStatus.COLLECTING);
+        }
+
         if ("REFUND".equalsIgnoreCase(request.action())) {
             courierRefundService.refund(order, refundAmount);
             if (claim.getCourierOrderItem() != null) {
@@ -142,6 +165,21 @@ public class CourierClaimAppService {
             claim.resolve();
         }
 
+        return CourierClaimResponse.from(claim);
+    }
+
+    // === 관리자: 회수 상태 변경 ===
+
+    @Transactional
+    public CourierClaimResponse updateReturnStatus(Long claimId, String statusStr) {
+        CourierClaim claim = courierClaimService.findById(claimId);
+        CourierClaimReturnStatus newStatus;
+        try {
+            newStatus = CourierClaimReturnStatus.valueOf(statusStr);
+        } catch (IllegalArgumentException e) {
+            throw new AdminValidateException("유효하지 않은 회수 상태입니다: " + statusStr);
+        }
+        claim.updateReturnStatus(newStatus);
         return CourierClaimResponse.from(claim);
     }
 

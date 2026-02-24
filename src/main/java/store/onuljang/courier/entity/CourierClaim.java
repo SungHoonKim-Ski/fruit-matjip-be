@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.*;
 import store.onuljang.shared.entity.base.BaseEntity;
+import store.onuljang.shared.entity.enums.CourierClaimReturnStatus;
 import store.onuljang.shared.entity.enums.CourierClaimStatus;
 import store.onuljang.shared.entity.enums.CourierClaimType;
 import store.onuljang.shared.entity.enums.ShippingFeeBearer;
@@ -64,6 +65,16 @@ public class CourierClaim extends BaseEntity {
     @Column(name = "resolved_at")
     private LocalDateTime resolvedAt;
 
+    @Getter
+    @Column(name = "point_amount", precision = 12, scale = 2)
+    private BigDecimal pointAmount;
+
+    @Getter
+    @Enumerated(EnumType.STRING)
+    @Column(name = "return_status", nullable = false, length = 20)
+    @Builder.Default
+    private CourierClaimReturnStatus returnStatus = CourierClaimReturnStatus.NONE;
+
     public void markInReview() {
         this.claimStatus = CourierClaimStatus.IN_REVIEW;
     }
@@ -88,5 +99,13 @@ public class CourierClaim extends BaseEntity {
 
     public void setReshipOrderId(Long reshipOrderId) {
         this.reshipOrderId = reshipOrderId;
+    }
+
+    public void updateReturnStatus(CourierClaimReturnStatus status) {
+        this.returnStatus = status;
+    }
+
+    public void setPointAmount(BigDecimal pointAmount) {
+        this.pointAmount = pointAmount;
     }
 }

@@ -24,6 +24,7 @@ public record CourierProductResponse(
     LocalDateTime createdAt,
     Long shippingFeeTemplateId,
     String shippingFeeTemplateName,
+    BigDecimal combinedShippingFee,
     List<OptionGroupResponse> optionGroups
 ) {
     public record CategoryItem(Long id, String name) {}
@@ -56,6 +57,7 @@ public record CourierProductResponse(
                         product.getShippingFeeTemplate() != null
                                 ? product.getShippingFeeTemplate().getName()
                                 : null)
+                .combinedShippingFee(product.getCombinedShippingFee())
                 .optionGroups(product.getOptionGroups().stream()
                         .map(OptionGroupResponse::from).toList())
                 .build();

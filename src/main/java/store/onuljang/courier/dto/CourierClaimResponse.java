@@ -3,6 +3,7 @@ package store.onuljang.courier.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import store.onuljang.courier.entity.CourierClaim;
+import store.onuljang.shared.entity.enums.CourierClaimReturnStatus;
 import store.onuljang.shared.entity.enums.CourierClaimStatus;
 import store.onuljang.shared.entity.enums.CourierClaimType;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
@@ -20,6 +21,8 @@ public record CourierClaimResponse(
         String reason,
         String adminNote,
         BigDecimal refundAmount,
+        BigDecimal pointAmount,
+        CourierClaimReturnStatus returnStatus,
         Long reshipOrderId,
         ShippingFeeBearer returnShippingFeeBearer,
         LocalDateTime resolvedAt,
@@ -42,6 +45,8 @@ public record CourierClaimResponse(
                 claim.getReason(),
                 claim.getAdminNote(),
                 claim.getRefundAmount(),
+                claim.getPointAmount(),
+                claim.getReturnStatus(),
                 claim.getReshipOrderId(),
                 claim.getReturnShippingFeeBearer(),
                 claim.getResolvedAt(),

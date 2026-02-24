@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.*;
 import store.onuljang.shared.entity.base.BaseEntity;
+import store.onuljang.shared.entity.enums.CourierCompany;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 import store.onuljang.shared.user.entity.Users;
 import store.onuljang.shared.util.TimeUtil;
@@ -83,6 +84,11 @@ public class CourierOrder extends BaseEntity {
     private BigDecimal totalAmount;
 
     @Getter
+    @Column(name = "point_used", nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal pointUsed = BigDecimal.ZERO;
+
+    @Getter
     @Column(name = "pg_tid", length = 100)
     private String pgTid;
 
@@ -95,9 +101,10 @@ public class CourierOrder extends BaseEntity {
     private String waybillNumber;
 
     @Getter
+    @Enumerated(EnumType.STRING)
     @Column(name = "courier_company", length = 30)
     @Builder.Default
-    private String courierCompany = "LOGEN";
+    private CourierCompany courierCompany = CourierCompany.LOGEN;
 
     @Getter
     @Column(name = "shipped_at")
@@ -141,6 +148,13 @@ public class CourierOrder extends BaseEntity {
         this.shippedAt = TimeUtil.nowDateTime();
     }
 
+    public void markShipped(String waybillNumber, CourierCompany courierCompany) {
+        this.status = CourierOrderStatus.SHIPPED;
+        this.waybillNumber = waybillNumber;
+        this.courierCompany = courierCompany;
+        this.shippedAt = TimeUtil.nowDateTime();
+    }
+
     public void markInTransit() {
         this.status = CourierOrderStatus.IN_TRANSIT;
     }
@@ -176,6 +190,19 @@ public class CourierOrder extends BaseEntity {
 
     public void setPgTid(String pgTid) {
         this.pgTid = pgTid;
+    }
+
+    public void setPointUsed(BigDecimal pointUsed) {
+        this.pointUsed = pointUsed;
+    }
+
+    public BigDecimal getPgPaymentAmount() {
+        return this.totalAmount.subtract(this.pointUsed);
+    }
+
+    public void markPaidByPoint() {
+        this.status = CourierOrderStatus.PAID;
+        this.paidAt = TimeUtil.nowDateTime();
     }
 
     public String getProductSummary() {

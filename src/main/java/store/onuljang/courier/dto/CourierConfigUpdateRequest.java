@@ -6,8 +6,6 @@ public record CourierConfigUpdateRequest(
         Boolean enabled,
         BigDecimal islandSurcharge,
         BigDecimal baseShippingFee,
-        Boolean combinedShippingEnabled,
-        Integer combinedShippingMaxQuantity,
         String noticeText,
         String senderName,
         String senderPhone,

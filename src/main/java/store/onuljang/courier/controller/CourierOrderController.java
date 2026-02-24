@@ -52,6 +52,14 @@ public class CourierOrderController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/orders/{displayCode}/cancel")
+    public ResponseEntity<Void> cancelPaidOrder(
+            Authentication auth, @PathVariable @NotBlank String displayCode) {
+        String uid = auth.getName();
+        courierOrderAppService.cancelPaidOrder(uid, displayCode);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/orders/fail")
     public ResponseEntity<Void> fail(
             Authentication auth,

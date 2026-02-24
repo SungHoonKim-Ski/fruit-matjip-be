@@ -62,6 +62,10 @@ public class Users extends BaseEntity {
     @Column(name = "restricted_until")
     private LocalDate restrictedUntil;
 
+    @Getter
+    @Column(name = "point_balance", nullable = false, precision = 12, scale = 2)
+    private BigDecimal pointBalance = BigDecimal.ZERO;
+
     @Builder
     public Users(String socialId, String name, UUID uid) {
         this.socialId = socialId;
@@ -72,6 +76,18 @@ public class Users extends BaseEntity {
         this.monthlyWarnCount = 0;
         this.totalWarnCount = 0;
         this.changeName = false;
+        this.pointBalance = BigDecimal.ZERO;
+    }
+
+    public void addPointBalance(BigDecimal amount) {
+        this.pointBalance = this.pointBalance.add(amount);
+    }
+
+    public void subtractPointBalance(BigDecimal amount) {
+        if (this.pointBalance.compareTo(amount) < 0) {
+            throw new UserValidateException("포인트 잔액이 부족합니다.");
+        }
+        this.pointBalance = this.pointBalance.subtract(amount);
     }
 
     public void modifyName(String name) {

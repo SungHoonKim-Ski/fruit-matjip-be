@@ -1,0 +1,1 @@
+ALTER TABLE courier_orders ADD COLUMN point_used DECIMAL(12,2) NOT NULL DEFAULT 0;

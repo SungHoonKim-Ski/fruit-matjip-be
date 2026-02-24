@@ -29,7 +29,9 @@ import store.onuljang.shared.feign.dto.reseponse.KakaoPayApproveResponse;
 import store.onuljang.shared.service.KakaoPayService;
 import store.onuljang.shared.user.entity.UserCourierInfo;
 import store.onuljang.shared.user.entity.Users;
+import store.onuljang.shared.entity.enums.UserPointTransactionType;
 import store.onuljang.shared.user.service.UserCourierInfoService;
+import store.onuljang.shared.user.service.UserPointService;
 import store.onuljang.shared.user.service.UserService;
 import store.onuljang.shared.util.DisplayCodeGenerator;
 import store.onuljang.shared.util.TimeUtil;
@@ -43,9 +45,11 @@ public class CourierOrderAppService {
     private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
 
     UserService userService;
+    UserPointService userPointService;
     UserCourierInfoService userCourierInfoService;
     CourierOrderService courierOrderService;
     CourierPaymentService courierPaymentService;
+    CourierRefundService courierRefundService;
     CourierPaymentProcessor courierPaymentProcessor;
     CourierProductService courierProductService;
     CourierShippingFeeService courierShippingFeeService;
@@ -138,11 +142,24 @@ public class CourierOrderAppService {
                                                         ? data.product()
                                                                 .getShippingFeeTemplate()
                                                                 .getId()
-                                                        : null))
+                                                        : null,
+                                                data.product().getCombinedShippingFee()))
                         .toList();
         ShippingFeeResult feeResult =
                 courierShippingFeeService.calculateByItems(feeItems, request.postalCode());
         BigDecimal totalAmount = productAmount.add(feeResult.totalShippingFee());
+
+        // 포인트 사용 검증
+        BigDecimal pointUsed = BigDecimal.ZERO;
+        if (request.pointUsed() != null && request.pointUsed().compareTo(BigDecimal.ZERO) > 0) {
+            if (request.pointUsed().compareTo(user.getPointBalance()) > 0) {
+                throw new UserValidateException("포인트 잔액이 부족합니다.");
+            }
+            if (request.pointUsed().compareTo(totalAmount) > 0) {
+                throw new UserValidateException("포인트 사용 금액이 결제 금액을 초과합니다.");
+            }
+            pointUsed = request.pointUsed();
+        }
 
         // 4) 주문 생성
         String displayCode =
@@ -165,6 +182,7 @@ public class CourierOrderAppService {
                         .shippingFee(feeResult.shippingFee())
                         .islandSurcharge(feeResult.islandSurcharge())
                         .totalAmount(totalAmount)
+                        .pointUsed(pointUsed)
                         .idempotencyKey(request.idempotencyKey())
                         .build();
 
@@ -204,7 +222,24 @@ public class CourierOrderAppService {
                                     .build());
         }
 
-        // 6) PG 결제 준비
+        // 포인트 차감
+        if (pointUsed.compareTo(BigDecimal.ZERO) > 0) {
+            userPointService.use(
+                    uid, pointUsed,
+                    UserPointTransactionType.USE_COURIER,
+                    "택배주문#" + displayCode + " 사용",
+                    "COURIER_ORDER", saved.getId());
+        }
+
+        // 6) PG 결제 준비 (전액 포인트 결제 시 PG 생략)
+        if (saved.getPgPaymentAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            saved.markPaidByPoint();
+            return CourierOrderReadyResponse.builder()
+                    .displayCode(saved.getDisplayCode())
+                    .redirectUrl("/shop/orders/" + saved.getDisplayCode())
+                    .build();
+        }
+
         return courierPaymentProcessor.preparePayment(saved, user, provider);
     }
 
@@ -247,6 +282,36 @@ public class CourierOrderAppService {
         order.markCanceled();
         courierPaymentService.markCanceled(order);
         restoreStock(order);
+        if (order.getPointUsed().compareTo(BigDecimal.ZERO) > 0) {
+            userPointService.earn(
+                    uid, order.getPointUsed(),
+                    UserPointTransactionType.CANCEL_USE,
+                    "주문취소#" + order.getDisplayCode() + " 포인트 환원",
+                    "COURIER_ORDER", order.getId(), null);
+        }
+    }
+
+    @Transactional
+    public void cancelPaidOrder(String uid, String displayCode) {
+        Users user = userService.findByUId(uid);
+        CourierOrder order = courierOrderService.findByDisplayCodeAndUser(displayCode, user);
+        if (order.getStatus() != CourierOrderStatus.PAID
+                && order.getStatus() != CourierOrderStatus.PREPARING) {
+            throw new UserValidateException("발송 완료된 주문은 취소할 수 없습니다.");
+        }
+        if (order.getPgPaymentAmount().compareTo(BigDecimal.ZERO) > 0) {
+            courierRefundService.refund(order, order.getPgPaymentAmount());
+        }
+        if (order.getPointUsed().compareTo(BigDecimal.ZERO) > 0) {
+            userPointService.earn(
+                    uid, order.getPointUsed(),
+                    UserPointTransactionType.CANCEL_USE,
+                    "주문취소#" + order.getDisplayCode() + " 포인트 환원",
+                    "COURIER_ORDER", order.getId(), null);
+        }
+        order.markCanceled();
+        courierPaymentService.markCanceled(order);
+        restoreStock(order);
     }
 
     @Transactional
@@ -260,6 +325,13 @@ public class CourierOrderAppService {
         order.markFailed();
         courierPaymentService.markFailed(order);
         restoreStock(order);
+        if (order.getPointUsed().compareTo(BigDecimal.ZERO) > 0) {
+            userPointService.earn(
+                    uid, order.getPointUsed(),
+                    UserPointTransactionType.CANCEL_USE,
+                    "주문취소#" + order.getDisplayCode() + " 포인트 환원",
+                    "COURIER_ORDER", order.getId(), null);
+        }
     }
 
     public List<CourierOrderResponse> getOrders(String uid, Integer year, Integer month) {

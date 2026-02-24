@@ -11,6 +11,8 @@ public record CourierOrderResponse(
         String productSummary,
         int totalQuantity,
         BigDecimal totalAmount,
+        BigDecimal pointUsed,
+        BigDecimal pgPaymentAmount,
         String thumbnailUrl,
         LocalDateTime createdAt) {
 
@@ -26,6 +28,8 @@ public record CourierOrderResponse(
                 order.getProductSummary(),
                 order.getTotalQuantity(),
                 order.getTotalAmount(),
+                order.getPointUsed(),
+                order.getPgPaymentAmount(),
                 thumbnail,
                 order.getCreatedAt());
     }

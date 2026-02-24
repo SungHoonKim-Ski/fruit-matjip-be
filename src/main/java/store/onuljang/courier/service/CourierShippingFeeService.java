@@ -43,7 +43,11 @@ public class CourierShippingFeeService {
                                             ? product.getShippingFeeTemplate().getId()
                                             : null;
                             return new ShippingFeeItemInput(
-                                    product.getId(), item.quantity(), itemAmount, templateId);
+                                    product.getId(),
+                                    item.quantity(),
+                                    itemAmount,
+                                    templateId,
+                                    product.getCombinedShippingFee());
                         })
                         .toList();
         return calculateByItems(feeItems, request.postalCode());
@@ -90,21 +94,17 @@ public class CourierShippingFeeService {
             totalShippingFee = totalShippingFee.add(template.calculateFee(groupQuantity, groupAmount));
         }
 
-        // 2) 기본배송 상품
-        if (!globalPolicyItems.isEmpty()) {
-            int totalQuantity =
-                    globalPolicyItems.stream().mapToInt(ShippingFeeItemInput::quantity).sum();
-            BigDecimal baseShippingFee = config.getBaseShippingFee();
-
-            int feeCount;
-            if (config.isCombinedShippingEnabled() && config.getCombinedShippingMaxQuantity() > 0) {
-                int maxQty = config.getCombinedShippingMaxQuantity();
-                feeCount = (totalQuantity + maxQty - 1) / maxQty;
+        // 2) 기본배송 상품 (템플릿 없는 상품)
+        for (ShippingFeeItemInput item : globalPolicyItems) {
+            BigDecimal feePerItem;
+            if (item.combinedShippingFee() != null) {
+                // 합배송 금액이 설정된 경우: 수량 × 합배송 단가
+                feePerItem = item.combinedShippingFee().multiply(BigDecimal.valueOf(item.quantity()));
             } else {
-                feeCount = totalQuantity;
+                // 합배송 금액 미설정: 수량 × 기본 배송비
+                feePerItem = config.getBaseShippingFee().multiply(BigDecimal.valueOf(item.quantity()));
             }
-            totalShippingFee =
-                    totalShippingFee.add(baseShippingFee.multiply(BigDecimal.valueOf(feeCount)));
+            totalShippingFee = totalShippingFee.add(feePerItem);
         }
 
         // 3) 도서산간 추가

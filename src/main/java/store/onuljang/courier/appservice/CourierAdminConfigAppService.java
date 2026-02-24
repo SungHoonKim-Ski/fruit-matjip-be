@@ -40,12 +40,6 @@ public class CourierAdminConfigAppService {
                 request.baseShippingFee() != null
                         ? request.baseShippingFee()
                         : config.getBaseShippingFee(),
-                request.combinedShippingEnabled() != null
-                        ? request.combinedShippingEnabled()
-                        : config.isCombinedShippingEnabled(),
-                request.combinedShippingMaxQuantity() != null
-                        ? request.combinedShippingMaxQuantity()
-                        : config.getCombinedShippingMaxQuantity(),
                 request.noticeText() != null ? request.noticeText() : config.getNoticeText(),
                 request.senderName() != null ? request.senderName() : config.getSenderName(),
                 request.senderPhone() != null ? request.senderPhone() : config.getSenderPhone(),

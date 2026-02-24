@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import store.onuljang.courier.entity.CourierOrder;
+import store.onuljang.shared.entity.enums.CourierCompany;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 
 public record AdminCourierOrderDetailResponse(
@@ -23,7 +24,7 @@ public record AdminCourierOrderDetailResponse(
         BigDecimal totalAmount,
         String pgTid,
         String waybillNumber,
-        String courierCompany,
+        CourierCompany courierCompany,
         LocalDateTime paidAt,
         LocalDateTime shippedAt,
         LocalDateTime deliveredAt,

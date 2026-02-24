@@ -268,7 +268,7 @@ class CourierClaimAppServiceTest {
             CourierClaim claim = createClaim(order, item, CourierClaimStatus.REQUESTED);
             CourierClaimApproveRequest request =
                     new CourierClaimApproveRequest(
-                            "REFUND", "환불 승인합니다", BigDecimal.valueOf(15000));
+                            "REFUND", "환불 승인합니다", BigDecimal.valueOf(15000), null, null);
 
             given(courierClaimService.findById(100L)).willReturn(claim);
 
@@ -296,7 +296,7 @@ class CourierClaimAppServiceTest {
             CourierClaim claim = createClaim(order, item, CourierClaimStatus.REQUESTED);
             CourierClaimApproveRequest request =
                     new CourierClaimApproveRequest(
-                            "REFUND", "부분 환불 승인", BigDecimal.valueOf(10000));
+                            "REFUND", "부분 환불 승인", BigDecimal.valueOf(10000), null, null);
 
             given(courierClaimService.findById(100L)).willReturn(claim);
 
@@ -317,7 +317,7 @@ class CourierClaimAppServiceTest {
             CourierOrder order = createOrder(CourierOrderStatus.DELIVERED, "C-26021400-ABCD1");
             CourierClaim claim = createClaim(order, null, CourierClaimStatus.APPROVED);
             CourierClaimApproveRequest request =
-                    new CourierClaimApproveRequest("REFUND", "승인", BigDecimal.valueOf(10000));
+                    new CourierClaimApproveRequest("REFUND", "승인", BigDecimal.valueOf(10000), null, null);
 
             given(courierClaimService.findById(100L)).willReturn(claim);
 
@@ -334,7 +334,7 @@ class CourierClaimAppServiceTest {
             CourierOrder order = createOrder(CourierOrderStatus.DELIVERED, "C-26021400-ABCD1");
             CourierClaim claim = createClaim(order, null, CourierClaimStatus.REJECTED);
             CourierClaimApproveRequest request =
-                    new CourierClaimApproveRequest("REFUND", "승인", BigDecimal.valueOf(10000));
+                    new CourierClaimApproveRequest("REFUND", "승인", BigDecimal.valueOf(10000), null, null);
 
             given(courierClaimService.findById(100L)).willReturn(claim);
 

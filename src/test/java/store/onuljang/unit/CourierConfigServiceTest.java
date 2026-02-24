@@ -88,8 +88,6 @@ class CourierConfigServiceTest {
                     true,
                     new BigDecimal("5000"),
                     new BigDecimal("3000"),
-                    false,
-                    1,
                     "변경된 안내",
                     "김철수",
                     "010-9999-8888",

@@ -56,4 +56,11 @@ public class AdminCourierClaimController {
         String newStatus = body.getOrDefault("order_status", body.getOrDefault("orderStatus", ""));
         return ResponseEntity.ok(courierClaimAppService.updateClaimOrderStatus(id, newStatus));
     }
+
+    @PatchMapping("/{id}/return-status")
+    public ResponseEntity<CourierClaimResponse> updateReturnStatus(
+            @PathVariable("id") Long id, @RequestBody Map<String, String> body) {
+        String returnStatus = body.getOrDefault("returnStatus", "");
+        return ResponseEntity.ok(courierClaimAppService.updateReturnStatus(id, returnStatus));
+    }
 }

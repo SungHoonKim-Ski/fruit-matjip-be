@@ -13,13 +13,19 @@ import store.onuljang.courier.dto.AdminCourierOrderListResponse;
 import store.onuljang.courier.dto.WaybillExcelFilterRequest;
 import store.onuljang.courier.entity.CourierOrder;
 import store.onuljang.courier.entity.CourierOrderItem;
+import org.springframework.web.multipart.MultipartFile;
+import store.onuljang.courier.dto.TrackingUploadResponse;
 import store.onuljang.courier.service.CourierOrderService;
 import store.onuljang.courier.service.CourierPaymentService;
 import store.onuljang.courier.service.CourierRefundService;
+import store.onuljang.courier.service.TrackingUploadService;
 import store.onuljang.courier.service.WaybillExcelService;
+import store.onuljang.shared.entity.enums.CourierCompany;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
+import store.onuljang.shared.entity.enums.UserPointTransactionType;
 import store.onuljang.shared.exception.AdminValidateException;
 import store.onuljang.shared.exception.UserValidateException;
+import store.onuljang.shared.user.service.UserPointService;
 
 @Slf4j
 @Service
@@ -32,6 +38,8 @@ public class CourierAdminOrderAppService {
     CourierPaymentService courierPaymentService;
     CourierRefundService courierRefundService;
     WaybillExcelService waybillExcelService;
+    TrackingUploadService trackingUploadService;
+    UserPointService userPointService;
 
     public AdminCourierOrderListResponse getOrders(
             CourierOrderStatus status, Boolean waybillDownloaded, int page, int size) {
@@ -76,17 +84,32 @@ public class CourierAdminOrderAppService {
             throw new AdminValidateException("이미 발송/배송완료/취소된 주문은 취소할 수 없습니다.");
         }
 
-        if (order.getStatus() == CourierOrderStatus.PAID) {
-            try {
-                courierRefundService.refund(order, order.getTotalAmount());
-            } catch (Exception e) {
-                log.warn("환불 실패 (orderId={}): {}", order.getId(), e.getMessage());
+        if (order.getStatus() == CourierOrderStatus.PAID
+                || order.getStatus() == CourierOrderStatus.PREPARING) {
+            if (order.getPgPaymentAmount().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                try {
+                    courierRefundService.refund(order, order.getPgPaymentAmount());
+                } catch (Exception e) {
+                    log.warn("환불 실패 (orderId={}): {}", order.getId(), e.getMessage());
+                }
+            }
+            if (order.getPointUsed().compareTo(java.math.BigDecimal.ZERO) > 0) {
+                userPointService.earn(
+                        order.getUser().getUid(), order.getPointUsed(),
+                        UserPointTransactionType.CANCEL_USE,
+                        "관리자취소#" + order.getDisplayCode() + " 포인트 환원",
+                        "COURIER_ORDER", order.getId(), "admin");
             }
         }
 
         order.markCanceled();
         courierPaymentService.markCanceled(order);
         restoreStock(order);
+    }
+
+    @Transactional
+    public TrackingUploadResponse uploadTracking(MultipartFile file, CourierCompany courierCompany) {
+        return trackingUploadService.uploadTracking(file, courierCompany);
     }
 
     @Transactional

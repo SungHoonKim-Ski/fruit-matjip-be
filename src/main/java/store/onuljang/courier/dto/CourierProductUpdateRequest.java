@@ -14,5 +14,6 @@ public record CourierProductUpdateRequest(
     Boolean soldOut,
     List<Long> categoryIds,
     Long shippingFeeTemplateId,
+    BigDecimal combinedShippingFee,
     List<OptionGroupRequest> optionGroups
 ) {}

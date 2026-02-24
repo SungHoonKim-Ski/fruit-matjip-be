@@ -5,4 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record CourierClaimApproveRequest(
-        @NotNull String action, @NotBlank String adminNote, BigDecimal refundAmount) {}
+        @NotNull String action,
+        @NotBlank String adminNote,
+        BigDecimal refundAmount,
+        BigDecimal pointAmount,
+        Boolean returnRequired) {}

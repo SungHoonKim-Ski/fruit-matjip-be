@@ -84,6 +84,8 @@ public class CourierAdminProductAppService {
                     shippingFeeTemplateService.findById(request.shippingFeeTemplateId()));
         }
 
+        product.setCombinedShippingFee(request.combinedShippingFee());
+
         courierProductService.save(product);
 
         if (request.optionGroups() != null && !request.optionGroups().isEmpty()) {
@@ -147,6 +149,8 @@ public class CourierAdminProductAppService {
             product.setShippingFeeTemplate(
                     shippingFeeTemplateService.findById(request.shippingFeeTemplateId()));
         }
+
+        product.setCombinedShippingFee(request.combinedShippingFee());
 
         if (request.optionGroups() != null) {
             List<CourierProductOptionGroup> groups = buildOptionGroups(product, request.optionGroups());

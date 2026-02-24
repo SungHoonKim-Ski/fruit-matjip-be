@@ -112,7 +112,8 @@ class CourierOrderAppServiceTest {
                 "101호",
                 "문 앞에 놓아주세요",
                 "KAKAOPAY",
-                idempotencyKey);
+                idempotencyKey,
+                null);
     }
 
     // --- ready ---

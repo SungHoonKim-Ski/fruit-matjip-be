@@ -154,6 +154,7 @@ class CourierAdminProductAppServiceTest {
                             1,
                             List.of(10L),
                             null,
+                            null,
                             null);
 
             given(adminService.findById(1L)).willReturn(testAdmin);
@@ -179,6 +180,7 @@ class CourierAdminProductAppServiceTest {
                             "한라봉",
                             "https://example.com/img.jpg",
                             new BigDecimal("25000"),
+                            null,
                             null,
                             null,
                             null,
@@ -224,6 +226,7 @@ class CourierAdminProductAppServiceTest {
                             null,
                             null,
                             null,
+                            null,
                             null);
 
             given(courierProductService.findById(1L)).willReturn(product);
@@ -246,7 +249,7 @@ class CourierAdminProductAppServiceTest {
 
             CourierProductUpdateRequest request =
                     new CourierProductUpdateRequest(
-                            null, null, null, null, null, null, false, null, null, null, null);
+                            null, null, null, null, null, null, false, null, null, null, null, null);
 
             given(courierProductService.findById(1L)).willReturn(product);
 
@@ -271,7 +274,7 @@ class CourierAdminProductAppServiceTest {
             CourierProductUpdateRequest request =
                     new CourierProductUpdateRequest(
                             null, null, null, null, null, null, null, null, List.of(10L), null,
-                            null);
+                            null, null);
 
             given(courierProductService.findById(1L)).willReturn(product);
             given(courierProductCategoryService.findById(10L))

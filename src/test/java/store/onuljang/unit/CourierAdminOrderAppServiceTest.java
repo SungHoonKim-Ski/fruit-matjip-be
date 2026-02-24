@@ -46,6 +46,8 @@ class CourierAdminOrderAppServiceTest {
     @Mock private CourierPaymentService courierPaymentService;
     @Mock private CourierRefundService courierRefundService;
     @Mock private WaybillExcelService waybillExcelService;
+    @Mock private store.onuljang.courier.service.TrackingUploadService trackingUploadService;
+    @Mock private store.onuljang.shared.user.service.UserPointService userPointService;
 
     private Users testUser;
 
@@ -449,10 +451,11 @@ class CourierAdminOrderAppServiceTest {
         }
 
         @Test
-        @DisplayName("PREPARING 상태에서 취소 - PG 환불 없이 재고 복원")
+        @DisplayName("PREPARING 상태에서 취소 - PG 환불 + 재고 복원")
         void cancel_preparing_success() {
             // arrange
             CourierOrder order = createOrder(CourierOrderStatus.PREPARING, "C-26021400-ABCD1");
+            ReflectionTestUtils.setField(order, "pgTid", "T_PG_TID_002");
             CourierProduct product = createProduct("감귤");
             ReflectionTestUtils.setField(product, "id", 1L);
             createOrderItem(order, product, 3);
@@ -465,7 +468,7 @@ class CourierAdminOrderAppServiceTest {
             // assert
             assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.CANCELED);
             verify(courierPaymentService).markCanceled(order);
-            verify(courierRefundService, never()).refund(any(), any());
+            verify(courierRefundService).refund(order, order.getTotalAmount());
         }
 
         @Test

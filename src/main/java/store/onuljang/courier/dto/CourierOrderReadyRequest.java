@@ -2,6 +2,7 @@ package store.onuljang.courier.dto;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 import java.util.List;
 
 public record CourierOrderReadyRequest(
@@ -13,7 +14,8 @@ public record CourierOrderReadyRequest(
         String address2,
         String shippingMemo,
         @NotBlank String pgProvider,
-        @NotBlank String idempotencyKey) {
+        @NotBlank String idempotencyKey,
+        BigDecimal pointUsed) {
 
     public record OrderItemRequest(
             @NotNull @Positive Long courierProductId,

@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -20,12 +21,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import store.onuljang.courier.appservice.CourierAdminOrderAppService;
 import store.onuljang.courier.dto.AdminCourierOrderDetailResponse;
 import store.onuljang.courier.dto.AdminCourierOrderListResponse;
 import store.onuljang.courier.dto.CourierShipRequest;
 import store.onuljang.courier.dto.CourierWaybillBulkRequest;
+import store.onuljang.courier.dto.TrackingUploadErrorResponse;
+import store.onuljang.courier.dto.TrackingUploadResponse;
 import store.onuljang.courier.dto.WaybillExcelFilterRequest;
+import store.onuljang.courier.service.TrackingUploadException;
+import store.onuljang.shared.entity.enums.CourierCompany;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;
 
 @RestController
@@ -92,6 +98,20 @@ public class AdminCourierOrderController {
                         MediaType.parseMediaType(
                                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
                 .body(excelData);
+    }
+
+    @PostMapping(value = "/upload-tracking", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadTracking(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("courierCompany") CourierCompany courierCompany) {
+        try {
+            TrackingUploadResponse response =
+                    courierAdminOrderAppService.uploadTracking(file, courierCompany);
+            return ResponseEntity.ok(response);
+        } catch (TrackingUploadException e) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                    .body(new TrackingUploadErrorResponse(e.getMessage(), e.getErrors()));
+        }
     }
 
     @PostMapping("/waybill/excel/bulk")

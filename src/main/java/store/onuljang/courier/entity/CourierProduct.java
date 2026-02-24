@@ -100,6 +100,11 @@ public class CourierProduct extends BaseEntity {
     @JoinColumn(name = "shipping_fee_template_id")
     private ShippingFeeTemplate shippingFeeTemplate;
 
+    @Getter
+    @Setter
+    @Column(name = "combined_shipping_fee", precision = 12, scale = 2)
+    private BigDecimal combinedShippingFee;
+
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 

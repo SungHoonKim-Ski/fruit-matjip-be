@@ -26,5 +26,7 @@ public record CourierProductCreateRequest(
 
     Long shippingFeeTemplateId,
 
+    BigDecimal combinedShippingFee,
+
     List<OptionGroupRequest> optionGroups
 ) {}
