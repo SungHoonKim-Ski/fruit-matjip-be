@@ -9,5 +9,6 @@ public record AdminLogEvent(
     String method,
     Integer status,
     Long durationMs,
-    String requestId)
+    String requestId,
+    String clientIp)
 { }

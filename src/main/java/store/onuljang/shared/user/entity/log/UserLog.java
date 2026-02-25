@@ -34,6 +34,9 @@ public class UserLog extends BaseLogEntity {
     @Column(name = "request_id", length = 64)
     private String requestId;
 
+    @Column(name = "client_ip", length = 45)
+    private String clientIp;
+
     public static UserLog from(UserLogEvent e) {
         return UserLog.builder()
             .userUid(e.userUid())
@@ -42,6 +45,7 @@ public class UserLog extends BaseLogEntity {
             .status(e.status())
             .durationMs(e.durationMs())
             .requestId(truncate(e.requestId(), 64))
+            .clientIp(truncate(e.clientIp(), 45))
             .build();
     }
 

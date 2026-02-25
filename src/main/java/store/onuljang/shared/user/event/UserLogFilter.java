@@ -74,10 +74,19 @@ public class UserLogFilter extends OncePerRequestFilter {
                     .path(req.getRequestURI())
                     .durationMs(durationMs)
                     .method(req.getMethod())
+                    .clientIp(resolveClientIp(req))
                     .build()
             );
         }
     }
+    private String resolveClientIp(HttpServletRequest req) {
+        String xff = req.getHeader("X-Forwarded-For");
+        if (xff != null && !xff.isBlank()) {
+            return xff.split(",")[0].trim();
+        }
+        return req.getRemoteAddr();
+    }
+
     @Nullable
     private String currentUserIdOrNull(HttpServletRequest req) {
         String header = req.getHeader("Authorization");
