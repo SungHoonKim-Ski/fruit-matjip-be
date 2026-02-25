@@ -1,3 +1,10 @@
 package store.onuljang.courier.scheduler;
 
-public record TrackingResultMessage(String displayCode, String status, String location, String timestamp) {}
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public record TrackingResultMessage(
+    @JsonProperty("displayCode") String displayCode,
+    @JsonProperty("status") String status,
+    @JsonProperty("location") String location,
+    @JsonProperty("timestamp") String timestamp
+) {}

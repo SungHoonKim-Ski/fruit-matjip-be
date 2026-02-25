@@ -74,9 +74,8 @@ class TrackingResultPollingSchedulerTest {
     }
 
     private Message buildMessage(String displayCode, String status) throws Exception {
-        // Use snake_case keys to match global SNAKE_CASE ObjectMapper used during deserialization
         String body = objectMapper.writeValueAsString(Map.of(
-            "display_code", displayCode,
+            "displayCode", displayCode,
             "status", status,
             "location", "서울 강남",
             "timestamp", "2026-02-24T10:00:00"
