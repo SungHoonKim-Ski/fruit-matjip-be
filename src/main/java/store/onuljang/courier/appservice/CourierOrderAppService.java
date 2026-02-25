@@ -224,7 +224,7 @@ public class CourierOrderAppService {
                     uid, pointUsed,
                     UserPointTransactionType.USE_COURIER,
                     "택배주문#" + displayCode + " 사용",
-                    "COURIER_ORDER", saved.getId());
+                    "COURIER_ORDER", saved.getId(), null);
         }
 
         // 6) PG 결제 준비 (전액 포인트 결제 시 PG 생략)

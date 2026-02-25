@@ -139,7 +139,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
             // Act
             UserPointTransaction tx = userPointService.use(
                     user.getUid(), new BigDecimal("3000"), UserPointTransactionType.USE_COURIER,
-                    "쿠폰 사용", null, null);
+                    "쿠폰 사용", null, null, null);
             entityManager.flush();
             entityManager.clear();
 
@@ -161,7 +161,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
             // Act & Assert
             assertThatThrownBy(() -> userPointService.use(
                     user.getUid(), new BigDecimal("6000"), UserPointTransactionType.USE_COURIER,
-                    "잔액 초과 사용", null, null))
+                    "잔액 초과 사용", null, null, null))
                     .isInstanceOf(UserValidateException.class)
                     .hasMessageContaining("포인트 잔액이 부족합니다");
         }
@@ -176,7 +176,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
             // Act
             UserPointTransaction tx = userPointService.use(
                     user.getUid(), new BigDecimal("5000"), UserPointTransactionType.USE_COURIER,
-                    "전액 사용", null, null);
+                    "전액 사용", null, null, null);
 
             // Assert
             assertThat(tx.getBalanceAfter()).isEqualByComparingTo(BigDecimal.ZERO);
@@ -188,7 +188,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
             // Act & Assert
             assertThatThrownBy(() -> userPointService.use(
                     user.getUid(), BigDecimal.ZERO, UserPointTransactionType.USE_COURIER,
-                    "0원 사용", null, null))
+                    "0원 사용", null, null, null))
                     .isInstanceOf(UserValidateException.class)
                     .hasMessageContaining("0보다 커야 합니다");
         }
@@ -248,7 +248,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
                     UserPointTransactionType.EARN_ADMIN, "적립", null, null, "admin");
             UserPointTransaction useTx = userPointService.use(
                     user.getUid(), new BigDecimal("2000"), UserPointTransactionType.USE_COURIER,
-                    "사용", null, null);
+                    "사용", null, null, null);
             entityManager.flush();
             entityManager.clear();
 
@@ -280,7 +280,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
                     UserPointTransactionType.EARN_ADMIN, "적립", null, null, "admin");
             UserPointTransaction useTx = userPointService.use(
                     user.getUid(), new BigDecimal("4000"), UserPointTransactionType.USE_COURIER,
-                    "사용", null, null);
+                    "사용", null, null, null);
             entityManager.flush();
             entityManager.clear();
 
@@ -306,7 +306,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
                     UserPointTransactionType.EARN_ADMIN, "적립", null, null, "admin");
             UserPointTransaction useTx = userPointService.use(
                     user.getUid(), new BigDecimal("1000"), UserPointTransactionType.USE_STORE,
-                    "매장 사용", null, null);
+                    "매장 사용", null, null, null);
             entityManager.flush();
             entityManager.clear();
 
@@ -460,7 +460,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
             userPointService.earn(user.getUid(), new BigDecimal("2000"),
                     UserPointTransactionType.EARN_CS, "두 번째 적립", null, null, "cs");
             userPointService.use(user.getUid(), new BigDecimal("500"),
-                    UserPointTransactionType.USE_COURIER, "쿠폰 사용", null, null);
+                    UserPointTransactionType.USE_COURIER, "쿠폰 사용", null, null, null);
             entityManager.flush();
             entityManager.clear();
 
@@ -526,7 +526,7 @@ class UserPointServiceIntegrationTest extends IntegrationTestBase {
                     user.getUid(), new BigDecimal("10000"),
                     UserPointTransactionType.EARN_ADMIN, "적립", null, null, "admin");
             userPointService.use(user.getUid(), new BigDecimal("8000"),
-                    UserPointTransactionType.USE_COURIER, "사용", null, null);
+                    UserPointTransactionType.USE_COURIER, "사용", null, null, null);
             entityManager.flush();
             entityManager.clear();
 

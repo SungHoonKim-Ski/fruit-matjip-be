@@ -71,7 +71,8 @@ public class UserPointService {
         UserPointTransactionType type,
         String description,
         String referenceType,
-        Long referenceId
+        Long referenceId,
+        String createdBy
     ) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new UserValidateException("포인트 금액은 0보다 커야 합니다.");
@@ -86,6 +87,7 @@ public class UserPointService {
             .description(description)
             .referenceType(referenceType)
             .referenceId(referenceId)
+            .createdBy(createdBy)
             .build();
         return userPointTransactionRepository.save(tx);
     }

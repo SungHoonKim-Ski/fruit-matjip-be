@@ -16,6 +16,7 @@ import store.onuljang.shared.user.entity.Users;
 import store.onuljang.shared.user.service.UserPointService;
 import store.onuljang.shared.user.service.UserService;
 import store.onuljang.shared.user.repository.UserQueryRepository;
+import store.onuljang.shop.admin.util.SessionUtil;
 
 @RestController
 @RequestMapping("/api/admin/points")
@@ -60,7 +61,7 @@ public class AdminPointController {
             request.description(),
             null,
             null,
-            "admin"
+            "admin:" + SessionUtil.getAdminId()
         );
         return ResponseEntity.ok(PointTransactionResponse.from(tx));
     }
@@ -75,7 +76,8 @@ public class AdminPointController {
             UserPointTransactionType.USE_STORE,
             request.description(),
             null,
-            null
+            null,
+            "admin:" + SessionUtil.getAdminId()
         );
         return ResponseEntity.ok(PointTransactionResponse.from(tx));
     }
@@ -89,7 +91,7 @@ public class AdminPointController {
             request.allUsers(),
             request.amount(),
             request.description(),
-            "admin"
+            "admin:" + SessionUtil.getAdminId()
         );
         java.math.BigDecimal totalAmount = request.amount()
             .multiply(java.math.BigDecimal.valueOf(result[0]));
