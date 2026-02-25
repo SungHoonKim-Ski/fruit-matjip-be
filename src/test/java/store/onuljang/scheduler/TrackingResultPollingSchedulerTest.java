@@ -27,6 +27,7 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import store.onuljang.config.TestS3Config;
 import store.onuljang.config.TestSqsConfig;
 import store.onuljang.courier.entity.CourierOrder;
+import store.onuljang.courier.scheduler.TrackingResultMessageProcessor;
 import store.onuljang.courier.scheduler.TrackingResultPollingScheduler;
 import store.onuljang.courier.service.CourierOrderService;
 import store.onuljang.shared.entity.enums.CourierCompany;
@@ -39,6 +40,9 @@ class TrackingResultPollingSchedulerTest {
 
     @Autowired
     TrackingResultPollingScheduler scheduler;
+
+    @Autowired
+    TrackingResultMessageProcessor messageProcessor;
 
     @MockitoBean
     SqsClient sqsClient;
@@ -109,7 +113,7 @@ class TrackingResultPollingSchedulerTest {
         Message message = buildMessage("C-001", "IN_TRANSIT");
 
         // Act
-        scheduler.processMessage(message);
+        messageProcessor.process(message, "test-queue-url");
 
         // Assert
         assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.IN_TRANSIT);
@@ -128,7 +132,7 @@ class TrackingResultPollingSchedulerTest {
         Message message = buildMessage("C-002", "DELIVERED");
 
         // Act
-        scheduler.processMessage(message);
+        messageProcessor.process(message, "test-queue-url");
 
         // Assert
         assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.DELIVERED);
@@ -145,7 +149,7 @@ class TrackingResultPollingSchedulerTest {
         Message message = buildMessage("C-003", "DELIVERED");
 
         // Act
-        scheduler.processMessage(message);
+        messageProcessor.process(message, "test-queue-url");
 
         // Assert
         assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.DELIVERED);
@@ -162,7 +166,7 @@ class TrackingResultPollingSchedulerTest {
         Message message = buildMessage("C-004", "IN_TRANSIT");
 
         // Act
-        scheduler.processMessage(message);
+        messageProcessor.process(message, "test-queue-url");
 
         // Assert
         assertThat(order.getStatus()).isEqualTo(CourierOrderStatus.DELIVERED);

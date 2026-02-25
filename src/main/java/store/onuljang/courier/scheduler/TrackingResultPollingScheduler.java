@@ -1,6 +1,5 @@
 package store.onuljang.courier.scheduler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.NonNull;
@@ -17,16 +16,9 @@ import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
-import java.time.LocalDateTime;
-import store.onuljang.courier.entity.CourierOrder;
-import store.onuljang.courier.service.CourierOrderService;
-import store.onuljang.shared.entity.enums.CourierOrderStatus;
-import store.onuljang.shared.util.TimeUtil;
 
 @Slf4j
 @Component
@@ -34,9 +26,8 @@ import store.onuljang.shared.util.TimeUtil;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class TrackingResultPollingScheduler {
 
-    @NonNull CourierOrderService courierOrderService;
     @NonNull SqsClient sqsClient;
-    @NonNull ObjectMapper objectMapper;
+    @NonNull TrackingResultMessageProcessor messageProcessor;
 
     @NonFinal
     @Value("${cloud.aws.sqs.courier-tracking-result-queue-url}")
@@ -60,59 +51,12 @@ public class TrackingResultPollingScheduler {
             .build()).messages();
 
         for (Message message : messages) {
-            processMessage(message);
-        }
-    }
-
-    @Transactional
-    public void processMessage(Message message) {
-        try {
-            TrackingResultMessage result = objectMapper.readValue(
-                message.body(), TrackingResultMessage.class);
-
-            CourierOrder order = courierOrderService.findByDisplayCode(result.displayCode());
-            CourierOrderStatus current = order.getStatus();
-            String newStatus = result.status();
-
-            if ("IN_TRANSIT".equals(newStatus) && current == CourierOrderStatus.ORDER_COMPLETED) {
-                order.markInTransit();
-                log.info("[TrackingResultPollingScheduler] status updated: displayCode={}, {} -> IN_TRANSIT",
-                    result.displayCode(), current);
-            } else if ("DELIVERED".equals(newStatus)
-                && (current == CourierOrderStatus.ORDER_COMPLETED || current == CourierOrderStatus.IN_TRANSIT)) {
-                order.markDelivered();
-                log.info("[TrackingResultPollingScheduler] status updated: displayCode={}, {} -> DELIVERED",
-                    result.displayCode(), current);
-            }
-
-            if (result.location() != null && !result.location().isBlank()) {
-                LocalDateTime trackingTime = parseTrackingTimestamp(result.timestamp());
-                order.updateTrackingInfo(result.location(), trackingTime);
-            }
-
-            sqsClient.deleteMessage(DeleteMessageRequest.builder()
-                .queueUrl(trackingResultQueueUrl)
-                .receiptHandle(message.receiptHandle())
-                .build());
-        } catch (Exception e) {
-            log.error("[TrackingResultPollingScheduler] failed to process message: messageId={}, error={}",
-                message.messageId(), e.getMessage(), e);
+            messageProcessor.process(message, trackingResultQueueUrl);
         }
     }
 
     @Recover
     public void recover(Exception e) {
         log.error("[TrackingResultPollingScheduler] job failed after retries: {}", e.getMessage(), e);
-    }
-
-    private LocalDateTime parseTrackingTimestamp(String timestamp) {
-        if (timestamp == null || timestamp.isBlank()) {
-            return TimeUtil.nowDateTime();
-        }
-        try {
-            return LocalDateTime.parse(timestamp, java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        } catch (Exception e) {
-            return TimeUtil.nowDateTime();
-        }
     }
 }
