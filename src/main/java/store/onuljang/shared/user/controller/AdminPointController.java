@@ -15,6 +15,7 @@ import store.onuljang.shared.user.entity.UserPointTransaction;
 import store.onuljang.shared.user.entity.Users;
 import store.onuljang.shared.user.service.UserPointService;
 import store.onuljang.shared.user.service.UserService;
+import store.onuljang.shared.user.repository.UserQueryRepository;
 
 @RestController
 @RequestMapping("/api/admin/points")
@@ -25,13 +26,16 @@ public class AdminPointController {
 
     UserPointService userPointService;
     UserService userService;
+    UserQueryRepository userQueryRepository;
 
     @GetMapping("/users")
     public ResponseEntity<List<AdminPointUserResponse>> searchUsers(
-        @RequestParam(required = false, defaultValue = "") String keyword
+        @RequestParam(required = false, defaultValue = "") String keyword,
+        @RequestParam(required = false, defaultValue = "0") int offset,
+        @RequestParam(required = false, defaultValue = "20") int limit
     ) {
-        List<Users> users = userService.getUsers(keyword, null, null, null, null, 20);
-        return ResponseEntity.ok(users.stream().map(AdminPointUserResponse::from).toList());
+        List<Users> result = userQueryRepository.getUsersByOffset(keyword, offset, limit);
+        return ResponseEntity.ok(result.stream().map(AdminPointUserResponse::from).toList());
     }
 
     @GetMapping("/users/{uid}/history")

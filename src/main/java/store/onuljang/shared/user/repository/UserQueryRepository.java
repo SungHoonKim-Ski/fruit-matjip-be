@@ -46,6 +46,17 @@ public class UserQueryRepository {
             .fetch();
     }
 
+    public List<Users> getUsersByOffset(String name, long offset, int limit) {
+        BooleanBuilder where = buildBaseWhere(name, false);
+        return queryFactory
+            .selectFrom(users)
+            .where(where)
+            .orderBy(users.name.asc(), users.id.asc())
+            .offset(offset)
+            .limit(limit)
+            .fetch();
+    }
+
     private BooleanBuilder buildBaseWhere(String name, boolean filterRestricted) {
         BooleanBuilder where = new BooleanBuilder();
         if (name != null && !name.isBlank()) {
@@ -142,15 +153,17 @@ public class UserQueryRepository {
         SortOrder sortOrder
     ) {
         List<OrderSpecifier<?>> orders = new ArrayList<>();
-        switch (sortKey) {
-            case TOTAL_REVENUE ->
-                orders.add(sortOrder == SortOrder.DESC ? users.totalRevenue.desc() : users.totalRevenue.asc());
-            case TOTAL_WARN_COUNT ->
-                orders.add(sortOrder == SortOrder.DESC ? users.totalWarnCount.desc() : users.totalWarnCount.asc());
-            case WARN_COUNT ->
-                orders.add(sortOrder == SortOrder.DESC ? users.monthlyWarnCount.desc() : users.monthlyWarnCount.asc());
-            case RESTRICTED_UNTIL ->
-                orders.add(sortOrder == SortOrder.DESC ? users.restrictedUntil.desc() : users.restrictedUntil.asc());
+        if (sortKey != null) {
+            switch (sortKey) {
+                case TOTAL_REVENUE ->
+                    orders.add(sortOrder == SortOrder.DESC ? users.totalRevenue.desc() : users.totalRevenue.asc());
+                case TOTAL_WARN_COUNT ->
+                    orders.add(sortOrder == SortOrder.DESC ? users.totalWarnCount.desc() : users.totalWarnCount.asc());
+                case WARN_COUNT ->
+                    orders.add(sortOrder == SortOrder.DESC ? users.monthlyWarnCount.desc() : users.monthlyWarnCount.asc());
+                case RESTRICTED_UNTIL ->
+                    orders.add(sortOrder == SortOrder.DESC ? users.restrictedUntil.desc() : users.restrictedUntil.asc());
+            }
         }
         // 항상 id를 tie-breaker 로 사용
         orders.add(sortOrder == SortOrder.DESC ? users.id.desc() : users.id.asc());
