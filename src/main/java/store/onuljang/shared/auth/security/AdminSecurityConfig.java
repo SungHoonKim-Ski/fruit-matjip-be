@@ -20,6 +20,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import store.onuljang.shop.admin.event.AdminLogFilter;
 import store.onuljang.shared.auth.dto.AdminUserDetails;
 
@@ -40,7 +41,7 @@ public class AdminSecurityConfig {
 
         http.securityMatcher("/api/admin/**", "/api/admin/shop/**")
             .authorizeHttpRequests(a -> a
-                .requestMatchers("/api/admin/login", "/api/admin/logout").permitAll()
+                .requestMatchers("/api/admin/login", "/api/admin/logout", "/api/admin/csrf").permitAll()
                 .requestMatchers("/api/admin/signup").hasRole("OWNER")
                 .requestMatchers("/api/admin/**", "/api/admin/shop/**").hasAnyRole("MANAGER", "OWNER")
             )
@@ -73,7 +74,10 @@ public class AdminSecurityConfig {
                 )
             )
             .cors(cors -> {})
-            .csrf(csrf -> csrf.disable());
+            .csrf(csrf -> csrf
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .ignoringRequestMatchers("/api/admin/login", "/api/admin/logout")
+            );
         return http.build();
     }
 

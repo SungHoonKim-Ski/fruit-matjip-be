@@ -6,11 +6,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.shop.admin.appservice.AdminAppService;
 import store.onuljang.shop.admin.dto.AdminSignupRequest;
 import store.onuljang.shared.auth.dto.AdminUserDetails;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin")
@@ -27,6 +30,17 @@ public class AdminController {
         long res = adminAppService.signUp(request);
 
         return ResponseEntity.ok(res);
+    }
+
+    @GetMapping("/csrf")
+    public ResponseEntity<Map<String, String>> csrf(CsrfToken csrfToken) {
+        return ResponseEntity.ok(
+            Map.of(
+                "token", csrfToken.getToken(),
+                "headerName", csrfToken.getHeaderName(),
+                "parameterName", csrfToken.getParameterName()
+            )
+        );
     }
 
     @GetMapping("/validate")

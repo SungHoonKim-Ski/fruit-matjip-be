@@ -16,6 +16,7 @@ import store.onuljang.config.TestSqsConfig;
 
 import java.nio.charset.StandardCharsets;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 /**
@@ -95,8 +96,7 @@ public abstract class IntegrationTestBase {
      */
     protected <T> ApiResponse<T> postAction(String uri, Object request, Class<T> responseType) throws Exception {
         return performAction(
-                post(uri).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
-                        ,
+                post(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)),
                 responseType);
     }
 
@@ -105,7 +105,7 @@ public abstract class IntegrationTestBase {
      */
     protected <T> ApiResponse<T> postAction(String uri, Object request, String accessToken, Class<T> responseType)
             throws Exception {
-        return performAction(post(uri).contentType(MediaType.APPLICATION_JSON)
+        return performAction(post(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + accessToken).content(objectMapper.writeValueAsString(request)),
                 responseType);
     }
@@ -115,8 +115,7 @@ public abstract class IntegrationTestBase {
      */
     protected <T> ApiResponse<T> putAction(String uri, Object request, Class<T> responseType) throws Exception {
         return performAction(
-                put(uri).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
-                        ,
+                put(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)),
                 responseType);
     }
 
@@ -125,8 +124,7 @@ public abstract class IntegrationTestBase {
      */
     protected ApiResponse<Void> putAction(String uri, Object request) throws Exception {
         return performAction(
-                put(uri).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
-                        ,
+                put(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)),
                 Void.class);
     }
 
@@ -151,7 +149,7 @@ public abstract class IntegrationTestBase {
      */
     protected ApiResponse<Void> patchAction(String uri, String accessToken) throws Exception {
         return performAction(
-                patch(uri).contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken),
+                patch(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken),
                 Void.class);
     }
 
@@ -160,7 +158,7 @@ public abstract class IntegrationTestBase {
      */
     protected <T> ApiResponse<T> patchAction(String uri, Object request, String accessToken, Class<T> responseType)
             throws Exception {
-        return performAction(patch(uri).contentType(MediaType.APPLICATION_JSON)
+        return performAction(patch(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON)
                 .header("Authorization", "Bearer " + accessToken).content(objectMapper.writeValueAsString(request)),
                 responseType);
     }
@@ -170,8 +168,7 @@ public abstract class IntegrationTestBase {
      */
     protected <T> ApiResponse<T> patchAction(String uri, Object request, Class<T> responseType) throws Exception {
         return performAction(
-                patch(uri).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request))
-                        ,
+                patch(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(request)),
                 responseType);
     }
 
@@ -179,7 +176,7 @@ public abstract class IntegrationTestBase {
      * PATCH 요청 (관리자용, 인증 없음, 바디 없음)
      */
     protected ApiResponse<Void> patchAction(String uri) throws Exception {
-        return performAction(patch(uri).contentType(MediaType.APPLICATION_JSON), Void.class);
+        return performAction(patch(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON), Void.class);
     }
 
     /**
@@ -187,7 +184,7 @@ public abstract class IntegrationTestBase {
      */
     protected ApiResponse<Void> deleteAction(String uri, String accessToken) throws Exception {
         return performAction(
-                delete(uri).contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken),
+                delete(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON).header("Authorization", "Bearer " + accessToken),
                 Void.class);
     }
 
@@ -195,7 +192,7 @@ public abstract class IntegrationTestBase {
      * DELETE 요청 (인증 없음)
      */
     protected ApiResponse<Void> deleteAction(String uri) throws Exception {
-        return performAction(delete(uri).contentType(MediaType.APPLICATION_JSON), Void.class);
+        return performAction(delete(uri).with(csrf()).contentType(MediaType.APPLICATION_JSON), Void.class);
     }
 
     /**
