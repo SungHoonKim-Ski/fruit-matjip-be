@@ -60,6 +60,7 @@ public class AdminSecurityConfig {
                 )
             .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterAfter(new AdminLogFilter(eventPublisher), SecurityContextHolderFilter.class)
+            .addFilterAfter(new AdminSessionIpFilter(), AdminLogFilter.class)
             .headers(headers -> headers
                 .frameOptions(frame -> frame.deny())
                 .contentTypeOptions(contentType -> {})
@@ -90,6 +91,15 @@ public class AdminSecurityConfig {
 
             AdminUserDetails principal = (AdminUserDetails) auth.getPrincipal();
             session.setAttribute("adminId", principal.getAdminId());
+
+            String clientIp = req.getHeader("X-Forwarded-For");
+            if (clientIp != null && !clientIp.isBlank()) {
+                clientIp = clientIp.split(",")[0].trim();
+            }
+            if (clientIp == null || clientIp.isBlank()) {
+                clientIp = req.getRemoteAddr();
+            }
+            session.setAttribute("sessionIp", clientIp);
 
             // 응답
             res.setStatus(200);
