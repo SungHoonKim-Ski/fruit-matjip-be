@@ -1,11 +1,12 @@
 package store.onuljang.shared.notification.kakao.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
 
 public record KakaoNotificationMessage(
-    String tplCode,
-    String receiverPhone,
-    String receiverName,
-    Map<String, String> variables,
-    String buttonUrl
+    @JsonProperty("tplCode") String tplCode,
+    @JsonProperty("receiverPhone") String receiverPhone,
+    @JsonProperty("receiverName") String receiverName,
+    @JsonProperty("variables") Map<String, String> variables,
+    @JsonProperty("buttonUrl") String buttonUrl
 ) {}
