@@ -78,6 +78,14 @@ DELIVERY:
   END_HOUR: 19
   END_MINUTE: 30
 
+STORE:
+  RESERVATION_DEADLINE_HOUR: 19
+  RESERVATION_DEADLINE_MINUTE: 30
+  CANCELLATION_DEADLINE_HOUR: 19
+  CANCELLATION_DEADLINE_MINUTE: 0
+  PICKUP_DEADLINE_HOUR: 20
+  PICKUP_DEADLINE_MINUTE: 0
+
 cloud:
   aws:
     s3:
@@ -90,12 +98,26 @@ cloud:
       base-url: https://sqs.ap-northeast-2.amazonaws.com/000000000000
       courier-tracking-request-queue-url: https://sqs.ap-northeast-2.amazonaws.com/000000000000/test-courier-tracking-request
       courier-tracking-result-queue-url: https://sqs.ap-northeast-2.amazonaws.com/000000000000/test-courier-tracking-result
+      kakao-notification-queue-url: https://sqs.ap-northeast-2.amazonaws.com/000000000000/test-kakao-notification
     account-id: "000000000000"
     region:
       static: ap-northeast-2
     credentials:
       access-key: test-access-key
       secret-key: test-secret-key
+
+KAKAO_NOTIFICATION:
+  ENABLED: false
+  SITE_URL: https://test.fruit-matjip.store
+
+ALIGO:
+  TPL_CODE_ORDER_COMPLETED: UF_7406
+  TPL_CODE_IN_TRANSIT: UF_7407
+  TPL_CODE_DELIVERED: UF_7408
+  TPL_CODE_CANCELED: UF_7409
+  API_KEY: test-api-key
+  USER_ID: test-user-id
+  SENDER_KEY: test-sender-key
 
 logging:
   level:

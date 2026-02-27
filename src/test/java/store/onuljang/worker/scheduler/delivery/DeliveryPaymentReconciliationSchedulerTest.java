@@ -1,4 +1,4 @@
-package store.onuljang.scheduler;
+package store.onuljang.worker.scheduler.delivery;
 
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.shared.config.KakaoPayConfigDto;
 import store.onuljang.config.TestS3Config;
 import store.onuljang.config.TestSqsConfig;
-import store.onuljang.shop.delivery.scheduler.DeliveryPaymentReconciliationScheduler;
 import store.onuljang.shared.exception.KakaoPayException;
 import store.onuljang.shared.feign.dto.reseponse.KakaoPayOrderResponse;
 import store.onuljang.shop.delivery.repository.DeliveryOrderRepository;

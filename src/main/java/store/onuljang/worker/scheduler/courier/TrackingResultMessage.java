@@ -1,4 +1,4 @@
-package store.onuljang.courier.scheduler;
+package store.onuljang.worker.scheduler.courier;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

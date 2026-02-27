@@ -1,4 +1,4 @@
-package store.onuljang.courier.scheduler;
+package store.onuljang.worker.listener.kakao;
 
 import java.util.List;
 import lombok.AccessLevel;
@@ -24,14 +24,14 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class TrackingResultPollingScheduler {
+public class KakaoNotificationPollingScheduler {
 
     @NonNull SqsClient sqsClient;
-    @NonNull TrackingResultMessageProcessor messageProcessor;
+    @NonNull KakaoNotificationMessageProcessor messageProcessor;
 
     @NonFinal
-    @Value("${cloud.aws.sqs.courier-tracking-result-queue-url}")
-    String trackingResultQueueUrl;
+    @Value("${cloud.aws.sqs.kakao-notification-queue-url}")
+    String kakaoNotificationQueueUrl;
 
     @Retryable(
         retryFor = {
@@ -42,21 +42,29 @@ public class TrackingResultPollingScheduler {
         maxAttempts = 3,
         backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
     )
-    @Scheduled(fixedDelay = 60_000)
+    @Scheduled(fixedDelay = 30_000)
     public void run() {
-        List<Message> messages = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
-            .queueUrl(trackingResultQueueUrl)
+        if (kakaoNotificationQueueUrl == null || kakaoNotificationQueueUrl.isBlank()) {
+            return;
+        }
+
+        var response = sqsClient.receiveMessage(ReceiveMessageRequest.builder()
+            .queueUrl(kakaoNotificationQueueUrl)
             .maxNumberOfMessages(10)
             .waitTimeSeconds(0)
-            .build()).messages();
+            .build());
+        if (response == null) {
+            return;
+        }
 
+        List<Message> messages = response.messages();
         for (Message message : messages) {
-            messageProcessor.process(message, trackingResultQueueUrl);
+            messageProcessor.process(message, kakaoNotificationQueueUrl);
         }
     }
 
     @Recover
     public void recover(Exception e) {
-        log.error("[TrackingResultPollingScheduler] job failed after retries: {}", e.getMessage(), e);
+        log.error("[KakaoNotificationPollingScheduler] job failed after retries: {}", e.getMessage(), e);
     }
 }

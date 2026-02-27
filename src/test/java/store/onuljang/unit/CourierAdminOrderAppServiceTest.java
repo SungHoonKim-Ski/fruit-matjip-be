@@ -52,6 +52,7 @@ class CourierAdminOrderAppServiceTest {
     @Mock private WaybillExcelService waybillExcelService;
     @Mock private store.onuljang.courier.service.TrackingUploadService trackingUploadService;
     @Mock private store.onuljang.shared.user.service.UserPointService userPointService;
+    @Mock private org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     private Users testUser;
 

@@ -60,6 +60,19 @@ TOSSPAY:
   SECRET_KEY: ${TOSSPAY_SECRET_KEY:}
   HOST: ${TOSSPAY_HOST:https://api.tosspayments.com}
 
+KAKAO_NOTIFICATION:
+  ENABLED: ${KAKAO_NOTIFICATION_ENABLED:false}
+  SITE_URL: ${KAKAO_NOTIFICATION_SITE_URL:https://fruit-matjip.store}
+
+ALIGO:
+  TPL_CODE_ORDER_COMPLETED: ${ALIGO_TPL_CODE_ORDER_COMPLETED:UF_7406}
+  TPL_CODE_IN_TRANSIT: ${ALIGO_TPL_CODE_IN_TRANSIT:UF_7407}
+  TPL_CODE_DELIVERED: ${ALIGO_TPL_CODE_DELIVERED:UF_7408}
+  TPL_CODE_CANCELED: ${ALIGO_TPL_CODE_CANCELED:UF_7409}
+  API_KEY: ${ALIGO_API_KEY:}
+  USER_ID: ${ALIGO_USER_ID:}
+  SENDER_KEY: ${ALIGO_SENDER_KEY:}
+
 security:
   jwt:
     secret: ${JWT_SECRET}
@@ -76,6 +89,7 @@ cloud:
       base-url: https://sqs.${cloud.aws.region.static}.amazonaws.com/${cloud.aws.account-id}
       courier-tracking-request-queue-url: ${cloud.aws.sqs.base-url}/${SQS_COURIER_TRACKING_REQUEST_QUEUE_NAME:}
       courier-tracking-result-queue-url: ${cloud.aws.sqs.base-url}/${SQS_COURIER_TRACKING_RESULT_QUEUE_NAME:}
+      kakao-notification-queue-url: ${cloud.aws.sqs.base-url}/${SQS_KAKAO_NOTIFICATION_QUEUE_NAME:}
     account-id: ${AWS_ACCOUNT_ID:895428158418}
     stack:
       auto: false

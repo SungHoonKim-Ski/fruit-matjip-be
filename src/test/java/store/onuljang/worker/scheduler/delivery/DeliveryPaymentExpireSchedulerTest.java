@@ -1,4 +1,4 @@
-package store.onuljang.scheduler;
+package store.onuljang.worker.scheduler.delivery;
 
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.AfterEach;
@@ -12,7 +12,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
 import store.onuljang.config.TestSqsConfig;
-import store.onuljang.shop.delivery.scheduler.DeliveryPaymentExpireScheduler;
 import store.onuljang.shop.delivery.repository.DeliveryOrderRepository;
 import store.onuljang.shop.admin.entity.Admin;
 import store.onuljang.shop.delivery.entity.DeliveryOrder;

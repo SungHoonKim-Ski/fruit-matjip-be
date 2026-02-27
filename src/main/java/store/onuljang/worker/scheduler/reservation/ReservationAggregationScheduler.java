@@ -1,4 +1,4 @@
-package store.onuljang.shop.reservation.scheduler;
+package store.onuljang.worker.scheduler.reservation;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +22,7 @@ public class ReservationAggregationScheduler {
     AdminAggregationAppService adminAggregationAppService;
 
     /**
-     * 매일 00:10(KST) 실행.
+     * 매일 04:30(KST) 실행. 최대 27시(03:00) 이후 안전 마진 확보.
      */
     @Retryable(
         retryFor = {
@@ -36,7 +36,7 @@ public class ReservationAggregationScheduler {
         maxAttempts = 3,
         backoff = @Backoff(delay = 1000, multiplier = 2, random = true)
     )
-    @Scheduled(cron = "0 10 0 * * *", zone = "Asia/Seoul")
+    @Scheduled(cron = "0 30 4 * * *", zone = "Asia/Seoul")
     public void aggregate() {
         adminAggregationAppService.aggregateReservation();
     }

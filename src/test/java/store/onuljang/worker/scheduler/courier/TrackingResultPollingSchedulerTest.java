@@ -1,4 +1,4 @@
-package store.onuljang.scheduler;
+package store.onuljang.worker.scheduler.courier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,8 +27,6 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import store.onuljang.config.TestS3Config;
 import store.onuljang.config.TestSqsConfig;
 import store.onuljang.courier.entity.CourierOrder;
-import store.onuljang.courier.scheduler.TrackingResultMessageProcessor;
-import store.onuljang.courier.scheduler.TrackingResultPollingScheduler;
 import store.onuljang.courier.service.CourierOrderService;
 import store.onuljang.shared.entity.enums.CourierCompany;
 import store.onuljang.shared.entity.enums.CourierOrderStatus;

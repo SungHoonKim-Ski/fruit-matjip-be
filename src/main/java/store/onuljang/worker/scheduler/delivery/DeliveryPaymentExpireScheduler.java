@@ -1,4 +1,4 @@
-package store.onuljang.shop.delivery.scheduler;
+package store.onuljang.worker.scheduler.delivery;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

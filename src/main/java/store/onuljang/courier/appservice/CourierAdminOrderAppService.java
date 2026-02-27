@@ -6,8 +6,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import store.onuljang.courier.event.CourierStatusChangedEvent;
 import store.onuljang.courier.dto.AdminCourierOrderDetailResponse;
 import store.onuljang.courier.dto.AdminCourierOrderListResponse;
 import store.onuljang.courier.dto.WaybillExcelFilterRequest;
@@ -40,6 +42,7 @@ public class CourierAdminOrderAppService {
     WaybillExcelService waybillExcelService;
     TrackingUploadService trackingUploadService;
     UserPointService userPointService;
+    ApplicationEventPublisher eventPublisher;
 
     public AdminCourierOrderListResponse getOrders(
             CourierOrderStatus status, int page, int size) {
@@ -58,6 +61,11 @@ public class CourierAdminOrderAppService {
         CourierOrder order = courierOrderService.findById(id);
         validateAdminTransition(order, nextStatus);
         applyStatus(order, nextStatus);
+        if (nextStatus == CourierOrderStatus.ORDER_COMPLETED
+                || nextStatus == CourierOrderStatus.IN_TRANSIT
+                || nextStatus == CourierOrderStatus.DELIVERED) {
+            publishStatusEvent(order, nextStatus);
+        }
     }
 
     @Transactional
@@ -68,6 +76,7 @@ public class CourierAdminOrderAppService {
             throw new AdminValidateException("발주완료 처리는 결제완료 또는 발주중 상태에서만 가능합니다.");
         }
         order.markOrderCompleted(waybillNumber, courierCompany);
+        publishStatusEvent(order, CourierOrderStatus.ORDER_COMPLETED);
     }
 
     @Transactional
@@ -102,6 +111,7 @@ public class CourierAdminOrderAppService {
         order.markCanceled();
         courierPaymentService.markCanceled(order);
         restoreStock(order);
+        publishStatusEvent(order, CourierOrderStatus.CANCELED);
     }
 
     @Transactional
@@ -201,6 +211,18 @@ public class CourierAdminOrderAppService {
             case DELIVERED -> order.markDelivered();
             default -> throw new AdminValidateException("변경할 수 없는 상태입니다.");
         }
+    }
+
+    private void publishStatusEvent(CourierOrder order, CourierOrderStatus newStatus) {
+        eventPublisher.publishEvent(new CourierStatusChangedEvent(
+            order.getDisplayCode(),
+            newStatus,
+            order.getReceiverPhone(),
+            order.getReceiverName(),
+            order.getCourierCompany() != null ? order.getCourierCompany().name() : null,
+            order.getWaybillNumber(),
+            order.getProductSummary()
+        ));
     }
 
     private void restoreStock(CourierOrder order) {

@@ -1,4 +1,4 @@
-package store.onuljang.shop.reservation.scheduler;
+package store.onuljang.worker.scheduler.reservation;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

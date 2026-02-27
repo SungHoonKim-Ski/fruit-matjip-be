@@ -1,4 +1,4 @@
-package store.onuljang.shop.delivery.scheduler;
+package store.onuljang.worker.scheduler.delivery;
 
 import java.time.LocalDateTime;
 import java.util.List;

@@ -1,4 +1,4 @@
-package store.onuljang.scheduler;
+package store.onuljang.worker.scheduler.reservation;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import store.onuljang.config.TestS3Config;
 import store.onuljang.config.TestSqsConfig;
-import store.onuljang.shop.reservation.scheduler.ReservationAggregationScheduler;
 import store.onuljang.shop.admin.entity.Admin;
 import store.onuljang.shop.product.entity.Product;
 import store.onuljang.shared.user.entity.Users;
