@@ -69,7 +69,7 @@ public class KakaoNotificationMessageProcessor {
             }
 
             String builtMessage = buildMessage(template.content(), notification.variables());
-            String buttonJson = injectButtonUrl(template.buttons(), notification.buttonUrl());
+            String buttonJson = buildMessage(template.buttons(), notification.variables());
 
             boolean success = callAligoApi(
                 tplCode,
@@ -166,15 +166,6 @@ public class KakaoNotificationMessageProcessor {
             }
         }
         return result;
-    }
-
-    private String injectButtonUrl(String buttonJson, String buttonUrl) {
-        if (buttonUrl == null || buttonUrl.isBlank()) {
-            return buttonJson;
-        }
-        return buttonJson
-            .replace("#{url}", buttonUrl)
-            .replace("about:blank", buttonUrl);
     }
 
     private boolean callAligoApi(String tplCode, String receiverPhone, String receiverName,
