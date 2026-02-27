@@ -36,15 +36,17 @@ public class KakaoNotificationMessageProcessor {
     @NonNull ObjectMapper objectMapper;
     @NonNull AligoProperties aligoProperties;
 
-    private static final Map<String, String[]> TEMPLATE_META = Map.of(
-        "UF_7406", new String[]{"배송시작", "배송조회"},
-        "UF_7407", new String[]{"배송중", "배송조회"},
-        "UF_7408", new String[]{"배송완료", "배송조회"},
-        "UF_7409", new String[]{"배송취소", "배송조회"},
-        "UF_7410", new String[]{"문의답변", "답변 조회"}
+    private static final Map<String, String> SUBJECTS = Map.of(
+        "UF_7406", "배송시작",
+        "UF_7407", "배송중",
+        "UF_7408", "배송완료",
+        "UF_7409", "배송취소",
+        "UF_7410", "문의답변"
     );
 
-    private static final ConcurrentHashMap<String, String> TEMPLATE_CONTENT_CACHE = new ConcurrentHashMap<>();
+    private record CachedTemplate(String content, String buttons) {}
+
+    private static final ConcurrentHashMap<String, CachedTemplate> TEMPLATE_CACHE = new ConcurrentHashMap<>();
 
     @Transactional
     public void process(Message message, String queueUrl) {
@@ -53,27 +55,27 @@ public class KakaoNotificationMessageProcessor {
                 message.body(), KakaoNotificationMessage.class);
 
             String tplCode = notification.tplCode();
-            String[] meta = TEMPLATE_META.get(tplCode);
-            if (meta == null) {
+            String subject = SUBJECTS.get(tplCode);
+            if (subject == null) {
                 log.error("[KakaoNotification] unknown tplCode={}, deleting message", tplCode);
                 deleteMessage(queueUrl, message);
                 return;
             }
 
-            String templateContent = getTemplateContent(tplCode);
-            if (templateContent == null) {
+            CachedTemplate template = getTemplate(tplCode);
+            if (template == null) {
                 log.warn("[KakaoNotification] template fetch failed for tplCode={}, will retry", tplCode);
                 return;
             }
 
-            String builtMessage = buildMessage(templateContent, notification.variables());
-            String buttonJson = buildButtonJson(meta[1], notification.buttonUrl());
+            String builtMessage = buildMessage(template.content(), notification.variables());
+            String buttonJson = injectButtonUrl(template.buttons(), notification.buttonUrl());
 
             boolean success = callAligoApi(
                 tplCode,
                 notification.receiverPhone(),
                 notification.receiverName(),
-                meta[0],
+                subject,
                 builtMessage,
                 buttonJson
             );
@@ -92,8 +94,8 @@ public class KakaoNotificationMessageProcessor {
         }
     }
 
-    private String getTemplateContent(String tplCode) {
-        String cached = TEMPLATE_CONTENT_CACHE.get(tplCode);
+    private CachedTemplate getTemplate(String tplCode) {
+        CachedTemplate cached = TEMPLATE_CACHE.get(tplCode);
         if (cached != null) {
             return cached;
         }
@@ -101,7 +103,7 @@ public class KakaoNotificationMessageProcessor {
     }
 
     @SuppressWarnings("unchecked")
-    private String fetchAndCacheTemplate(String tplCode) {
+    private CachedTemplate fetchAndCacheTemplate(String tplCode) {
         try {
             StringJoiner params = new StringJoiner("&");
             params.add("apikey=" + encode(aligoProperties.getApiKey()));
@@ -133,15 +135,23 @@ public class KakaoNotificationMessageProcessor {
                 return null;
             }
 
-            String content = (String) list.get(0).get("templtContent");
+            Map<String, Object> tpl = list.get(0);
+            String content = (String) tpl.get("templtContent");
             if (content == null) {
                 log.error("[KakaoNotification] templtContent is null: tplCode={}", tplCode);
                 return null;
             }
 
-            TEMPLATE_CONTENT_CACHE.put(tplCode, content);
-            log.info("[KakaoNotification] template cached: tplCode={}", tplCode);
-            return content;
+            String buttons = "{}";
+            Object buttonsObj = tpl.get("buttons");
+            if (buttonsObj != null) {
+                buttons = objectMapper.writeValueAsString(buttonsObj);
+            }
+
+            CachedTemplate cached = new CachedTemplate(content, buttons);
+            TEMPLATE_CACHE.put(tplCode, cached);
+            log.info("[KakaoNotification] template cached: tplCode={}, buttons={}", tplCode, buttons);
+            return cached;
         } catch (Exception e) {
             log.error("[KakaoNotification] template fetch failed: tplCode={}, error={}", tplCode, e.getMessage(), e);
             return null;
@@ -158,12 +168,13 @@ public class KakaoNotificationMessageProcessor {
         return result;
     }
 
-    private String buildButtonJson(String buttonName, String buttonUrl) {
-        String escapedUrl = buttonUrl != null ? buttonUrl.replace("\"", "\\\"") : "";
-        String escapedName = buttonName != null ? buttonName.replace("\"", "\\\"") : "";
-        return "[{\"name\":\"채널추가\",\"linkType\":\"AC\",\"linkTypeName\":\"채널추가\"},"
-            + "{\"name\":\"" + escapedName + "\",\"linkType\":\"WL\",\"linkTypeName\":\"웹링크\","
-            + "\"linkMo\":\"" + escapedUrl + "\",\"linkPc\":\"" + escapedUrl + "\"}]";
+    private String injectButtonUrl(String buttonJson, String buttonUrl) {
+        if (buttonUrl == null || buttonUrl.isBlank()) {
+            return buttonJson;
+        }
+        return buttonJson
+            .replace("#{url}", buttonUrl)
+            .replace("about:blank", buttonUrl);
     }
 
     private boolean callAligoApi(String tplCode, String receiverPhone, String receiverName,
@@ -203,10 +214,9 @@ public class KakaoNotificationMessageProcessor {
             String errorMessage = result.getOrDefault("message", "unknown").toString();
             log.warn("[KakaoNotification] Aligo API error: code={}, message={}", code, errorMessage);
 
-            // Non-retryable errors: delete message to prevent infinite retry
             if (code == -99 || code == -101 || code == -201) {
                 log.error("[KakaoNotification] non-retryable error (code={}), deleting message", code);
-                return true; // caller will delete
+                return true;
             }
 
             return false;
