@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.SendMessageBatchRequest;
-import software.amazon.awssdk.services.sqs.model.SendMessageBatchResponse;
 import store.onuljang.config.TestS3Config;
 import store.onuljang.config.TestSqsConfig;
 import store.onuljang.courier.entity.CourierOrder;
@@ -46,12 +44,6 @@ class CourierTrackingRequestSchedulerTest {
 
     @Autowired
     ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setUp() {
-        when(sqsClient.sendMessageBatch(any(SendMessageBatchRequest.class)))
-            .thenReturn(SendMessageBatchResponse.builder().build());
-    }
 
     private CourierOrder buildShippedOrder(String displayCode, String waybillNumber) {
         CourierOrder order = CourierOrder.builder()
