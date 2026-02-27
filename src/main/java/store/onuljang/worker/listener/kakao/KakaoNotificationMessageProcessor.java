@@ -178,12 +178,8 @@ public class KakaoNotificationMessageProcessor {
         for (Map<String, Object> btn : buttonList) {
             Map<String, Object> cleanBtn = new LinkedHashMap<>();
             for (Map.Entry<String, Object> e : btn.entrySet()) {
-                String key = e.getKey();
-                Object val = e.getValue();
-                if ("ordering".equals(key)) continue;
-                if (val == null) continue;
-                if (val instanceof String s && s.isEmpty()) continue;
-                cleanBtn.put(key, val);
+                if ("ordering".equals(e.getKey())) continue;
+                cleanBtn.put(e.getKey(), e.getValue());
             }
             cleaned.add(cleanBtn);
         }
