@@ -118,6 +118,7 @@ ALIGO:
   API_KEY: test-api-key
   USER_ID: test-user-id
   SENDER_KEY: test-sender-key
+  SENDER_PHONE: "010-0000-0000"
 
 logging:
   level:

@@ -19,4 +19,7 @@ public class AligoProperties {
 
     @Value("${ALIGO.SENDER_KEY:}")
     String senderKey;
+
+    @Value("${ALIGO.SENDER_PHONE:}")
+    String senderPhone;
 }

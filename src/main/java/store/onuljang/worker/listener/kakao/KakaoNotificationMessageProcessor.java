@@ -118,6 +118,7 @@ public class KakaoNotificationMessageProcessor {
             params.add("apikey=" + encode(aligoProperties.getApiKey()));
             params.add("userid=" + encode(aligoProperties.getUserId()));
             params.add("senderkey=" + encode(aligoProperties.getSenderKey()));
+            params.add("sender=" + encode(aligoProperties.getSenderPhone()));
             params.add("tpl_code=" + encode(tplCode));
             params.add("receiver_1=" + encode(receiverPhone));
             params.add("recvname_1=" + encode(receiverName != null ? receiverName : ""));
