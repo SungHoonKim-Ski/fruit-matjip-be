@@ -7,8 +7,10 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentHashMap;
 import lombok.AccessLevel;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,31 +29,22 @@ import store.onuljang.shared.notification.kakao.dto.KakaoNotificationMessage;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class KakaoNotificationMessageProcessor {
 
-    private static final String ALIGO_API_URL = "https://kakaoapi.aligo.in/akv10/alimtalk/send/";
+    private static final String ALIGO_SEND_URL = "https://kakaoapi.aligo.in/akv10/alimtalk/send/";
+    private static final String ALIGO_TEMPLATE_URL = "https://kakaoapi.aligo.in/akv10/template/list/";
 
     @NonNull SqsClient sqsClient;
     @NonNull ObjectMapper objectMapper;
     @NonNull AligoProperties aligoProperties;
 
-    private static final Map<String, Template> TEMPLATES = Map.of(
-        "UF_7406", new Template(
-            "[과일맛집 1995] 배송이 시작되었어요.\n\n▶ 주문번호: #{주문번호}\n▶ 주문상품: #{주문상품}\n▶ 택배사: #{택배사}\n▶ 송장번호: #{송장번호}",
-            "배송시작", "배송조회"),
-        "UF_7407", new Template(
-            "[과일맛집 1995] 상품이 배송 중이에요.\n\n▶ 주문번호: #{주문번호}\n▶ 주문상품: #{주문상품}\n▶ 택배사: #{택배사}\n▶ 송장번호: #{송장번호}",
-            "배송중", "배송조회"),
-        "UF_7408", new Template(
-            "[과일맛집 1995] 배송이 완료되었어요.\n\n▶ 주문번호: #{주문번호}\n▶ 주문상품: #{주문상품}\n▶ 택배사: #{택배사}\n▶ 송장번호: #{송장번호}",
-            "배송완료", "배송조회"),
-        "UF_7409", new Template(
-            "[과일맛집 1995] 배송이 취소되었어요.\n\n▶ 주문번호: #{주문번호}\n▶ 주문상품: #{주문상품}",
-            "배송취소", "배송조회"),
-        "UF_7410", new Template(
-            "[과일맛집 1995] 문의하신 내용에 답변이 등록되었어요.\n\n▶ 주문번호: #{주문번호}\n▶ 주문상품: #{주문상품}",
-            "문의답변", "답변 조회")
+    private static final Map<String, String[]> TEMPLATE_META = Map.of(
+        "UF_7406", new String[]{"배송시작", "배송조회"},
+        "UF_7407", new String[]{"배송중", "배송조회"},
+        "UF_7408", new String[]{"배송완료", "배송조회"},
+        "UF_7409", new String[]{"배송취소", "배송조회"},
+        "UF_7410", new String[]{"문의답변", "답변 조회"}
     );
 
-    private record Template(String message, String subject, String buttonName) {}
+    private static final ConcurrentHashMap<String, String> TEMPLATE_CONTENT_CACHE = new ConcurrentHashMap<>();
 
     @Transactional
     public void process(Message message, String queueUrl) {
@@ -60,36 +53,98 @@ public class KakaoNotificationMessageProcessor {
                 message.body(), KakaoNotificationMessage.class);
 
             String tplCode = notification.tplCode();
-            Template template = TEMPLATES.get(tplCode);
-            if (template == null) {
-                log.error("[KakaoNotificationMessageProcessor] unknown tplCode={}, deleting message", tplCode);
+            String[] meta = TEMPLATE_META.get(tplCode);
+            if (meta == null) {
+                log.error("[KakaoNotification] unknown tplCode={}, deleting message", tplCode);
                 deleteMessage(queueUrl, message);
                 return;
             }
 
-            String builtMessage = buildMessage(template.message(), notification.variables());
-            String buttonJson = buildButtonJson(template.buttonName(), notification.buttonUrl());
+            String templateContent = getTemplateContent(tplCode);
+            if (templateContent == null) {
+                log.warn("[KakaoNotification] template fetch failed for tplCode={}, will retry", tplCode);
+                return;
+            }
+
+            String builtMessage = buildMessage(templateContent, notification.variables());
+            String buttonJson = buildButtonJson(meta[1], notification.buttonUrl());
 
             boolean success = callAligoApi(
                 tplCode,
                 notification.receiverPhone(),
                 notification.receiverName(),
-                template.subject(),
+                meta[0],
                 builtMessage,
                 buttonJson
             );
 
             if (success) {
                 deleteMessage(queueUrl, message);
-                log.info("[KakaoNotificationMessageProcessor] sent: tplCode={}, receiver={}",
+                log.info("[KakaoNotification] sent: tplCode={}, receiver={}",
                     tplCode, maskPhone(notification.receiverPhone()));
             } else {
-                log.warn("[KakaoNotificationMessageProcessor] Aligo API failed (transient), will retry: tplCode={}, receiver={}",
+                log.warn("[KakaoNotification] Aligo API failed (transient), will retry: tplCode={}, receiver={}",
                     tplCode, maskPhone(notification.receiverPhone()));
             }
         } catch (Exception e) {
-            log.error("[KakaoNotificationMessageProcessor] failed to process message: messageId={}, error={}",
+            log.error("[KakaoNotification] failed to process message: messageId={}, error={}",
                 message.messageId(), e.getMessage(), e);
+        }
+    }
+
+    private String getTemplateContent(String tplCode) {
+        String cached = TEMPLATE_CONTENT_CACHE.get(tplCode);
+        if (cached != null) {
+            return cached;
+        }
+        return fetchAndCacheTemplate(tplCode);
+    }
+
+    @SuppressWarnings("unchecked")
+    private String fetchAndCacheTemplate(String tplCode) {
+        try {
+            StringJoiner params = new StringJoiner("&");
+            params.add("apikey=" + encode(aligoProperties.getApiKey()));
+            params.add("userid=" + encode(aligoProperties.getUserId()));
+            params.add("senderkey=" + encode(aligoProperties.getSenderKey()));
+            params.add("tpl_code=" + encode(tplCode));
+
+            HttpClient httpClient = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(ALIGO_TEMPLATE_URL))
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .POST(HttpRequest.BodyPublishers.ofString(params.toString()))
+                .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            Map<String, Object> result = objectMapper.readValue(response.body(), Map.class);
+
+            Object codeObj = result.get("code");
+            int code = codeObj instanceof Number ? ((Number) codeObj).intValue() : Integer.parseInt(codeObj.toString());
+            if (code != 0) {
+                log.error("[KakaoNotification] template list API error: code={}, message={}",
+                    code, result.getOrDefault("message", "unknown"));
+                return null;
+            }
+
+            List<Map<String, Object>> list = (List<Map<String, Object>>) result.get("list");
+            if (list == null || list.isEmpty()) {
+                log.error("[KakaoNotification] template not found: tplCode={}", tplCode);
+                return null;
+            }
+
+            String content = (String) list.get(0).get("templtContent");
+            if (content == null) {
+                log.error("[KakaoNotification] templtContent is null: tplCode={}", tplCode);
+                return null;
+            }
+
+            TEMPLATE_CONTENT_CACHE.put(tplCode, content);
+            log.info("[KakaoNotification] template cached: tplCode={}", tplCode);
+            return content;
+        } catch (Exception e) {
+            log.error("[KakaoNotification] template fetch failed: tplCode={}, error={}", tplCode, e.getMessage(), e);
+            return null;
         }
     }
 
@@ -128,7 +183,7 @@ public class KakaoNotificationMessageProcessor {
 
             HttpClient httpClient = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(ALIGO_API_URL))
+                .uri(URI.create(ALIGO_SEND_URL))
                 .header("Content-Type", "application/x-www-form-urlencoded")
                 .POST(HttpRequest.BodyPublishers.ofString(params.toString()))
                 .build();
@@ -146,17 +201,17 @@ public class KakaoNotificationMessageProcessor {
             }
 
             String errorMessage = result.getOrDefault("message", "unknown").toString();
-            log.warn("[KakaoNotificationMessageProcessor] Aligo API error: code={}, message={}", code, errorMessage);
+            log.warn("[KakaoNotification] Aligo API error: code={}, message={}", code, errorMessage);
 
             // Non-retryable errors: delete message to prevent infinite retry
             if (code == -99 || code == -101 || code == -201) {
-                log.error("[KakaoNotificationMessageProcessor] non-retryable error (code={}), deleting message", code);
+                log.error("[KakaoNotification] non-retryable error (code={}), deleting message", code);
                 return true; // caller will delete
             }
 
             return false;
         } catch (Exception e) {
-            log.error("[KakaoNotificationMessageProcessor] HTTP call failed: {}", e.getMessage(), e);
+            log.error("[KakaoNotification] HTTP call failed: {}", e.getMessage(), e);
             return false;
         }
     }
