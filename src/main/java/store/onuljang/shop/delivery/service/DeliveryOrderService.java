@@ -102,6 +102,11 @@ public class DeliveryOrderService {
         return deliveryOrderRepository.findByStatusAndAcceptedAtBefore(DeliveryStatus.OUT_FOR_DELIVERY, cutoff);
     }
 
+    public List<DeliveryOrder> findActiveByDeliveryDate(LocalDate deliveryDate) {
+        return deliveryOrderRepository.findByDeliveryDateAndStatusIn(
+                deliveryDate, List.of(DeliveryStatus.PAID, DeliveryStatus.OUT_FOR_DELIVERY));
+    }
+
     @Transactional
     public void completePaid(long orderId, String approveAid) {
         DeliveryOrder order = findById(orderId);
