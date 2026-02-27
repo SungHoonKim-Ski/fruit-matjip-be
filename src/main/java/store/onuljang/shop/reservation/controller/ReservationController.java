@@ -12,8 +12,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.shop.reservation.appservice.ReservationAppService;
-import store.onuljang.shop.reservation.dto.ReservationRequest;
 import store.onuljang.shop.reservation.dto.ReservationListResponse;
+import store.onuljang.shop.reservation.dto.ReservationRequest;
+import store.onuljang.shop.reservation.dto.StoreConfigResponse;
+import store.onuljang.shop.reservation.service.StoreConfigService;
 
 import java.time.LocalDate;
 
@@ -24,6 +26,12 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ReservationController {
     ReservationAppService reservationAppService;
+    StoreConfigService storeConfigService;
+
+    @GetMapping("/config")
+    public ResponseEntity<StoreConfigResponse> getStoreConfig() {
+        return ResponseEntity.ok(StoreConfigResponse.from(storeConfigService.getConfig()));
+    }
 
     @PostMapping("/")
     public ResponseEntity<String> create(Authentication auth, @RequestBody @Valid ReservationRequest request) {

@@ -12,8 +12,6 @@ import store.onuljang.shared.exception.AdminValidateException;
 import store.onuljang.shop.delivery.repository.DeliveryConfigRepository;
 import store.onuljang.shop.delivery.entity.DeliveryConfig;
 
-import java.time.LocalTime;
-
 @Service
 @Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -31,9 +29,9 @@ public class DeliveryConfigService {
         if (request.feeDistanceKm() > request.maxDistanceKm()) {
             throw new AdminValidateException("배달 기준 거리보다 최대 거리가 짧습니다.");
         }
-        LocalTime start = LocalTime.of(request.startHour(), request.startMinute());
-        LocalTime end = LocalTime.of(request.endHour(), request.endMinute());
-        if (!start.isBefore(end)) {
+        int startTotal = request.startHour() * 60 + request.startMinute();
+        int endTotal = request.endHour() * 60 + request.endMinute();
+        if (startTotal >= endTotal) {
             throw new AdminValidateException("배달 시작 시간은 종료 시간보다 빨라야 합니다.");
         }
 

@@ -19,7 +19,7 @@ import store.onuljang.shared.util.TimeUtil;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Component
@@ -41,7 +41,7 @@ public class DeliveryValidator {
         if (!config.enabled()) {
             throw new UserValidateException("현재 배달 주문이 중단되어 있습니다.");
         }
-        LocalDate today = TimeUtil.nowDate();
+        LocalDate today = resolveCurrentBusinessDate(config);
         LocalDate deliveryDate = reservations.get(0).getPickupDate();
         if (!deliveryDate.isEqual(today)) {
             throw new UserValidateException("배달 주문은 오늘 수령 예약만 가능합니다.");
@@ -68,8 +68,7 @@ public class DeliveryValidator {
             });
         }
 
-        LocalTime deadlineTime = LocalTime.of(config.endHour(), config.endMinute());
-        if (TimeUtil.isAfterDeadline(today, deadlineTime)) {
+        if (TimeUtil.isDeadlineOver(today, config.endHour(), config.endMinute())) {
             throw new UserValidateException("배달 주문 가능 시간이 지났습니다.");
         }
     }
@@ -115,6 +114,12 @@ public class DeliveryValidator {
         int cutoffTotal = endTotal - 60;
         LocalDateTime now = TimeUtil.nowDateTime();
         int currentTotal = now.getHour() * 60 + now.getMinute();
+        if (config.endHour() >= 24) {
+            int overflowMinutes = (config.endHour() - 24) * 60 + config.endMinute();
+            if (currentTotal <= overflowMinutes) {
+                currentTotal += 24 * 60;
+            }
+        }
 
         if (currentTotal >= cutoffTotal) {
             throw new UserValidateException(
@@ -150,5 +155,21 @@ public class DeliveryValidator {
         if (!user.getUid().equals(reservation.getUser().getUid())) {
             throw new UserValidateException("다른 유저가 예약한 상품입니다.");
         }
+    }
+
+    /**
+     * cross-midnight 대응: 자정 이후 배달 종료시각 전이면 전날 영업일 반환.
+     */
+    private LocalDate resolveCurrentBusinessDate(DeliveryConfigSnapshot config) {
+        LocalDate today = TimeUtil.nowDate();
+        if (config.endHour() >= 24) {
+            int overflowMinutes = (config.endHour() - 24) * 60 + config.endMinute();
+            ZonedDateTime now = TimeUtil.nowZonedDateTime();
+            int nowTotal = now.getHour() * 60 + now.getMinute();
+            if (nowTotal <= overflowMinutes) {
+                return today.minusDays(1);
+            }
+        }
+        return today;
     }
 }

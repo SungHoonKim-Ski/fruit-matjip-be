@@ -148,4 +148,135 @@ class TimeUtilTest {
         // then
         assertThat(result).isFalse();
     }
+
+    // === resolveDeadline ===
+
+    @Test
+    @DisplayName("resolveDeadline - 일반 시간(19시)은 같은 날 반환")
+    void resolveDeadline_NormalHour_ReturnsSameDay() {
+        // given
+        LocalDate date = LocalDate.of(2025, 6, 15);
+
+        // when
+        java.time.ZonedDateTime result = TimeUtil.resolveDeadline(date, 19, 30);
+
+        // then
+        assertThat(result.toLocalDate()).isEqualTo(date);
+        assertThat(result.getHour()).isEqualTo(19);
+        assertThat(result.getMinute()).isEqualTo(30);
+    }
+
+    @Test
+    @DisplayName("resolveDeadline - 24시는 익일 0시 반환")
+    void resolveDeadline_Hour24_ReturnsNextDay0() {
+        // given
+        LocalDate date = LocalDate.of(2025, 6, 15);
+
+        // when
+        java.time.ZonedDateTime result = TimeUtil.resolveDeadline(date, 24, 0);
+
+        // then
+        assertThat(result.toLocalDate()).isEqualTo(date.plusDays(1));
+        assertThat(result.getHour()).isEqualTo(0);
+        assertThat(result.getMinute()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("resolveDeadline - 25시는 익일 1시 반환")
+    void resolveDeadline_Hour25_ReturnsNextDay1() {
+        // given
+        LocalDate date = LocalDate.of(2025, 6, 15);
+
+        // when
+        java.time.ZonedDateTime result = TimeUtil.resolveDeadline(date, 25, 0);
+
+        // then
+        assertThat(result.toLocalDate()).isEqualTo(date.plusDays(1));
+        assertThat(result.getHour()).isEqualTo(1);
+        assertThat(result.getMinute()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("resolveDeadline - 27시는 익일 3시 반환")
+    void resolveDeadline_Hour27_ReturnsNextDay3() {
+        // given
+        LocalDate date = LocalDate.of(2025, 6, 15);
+
+        // when
+        java.time.ZonedDateTime result = TimeUtil.resolveDeadline(date, 27, 0);
+
+        // then
+        assertThat(result.toLocalDate()).isEqualTo(date.plusDays(1));
+        assertThat(result.getHour()).isEqualTo(3);
+        assertThat(result.getMinute()).isEqualTo(0);
+    }
+
+    // === isDeadlineOver ===
+
+    @Test
+    @DisplayName("isDeadlineOver - 마감 전이면 false")
+    void isDeadlineOver_BeforeDeadline_ReturnsFalse() {
+        // given
+        LocalDate futureDate = nowDate().plusDays(2);
+
+        // when
+        boolean result = TimeUtil.isDeadlineOver(futureDate, 19, 0);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("isDeadlineOver - 마감 후이면 true")
+    void isDeadlineOver_AfterDeadline_ReturnsTrue() {
+        // given
+        LocalDate pastDate = nowDate().minusDays(1);
+
+        // when
+        boolean result = TimeUtil.isDeadlineOver(pastDate, 19, 0);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    // === isBusinessDayPast ===
+
+    @Test
+    @DisplayName("isBusinessDayPast - 과거 영업일이면 true")
+    void isBusinessDayPast_PastBusinessDay_ReturnsTrue() {
+        // given
+        LocalDate pastDate = nowDate().minusDays(2);
+
+        // when
+        boolean result = TimeUtil.isBusinessDayPast(pastDate, 20, 0);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    @DisplayName("isBusinessDayPast - 미래 영업일이면 false")
+    void isBusinessDayPast_FutureBusinessDay_ReturnsFalse() {
+        // given
+        LocalDate futureDate = nowDate().plusDays(2);
+
+        // when
+        boolean result = TimeUtil.isBusinessDayPast(futureDate, 20, 0);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("isBusinessDayPast - cross-midnight 마감(25시) 아직 안 지남")
+    void isBusinessDayPast_CrossMidnight_BeforeDeadline_ReturnsFalse() {
+        // given - 미래 날짜의 25시 마감은 분명히 아직 안 지남
+        LocalDate futureDate = nowDate().plusDays(1);
+
+        // when
+        boolean result = TimeUtil.isBusinessDayPast(futureDate, 25, 0);
+
+        // then
+        assertThat(result).isFalse();
+    }
 }

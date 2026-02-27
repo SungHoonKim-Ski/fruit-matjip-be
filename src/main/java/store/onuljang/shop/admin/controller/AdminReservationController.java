@@ -11,9 +11,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import store.onuljang.shop.admin.appservice.AdminReservationAppService;
+import store.onuljang.shop.admin.dto.AdminStoreConfigRequest;
 import store.onuljang.shop.admin.dto.AdminUpdateReservationsRequest;
 import store.onuljang.shop.admin.dto.AdminReservationListResponse;
 import store.onuljang.shop.admin.dto.AdminReservationsTodayResponse;
+import store.onuljang.shop.reservation.dto.StoreConfigResponse;
+import store.onuljang.shop.reservation.service.StoreConfigService;
 import store.onuljang.shared.entity.enums.ReservationStatus;
 
 import java.time.LocalDate;
@@ -25,6 +28,7 @@ import java.time.LocalDate;
 @Validated
 public class AdminReservationController {
     AdminReservationAppService adminReservationAppService;
+    StoreConfigService storeConfigService;
 
     @GetMapping
     public ResponseEntity<AdminReservationListResponse> getReservationsByDate(
@@ -58,5 +62,15 @@ public class AdminReservationController {
     @GetMapping("/sales/today")
     public ResponseEntity<AdminReservationsTodayResponse> getTodaySails() {
         return ResponseEntity.ok(adminReservationAppService.getTodaySales());
+    }
+
+    @GetMapping("/config")
+    public ResponseEntity<StoreConfigResponse> getStoreConfig() {
+        return ResponseEntity.ok(StoreConfigResponse.from(storeConfigService.getConfig()));
+    }
+
+    @PutMapping("/config")
+    public ResponseEntity<StoreConfigResponse> updateStoreConfig(@RequestBody @Validated AdminStoreConfigRequest request) {
+        return ResponseEntity.ok(StoreConfigResponse.from(storeConfigService.update(request)));
     }
 }

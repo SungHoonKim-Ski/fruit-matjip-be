@@ -98,34 +98,19 @@ public class Reservation extends BaseEntity {
     }
 
     public void cancelByUser() {
-        if (TimeUtil.isPastDate(pickupDate)) {
-            throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
-        }
-        if (TimeUtil.isCancelDeadlineOver(pickupDate)) {
-            throw new UserValidateException("취소 가능 시각이 지났습니다.");
-        }
         if (this.status != ReservationStatus.PENDING && this.status != ReservationStatus.SELF_PICK) {
             throw new UserValidateException("취소할 수 없는 예약입니다.");
         }
-
         this.changeStatus(ReservationStatus.CANCELED);
     }
 
     public void minusQuantityByUser(int minusQuantity) {
-        if (TimeUtil.isPastDate(pickupDate)) {
-            throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
-        }
-        if (TimeUtil.isCancelDeadlineOver(pickupDate)) {
-            throw new UserValidateException("취소 가능 시각이 지났습니다.");
-        }
         if (this.status != ReservationStatus.PENDING) {
             throw new UserValidateException("변경할 수 없는 예약입니다.");
         }
-
         if (this.quantity - minusQuantity < 1) {
             throw new UserValidateException("변경 뒤 수량은 1개 이상이어야 합니다.");
         }
-
         this.minusQuantity(minusQuantity);
         this.amount = this.sellPrice.multiply(new BigDecimal(this.quantity));
     }

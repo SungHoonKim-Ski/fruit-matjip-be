@@ -22,6 +22,8 @@ import store.onuljang.shop.product.service.ProductsService;
 import store.onuljang.shop.reservation.service.ReservationService;
 import store.onuljang.shared.user.service.UserService;
 import store.onuljang.shop.delivery.service.DeliveryOrderService;
+import store.onuljang.shop.reservation.config.StoreConfigSnapshot;
+import store.onuljang.shop.reservation.service.StoreConfigService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -58,6 +60,9 @@ class ReservationAppServiceTest {
     @Mock
     private DeliveryOrderService deliveryOrderService;
 
+    @Mock
+    private StoreConfigService storeConfigService;
+
     private Users testUser;
     private Product testProduct;
     private Admin testAdmin;
@@ -75,6 +80,9 @@ class ReservationAppServiceTest {
                 .sellDate(LocalDate.now().plusDays(1)).productUrl("https://example.com/image.jpg").visible(true)
                 .selfPick(true).registeredAdmin(testAdmin).build();
         ReflectionTestUtils.setField(testProduct, "id", 1L);
+
+        lenient().when(storeConfigService.getConfig())
+                .thenReturn(new StoreConfigSnapshot(19, 30, 19, 0, 20, 0));
     }
 
     @Nested

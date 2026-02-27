@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
 import java.math.BigDecimal;
-import java.time.LocalTime;
 
 @Component
 @Getter
@@ -51,16 +50,16 @@ public class DeliveryConfigDto {
         validateMinute(startMinute, "START_MINUTE");
         validateMinute(endMinute, "END_MINUTE");
 
-        LocalTime start = LocalTime.of(startHour, startMinute);
-        LocalTime end = LocalTime.of(endHour, endMinute);
-        if (!start.isBefore(end)) {
+        int startTotal = startHour * 60 + startMinute;
+        int endTotal = endHour * 60 + endMinute;
+        if (startTotal >= endTotal) {
             throw new IllegalStateException("DELIVERY start time must be before end time.");
         }
     }
 
     private void validateHour(int hour, String key) {
-        if (hour < 0 || hour > 23) {
-            throw new IllegalStateException("DELIVERY " + key + " must be between 0 and 23.");
+        if (hour < 0 || hour > 27) {
+            throw new IllegalStateException("DELIVERY " + key + " must be between 0 and 27.");
         }
     }
 

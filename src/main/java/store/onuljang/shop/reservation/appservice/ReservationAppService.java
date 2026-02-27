@@ -16,7 +16,9 @@ import store.onuljang.shared.user.entity.Users;
 import store.onuljang.shared.entity.enums.DeliveryStatus;
 import store.onuljang.shared.entity.enums.UserProductAction;
 import store.onuljang.shop.product.service.ProductsService;
+import store.onuljang.shop.reservation.config.StoreConfigSnapshot;
 import store.onuljang.shop.reservation.service.ReservationService;
+import store.onuljang.shop.reservation.service.StoreConfigService;
 import store.onuljang.shared.user.service.UserService;
 import store.onuljang.shop.delivery.service.DeliveryOrderService;
 import store.onuljang.shared.util.DisplayCodeGenerator;
@@ -29,8 +31,6 @@ import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static store.onuljang.shared.util.TimeUtil.*;
-
 @Service
 @Transactional(readOnly = true)
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -41,6 +41,7 @@ public class ReservationAppService {
     ProductsService productsService;
     DeliveryOrderService deliveryOrderService;
     ApplicationEventPublisher eventPublisher;
+    StoreConfigService storeConfigService;
 
     @Transactional
     public String reserve(String uId, ReservationRequest request) {
@@ -78,6 +79,7 @@ public class ReservationAppService {
         Users user = userService.findByUidWithLock(uId);
 
         validateUserReservation(user, reservation);
+        validateCancelTime(reservation.getPickupDate());
 
         reservation.minusQuantityByUser(minusQuantity);
         product.addStock(minusQuantity);
@@ -96,6 +98,7 @@ public class ReservationAppService {
         Users user = userService.findByUidWithLock(uId);
 
         validateUserReservation(user, reservation);
+        validateCancelTime(reservation.getPickupDate());
         deliveryOrderService.findByReservation(reservation).ifPresent(order -> {
             if (order.getStatus() == DeliveryStatus.PAID
                 || order.getStatus() == DeliveryStatus.OUT_FOR_DELIVERY
@@ -145,7 +148,9 @@ public class ReservationAppService {
     }
 
     private void validateReserveTime(LocalDate sellDate, LocalTime sellTime) {
-        ZonedDateTime deadLine = sellDate.atTime(RESERVE_DEADLINE).atZone(KST);
+        StoreConfigSnapshot config = storeConfigService.getConfig();
+        ZonedDateTime deadLine = TimeUtil.resolveDeadline(
+            sellDate, config.reservationDeadlineHour(), config.reservationDeadlineMinute());
         if (TimeUtil.nowZonedDateTime().isAfter(deadLine)) {
             throw new UserValidateException("예약 가능한 시간이 지났습니다.");
         }
@@ -155,6 +160,18 @@ public class ReservationAppService {
             if (TimeUtil.nowDateTime().isBefore(postDateTime)) {
                 throw new UserValidateException("상품 게시 시간 전입니다.");
             }
+        }
+    }
+
+    private void validateCancelTime(LocalDate pickupDate) {
+        StoreConfigSnapshot config = storeConfigService.getConfig();
+        if (TimeUtil.isBusinessDayPast(pickupDate,
+                config.pickupDeadlineHour(), config.pickupDeadlineMinute())) {
+            throw new UserValidateException("과거 예약은 변경할 수 없습니다.");
+        }
+        if (TimeUtil.isDeadlineOver(pickupDate,
+                config.cancellationDeadlineHour(), config.cancellationDeadlineMinute())) {
+            throw new UserValidateException("취소 가능 시각이 지났습니다.");
         }
     }
 }

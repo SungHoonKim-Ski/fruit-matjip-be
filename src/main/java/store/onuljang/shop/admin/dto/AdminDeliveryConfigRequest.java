@@ -14,8 +14,8 @@ public record AdminDeliveryConfigRequest(
     @NotNull @DecimalMin("0") BigDecimal feePer100m,
     @NotNull @DecimalMin("0") Double feeDistanceKm,
     @NotNull @DecimalMin("0") Double maxDistanceKm,
-    @NotNull @Min(0) @Max(23) Integer startHour,
+    @NotNull @Min(0) @Max(27) Integer startHour,
     @NotNull @Min(0) @Max(59) Integer startMinute,
-    @NotNull @Min(0) @Max(23) Integer endHour,
+    @NotNull @Min(0) @Max(27) Integer endHour,
     @NotNull @Min(0) @Max(59) Integer endMinute
 ) {}

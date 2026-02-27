@@ -26,6 +26,8 @@ import store.onuljang.shared.entity.enums.DeliveryStatus;
 import store.onuljang.shared.entity.enums.ReservationStatus;
 import store.onuljang.support.TestFixture;
 import store.onuljang.shared.util.TimeUtil;
+import store.onuljang.shop.delivery.repository.DeliveryConfigRepository;
+import store.onuljang.shop.delivery.entity.DeliveryConfig;
 
 import java.math.BigDecimal;
 import java.time.*;
@@ -45,6 +47,9 @@ class DeliveryValidatorTest {
 
     @Autowired
     TestFixture testFixture;
+
+    @Autowired
+    DeliveryConfigRepository deliveryConfigRepository;
 
     private Admin admin;
 
@@ -414,5 +419,147 @@ class DeliveryValidatorTest {
         assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(15, 30))
             .isInstanceOf(UserValidateException.class)
             .hasMessageContaining("분 단위");
+    }
+
+    // --- cross-midnight 테스트 ---
+
+    @Test
+    @DisplayName("cross-midnight - 자정 이후 마감 전에 어제 영업일 배달 주문 가능")
+    void validateReservations_crossMidnight_beforeDeadline_passes() {
+        // given - 배달 종료 25:00 설정 (익일 01:00)
+        DeliveryConfig config = DeliveryConfig.builder()
+            .enabled(true)
+            .maxDistanceKm(3).feeDistanceKm(1.5)
+            .minAmount(new java.math.BigDecimal("15000"))
+            .feeNear(new java.math.BigDecimal("2900"))
+            .feePer100m(new java.math.BigDecimal("50"))
+            .startHour(12).startMinute(0).endHour(25).endMinute(0)
+            .build();
+        deliveryConfigRepository.save(config);
+
+        // 시각: 2026-01-22 00:30 (익일 자정 이후, 25시(01:00) 마감 전)
+        LocalDate yesterday = LocalDate.of(2026, 1, 21);
+        ZonedDateTime afterMidnight = ZonedDateTime.of(
+            yesterday.plusDays(1), LocalTime.of(0, 30), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(afterMidnight.toInstant(), TimeUtil.KST));
+
+        Users user = testFixture.createUser("심야배달");
+        Product product = testFixture.createProduct("심야딸기", 5, new BigDecimal("15000"), yesterday, admin);
+        Reservation reservation = testFixture.createReservation(user, product, 1);
+
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateReservations(user, List.of(reservation)))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("cross-midnight - 자정 이후 마감 이후에는 배달 불가")
+    void validateReservations_crossMidnight_afterDeadline_throwsException() {
+        // given - 배달 종료 25:00 설정 (익일 01:00)
+        DeliveryConfig config = DeliveryConfig.builder()
+            .enabled(true)
+            .maxDistanceKm(3).feeDistanceKm(1.5)
+            .minAmount(new java.math.BigDecimal("15000"))
+            .feeNear(new java.math.BigDecimal("2900"))
+            .feePer100m(new java.math.BigDecimal("50"))
+            .startHour(12).startMinute(0).endHour(25).endMinute(0)
+            .build();
+        deliveryConfigRepository.save(config);
+
+        // 시각: 2026-01-22 01:30 (익일 자정 이후, 25시(01:00) 마감 이후)
+        LocalDate yesterday = LocalDate.of(2026, 1, 21);
+        ZonedDateTime afterDeadline = ZonedDateTime.of(
+            yesterday.plusDays(1), LocalTime.of(1, 30), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(afterDeadline.toInstant(), TimeUtil.KST));
+
+        Users user = testFixture.createUser("심야배달2");
+        Product product = testFixture.createProduct("심야사과", 5, new BigDecimal("15000"), yesterday, admin);
+        Reservation reservation = testFixture.createReservation(user, product, 1);
+
+        // when / then
+        // 01:30은 25시(01:00) 마감 이후이므로 비즈니스 날짜가 2026-01-22로 전환됨
+        // → 어제(2026-01-21) 예약은 "오늘 수령 예약만 가능" 오류로 거부됨
+        assertThatThrownBy(() -> deliveryValidator.validateReservations(user, List.of(reservation)))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("오늘 수령 예약만 가능");
+    }
+
+    @Test
+    @DisplayName("cross-midnight - 자정 전에는 일반 동작 (당일 영업일)")
+    void validateReservations_crossMidnight_beforeMidnight_passes() {
+        // given - 배달 종료 25:00 설정 (익일 01:00)
+        DeliveryConfig config = DeliveryConfig.builder()
+            .enabled(true)
+            .maxDistanceKm(3).feeDistanceKm(1.5)
+            .minAmount(new java.math.BigDecimal("15000"))
+            .feeNear(new java.math.BigDecimal("2900"))
+            .feePer100m(new java.math.BigDecimal("50"))
+            .startHour(12).startMinute(0).endHour(25).endMinute(0)
+            .build();
+        deliveryConfigRepository.save(config);
+
+        // 시각: 2026-01-21 23:30 (자정 전, 배달 마감 전)
+        ZonedDateTime beforeMidnight = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 21), LocalTime.of(23, 30), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(beforeMidnight.toInstant(), TimeUtil.KST));
+
+        Users user = testFixture.createUser("심야배달3");
+        Product product = testFixture.createProduct("심야포도", 5, new BigDecimal("15000"),
+            LocalDate.of(2026, 1, 21), admin);
+        Reservation reservation = testFixture.createReservation(user, product, 1);
+
+        // when / then
+        assertThatCode(() -> deliveryValidator.validateReservations(user, List.of(reservation)))
+            .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("cross-midnight - 예약배달 슬롯 자정 이후 정상 동작")
+    void validateScheduledDelivery_crossMidnight_afterMidnight_passes() {
+        // given - 배달 시간 12:00~25:00 설정
+        DeliveryConfig config = DeliveryConfig.builder()
+            .enabled(true)
+            .maxDistanceKm(3).feeDistanceKm(1.5)
+            .minAmount(new java.math.BigDecimal("15000"))
+            .feeNear(new java.math.BigDecimal("2900"))
+            .feePer100m(new java.math.BigDecimal("50"))
+            .startHour(12).startMinute(0).endHour(25).endMinute(0)
+            .build();
+        deliveryConfigRepository.save(config);
+
+        // 시각: 자정 직후 (00:10) — 25시 규약으로 currentTotal = 24:10 = 1450분
+        // cutoff = 25*60 - 60 = 1440분, currentTotal(1450) >= cutoff(1440) → 접수 마감
+        ZonedDateTime afterMidnight = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 22), LocalTime.of(0, 10), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(afterMidnight.toInstant(), TimeUtil.KST));
+
+        // when / then - cutoff 지남
+        assertThatThrownBy(() -> deliveryValidator.validateScheduledDelivery(25, 0))
+            .isInstanceOf(UserValidateException.class)
+            .hasMessageContaining("까지만 접수 가능");
+    }
+
+    @Test
+    @DisplayName("cross-midnight - 23시에 예약배달 가능 (cutoff 전)")
+    void validateScheduledDelivery_crossMidnight_beforeCutoff_passes() {
+        // given - 배달 시간 12:00~25:00
+        DeliveryConfig config = DeliveryConfig.builder()
+            .enabled(true)
+            .maxDistanceKm(3).feeDistanceKm(1.5)
+            .minAmount(new java.math.BigDecimal("15000"))
+            .feeNear(new java.math.BigDecimal("2900"))
+            .feePer100m(new java.math.BigDecimal("50"))
+            .startHour(12).startMinute(0).endHour(25).endMinute(0)
+            .build();
+        deliveryConfigRepository.save(config);
+
+        // 시각: 23:00 — cutoff=24:00(1440분), currentTotal=23*60=1380 < 1440 → 접수 가능
+        ZonedDateTime evening = ZonedDateTime.of(
+            LocalDate.of(2026, 1, 21), LocalTime.of(23, 0), TimeUtil.KST);
+        TimeUtil.setClock(Clock.fixed(evening.toInstant(), TimeUtil.KST));
+
+        // when / then - 25시(01:00) 슬롯, 현재 23시이므로 2시간 남음 >= 1시간
+        assertThatCode(() -> deliveryValidator.validateScheduledDelivery(25, 0))
+            .doesNotThrowAnyException();
     }
 }
