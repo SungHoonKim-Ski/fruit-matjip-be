@@ -7,6 +7,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -70,6 +72,8 @@ public class KakaoNotificationMessageProcessor {
 
             String builtMessage = buildMessage(template.content(), notification.variables());
             String buttonJson = buildMessage(template.buttons(), notification.variables());
+
+            log.debug("[KakaoNotification] sending: tplCode={}, button={}", tplCode, buttonJson);
 
             boolean success = callAligoApi(
                 tplCode,
@@ -144,8 +148,8 @@ public class KakaoNotificationMessageProcessor {
 
             String buttons = "{}";
             Object buttonsObj = tpl.get("buttons");
-            if (buttonsObj != null) {
-                buttons = objectMapper.writeValueAsString(buttonsObj);
+            if (buttonsObj instanceof List<?> btnList && !btnList.isEmpty()) {
+                buttons = formatButtonsForSend((List<Map<String, Object>>) btnList);
             }
 
             CachedTemplate cached = new CachedTemplate(content, buttons);
@@ -166,6 +170,24 @@ public class KakaoNotificationMessageProcessor {
             }
         }
         return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    private String formatButtonsForSend(List<Map<String, Object>> buttonList) throws Exception {
+        List<Map<String, Object>> cleaned = new ArrayList<>();
+        for (Map<String, Object> btn : buttonList) {
+            Map<String, Object> cleanBtn = new LinkedHashMap<>();
+            for (Map.Entry<String, Object> e : btn.entrySet()) {
+                String key = e.getKey();
+                Object val = e.getValue();
+                if ("ordering".equals(key)) continue;
+                if (val == null) continue;
+                if (val instanceof String s && s.isEmpty()) continue;
+                cleanBtn.put(key, val);
+            }
+            cleaned.add(cleanBtn);
+        }
+        return objectMapper.writeValueAsString(Map.of("button", cleaned));
     }
 
     private boolean callAligoApi(String tplCode, String receiverPhone, String receiverName,
